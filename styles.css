@@ -81,6 +81,16 @@ section {
     height: 40px; /* Adjust as needed */
 }
 
+/* image styles */
+#image-section {
+    text-align: center; /* Center-align the contents */
+}
+
+#image-section img {
+    max-width: 100%; /* Ensure the image does not stretch too much */
+    height: auto; /* Maintain aspect ratio */
+}
+
 /* Footer styles */
 footer {
     background-color: #333;
