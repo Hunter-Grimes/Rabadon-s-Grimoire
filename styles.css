@@ -7,6 +7,7 @@ body, h1, h2, h3, p, ul {
 }
 
 /* Header styles */
+/***************************/
 header {
     background-color: #333;
     color: #fff;
@@ -36,8 +37,10 @@ nav ul li a {
     color: #fff;
     text-decoration: none;
 }
+/***************************/
 
 /* Main content styles */
+/***************************/
 main {
     display: flex;
     justify-content: space-between;
@@ -48,8 +51,10 @@ main {
 section {
     margin-bottom: 30px;
 }
+/***************************/
 
 /* Login section styles */
+/***************************/
 #login-section {
     display: flex; /* Added to make login box a flex container */
     flex-direction: column; /* Added to stack children vertically */
@@ -80,8 +85,10 @@ section {
 #login-section button {
     height: 40px; /* Adjust as needed */
 }
+/***************************/
 
-/* image styles */
+/* Image styles */
+/***************************/
 #image-section {
     display: flex;
     flex-direction: column;
@@ -104,8 +111,21 @@ section {
     display: block; /* Ensure the image is treated as a block element */
     margin: 0 auto; /* Center the image horizontally */
 }
+/***************************/
+
+/* Under construction section styles */
+/***************************/
+#under-construction {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 200px); /* Adjust the height as needed */
+}
+/***************************/
 
 /* Footer styles */
+/***************************/
 footer {
     background-color: #333;
     color: #fff;
@@ -116,3 +136,4 @@ footer {
     bottom: 0;
     width: 100%;
 }
+/***************************/
