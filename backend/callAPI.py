@@ -17,7 +17,7 @@ def getSumByName(name):
     if response.status_code == 200:
         return response.json()
     else:
-        raise Exception("Bad Response")
+        raise Exception("Bad or No Response")
 
 
 if __name__ == "__main__":
