@@ -1,13 +1,11 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse, abort
 from flask_sqlalchemy import SQLAlchemy
-import psycopg2
 
 app = Flask(__name__)
 api = Api(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
-# app.app_context().push()
 
 class UserModel(db.Model):
     UID = db.Column(db.Integer, primary_key=True)
@@ -16,6 +14,14 @@ class UserModel(db.Model):
     
     def __repr__(self) -> str:
         return f"User(name={self.name}, rank={self.rank})"
+
+class GameModel(db.Model):
+    GID = db.Column(db.Integer, primary_key=True)
+
+playedGame = db.Table('playedGame',
+    db.Column('user_id', db.Integer, db.ForeignKey('UserModel.UID'), primary_key=True),
+    db.Column('game_id', db.Integer, db.ForeignKey('GameModel.GID'), primary_key=True)
+)
 
 with app.app_context():
     db.create_all()
