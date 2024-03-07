@@ -1,0 +1,107 @@
+.top-nav {
+    width: 15%; /* Adjusts the navigation to take up the left half */
+    padding: 8px 0;
+    background-color: #f1f1f1;
+    border: 3px solid #ccc;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: flex-start; /* Aligns items to the left */
+    position: absolute; /* Ensures it's positioned as intended */
+    top: 0;
+    left: 0;
+}
+
+.top-nav a {
+    text-decoration: none;
+    color: #333;
+    padding: 10px; /* Reduced padding */
+    font-size: 18px; /* Smaller font size */
+}
+
+.edit-btn, .block-btn, .delete-btn{
+    margin: 0 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.edit-btn {
+    background-color: #4CAF50; /* Green */
+    color: black;
+}
+
+.block-btn {
+    background-color: #ffff00; /* Red */
+    color: black;
+}
+
+.delete-btn {
+    background-color: #f44336; /* Red */
+    color: black;
+}
+
+/* Reset default margins and paddings */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden; /* Prevents scrollbars on the body if not needed */
+}
+
+body {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+
+.users-container {
+    width: 50%; /* Take full width */
+    height: 100vh; /* Full viewport height */
+    overflow-y: auto; /* Allow vertical scrolling inside the container if content exceeds screen height */
+    display: flex;
+    flex-direction: column;
+    margin-top: 60px;
+}
+
+table {
+    width: 100%; /* Full width of its container */
+    border-collapse: collapse; /* Neat borders */
+    border: 3px solid #ccc;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px;
+    border: 1px solid #ddd; /* Light borders for cells */
+}
+
+thead {
+    background-color: #f2f2f2; /* A different color for the header for distinction */
+}
+
+/* Optional: Make the table look better on smaller screens */
+@media screen and (max-width: 600px) {
+    th, td {
+        padding: 4px; /* Less padding for smaller screens */
+    }
+}
+
+.search-container {
+    width: 50%; /* Takes up the right half of the page */
+    position: absolute; /* Allows precise positioning */
+    top: 47px; /* At the top of the viewport */
+    right: 0; /* Aligned to the right side of the viewport */
+    padding: 20px; /* Adds some spacing around the search bar */
+    box-sizing: border-box; /* Ensures padding doesn't add to the width */
+    display: flex; /* Utilizes Flexbox for alignment */
+    justify-content: flex-start; /* Aligns the search input to the right */
+    margin-top: 60px;
+}
+
+#searchInput {
+    width: 100%; /* Or any width you prefer */
+    padding: 10px;
+    margin: 0 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px; /* Gives the search input rounded corners */
+}

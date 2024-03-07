@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content= "width=device-width, initial-scale= 1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="adminDashboardCSS.css">
+</head>
+<body>
+    <div class = "top-nav">
+        <a href="adminDashboard.html">Dashboard</a>
+        <a href="interactingUsers.html"> Managing Users</a>
+    </div>
+    <div class="dashboard-container">
+        <h1>Admin Dashboard</h1>
+        <div class="widget traffic-stats">
+            <h3>Traffic Stats</h3>
+            <canvas id="trafficChart" style="position: relative; height:40vh; width:80vw"></canvas>
+        </div>
+
+        <div class="widget user-activity">
+            <h3>User Activity</h3>
+            <div class="scrollable-table">
+                <table id="userActivitiesTable">
+                    <thead>
+                    <tr>
+                        <th>Activity</th>
+                        <th>Timestamp</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- User activities will be inserted here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="widget performance-metrics">
+            <h3>Performance Metrics</h3>
+            <ul id="performanceList"></ul> <!-- Placeholder for performance metrics -->
+        </div>
+
+        <div class="widget post-queue">
+            <h3>Post/Publication Queue</h3>
+            <ul id="postQueueList"></ul> <!-- Placeholder for posts -->
+        </div>
+
+        <div class="widget comment-moderation">
+            <h3>Comment Moderation</h3>
+            <ul id="commentList"></ul> <!-- Placeholder for comments -->
+        </div>
+
+        <div class="widget media-library">
+            <h3>Media Library</h3>
+            <div id="mediaLibraryGrid"></div> <!-- Placeholder for media items -->
+        </div>
+
+        <div class="widget new-users">
+            <h3>Recent Signups/New Users</h3>
+            <ul id="newUsersList"></ul> <!-- Placeholder for new user signups -->
+        </div>
+
+        <div class="widget role-assignments">
+            <h3>Role Assignments</h3>
+            <div id="roleAssignmentsControls"></div> <!-- Placeholder for role management -->
+        </div>
+
+        <div class="widget user-feedback">
+            <h3>User Feedback</h3>
+            <ul id="userFeedbackList"></ul> <!-- Placeholder for feedback -->
+        </div>
+
+    </div>
+    <script src="adminDashboardJS.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+
+    </script>
+</body>
+</html>

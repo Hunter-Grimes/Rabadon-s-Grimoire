@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content= "width=device-width, initial-scale= 1.0">
+    <title>User Management</title>
+    <link rel="stylesheet" href="interactingUsersCSS.css">
+</head>
+<body>
+    <div class = "top-nav">
+        <a href="adminDashboard.html">Dashboard</a>
+        <a href="interactingUsers.html"> Managing Users</a>
+    </div>
+    <div class="users-container">
+        <h2>Manage Users</h2>
+        <table id="usersTable">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- User rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="search-container">
+        <input type="username" id="usernameSearch" placeholder="Search for usernames...">
+    </div>
+    <script src="interactingUsersJS.js"></script>
+</body>
+</html>

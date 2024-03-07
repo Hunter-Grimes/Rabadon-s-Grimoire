@@ -1,0 +1,78 @@
+.top-nav {
+    width: 15%; /* Adjusts the navigation to take up the left half */
+    padding: 8px 0;
+    background-color: #f1f1f1;
+    border: 3px solid #ccc;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: flex-start; /* Aligns items to the left */
+    position: absolute; /* Ensures it's positioned as intended */
+    top: 0;
+    left: 0;
+}
+
+.top-nav a {
+    text-decoration: none;
+    color: #333;
+    padding: 10px; /* Reduced padding */
+    font-size: 18px; /* Smaller font size */
+}
+
+.login-container, .dashboard-container, .users-container {
+    width: 80%;
+    margin: auto;
+    padding-top: 60px;
+}
+
+nav ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin-right: 20px;
+}
+
+input[type="text"], input[type="password"] {
+    display: block;
+    margin-bottom: 10px;
+}
+
+table {
+    width: 100%;
+    margin-top: 20px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+}
+
+.widget {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.scrollable-table {
+    max-height: 300px; /* Adjust based on your preference */
+    overflow-y: auto;
+    border: 1px solid #ccc;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
