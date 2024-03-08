@@ -1,12 +1,15 @@
 from dotenv import load_dotenv, find_dotenv
 import os
 import requests
+from HandleError import riotApiError as apiError
 
-def getSumByName(name):
-    load_dotenv()
-    api_key = os.getenv('RIOT_API_KEY')
+load_dotenv()
+api_key = os.getenv('RIOT_API_KEY')
+BASE_URL = "https://na1.api.riotgames.com/lol/"
 
-    requestURL = "https://na1.api.riotgames.com/lol/summoner/v4/summoners/by-name/"
+
+def getSummonerByName(name):
+    requestURL = BASE_URL + "summoner/v4/summoners/by-name/"
     
     requestURL = requestURL + name
     
@@ -17,4 +20,34 @@ def getSumByName(name):
     if response.status_code == 200:
         return response.json()
     else:
-        raise Exception("Bad or No Response")
+        apiError(response.status_code)
+
+
+def getSummonerByPUUID(PUUID):
+    requestURL = BASE_URL + "summoner/v4/summoners/by-puuid/"
+    
+    requestURL = requestURL + PUUID
+    
+    requestURL = requestURL + '?api_key=' + api_key
+
+    response = requests.get(requestURL)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        apiError(response.status_code)
+
+
+def getMatch(PUUID):
+    requestURL = BASE_URL + "match/v5/matches/by-puuid/"
+    
+    requestURL = requestURL + PUUID
+    
+    requestURL = requestURL + '?api_key=' + api_key
+
+    response = requests.get(requestURL)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        apiError(response.status_code)
