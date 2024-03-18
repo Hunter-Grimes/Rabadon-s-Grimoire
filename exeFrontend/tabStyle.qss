@@ -1,0 +1,31 @@
+QTabWidget::tab-bar {
+    left: 0px; 
+}
+
+QTabWidget::pane {
+  top:0px;
+}
+
+QTabBar::tab {
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    min-width: 100px;
+    padding: 5px;
+}
+
+QTabBar::tab:first {
+    border-top-left-radius: 3px; 
+}
+
+QTabBar::tab:last {
+    border-top-right-radius: 3px;
+}
+
+QTabBar::tab:selected {
+    background: blue;
+}
+
+QTabBar::tab:!selected {
+    background: gray; 
+    color: white;
+}
