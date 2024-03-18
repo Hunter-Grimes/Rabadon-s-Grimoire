@@ -1,5 +1,5 @@
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget, QTabBar
+from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget
 
 from profilePage import ProfilePage
 from patchNotesPage import PatchNotesPage
