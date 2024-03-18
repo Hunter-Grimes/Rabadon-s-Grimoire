@@ -10,8 +10,13 @@ from django.contrib.auth.views import (
 )
 
 # View for the home page
+def home(request):
+    return render(request, 'home.html')
+
+# View for the home page
 def index(request):
     return render(request, 'index.html')
+
 
 # View for user login
 class CustomLoginView(LoginView):
