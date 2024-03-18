@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rabadon's Grimoire - League of Legends Companion App</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Link to CSS file -->
 </head>
 <body>
     <!-- Header Section -->
@@ -13,10 +14,10 @@
         <!-- Navigation Links -->
             <nav id="nav-links">
                 <ul>
-                    <li><a href="home.html">Home</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="download.html">Download</a></li>
-                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="{% url 'home' %}">Home</a></li>
+                    <li><a href="{% url 'about' %}">About</a></li>
+                    <li><a href="{% url 'contact' %}">Contact</a></li>
+                    <li><a href="{% url 'download' %}">Download</a></li>
                 </ul>
             </nav>
             <!-- End of Navigation Links -->
@@ -51,19 +52,19 @@
         <!-- First image with title -->
         <div class="image-container">
             <h3>Interface</h3>
-            <img src="images/interface.jpg" alt="App Interface" class="image">
+            <img src="{% static 'images/interface.jpg' %}" alt="App Interface" class="image">
         </div>
         <!-- Second image with title -->
         <div class="image-container">
             <h3>Pop-up</h3>
-            <img src="images/pop-up.jpg" alt="Pop-up Image" class="image">
+            <img src="{% static 'images/pop-up.jpg' %}" alt="Pop-up Image" class="image">
         </div>
     </section>
 
     <!-- Under Construction Section -->
     <section id="under-construction">
         <h2>Under Construction</h2>
-        <img src="images/under-construction.jpg" alt="Under Construction Image">
+        <img src="{% static 'images/under-construction.jpg' %}" alt="Under Construction Image">
         <p>This page is currently under construction. Please check back later.</p>
     </section>
     

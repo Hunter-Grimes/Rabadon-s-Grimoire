@@ -13,10 +13,21 @@ from django.contrib.auth.views import (
 def home(request):
     return render(request, 'home.html')
 
-# View for the home page
+# View for the about page
+def about(request):
+    return render(request, 'about.html')
+
+# View for the contact page
+def contact(request):
+    return render(request, 'contact.html')
+
+# View for the download page
+def download(request):
+    return render(request, 'download.html')
+
+# View for the login page
 def index(request):
     return render(request, 'index.html')
-
 
 # View for user login
 class CustomLoginView(LoginView):
