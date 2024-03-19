@@ -1,18 +1,24 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QGridLayout, QScrollArea, QGroupBox
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QScrollArea, QGroupBox
 from PySide6.QtGui import QPixmap
-
+import requests
+from PySide6.QtGui import QColor
 
 class ProfilePage(QWidget):
+    BASE_URL = "http://127.0.0.1:5000"
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        #HARDCODED CHANGE BEFORE DEPLOYMENT
+        PUUID = 'pXeUrgH2ewhN3b4_0SWgNSBpMXHC8Ktfyx2OtcxwmVVnTrTI9ZLOYgiq6vo87WVI_MEs4OtWHzCx1w'
+        
         layout = QVBoxLayout()
         layout.setContentsMargins(10, 10, 10, 10)
         scroll = QScrollArea()
         group = QGroupBox()
         
         boxlayout = QVBoxLayout()
-        for _ in range(20):
-            boxlayout.addWidget(Match())
+        for id in requests.get(self.BASE_URL + '/game-id/last-20/' + PUUID).json():
+            boxlayout.addWidget(Match(id, PUUID))
         
         group.setLayout(boxlayout)
         scroll.setWidget(group)
@@ -20,64 +26,76 @@ class ProfilePage(QWidget):
         self.setLayout(layout)
         
 class Match(QWidget):
-    def __init__(self, *args, **kwargs):
+    IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
+    BASE_URL = "http://127.0.0.1:5000"
+    
+    def __init__(self, GID, PUUID, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        matchData = requests.get(self.BASE_URL + '/game-data/by-Player/' + GID + '/' + PUUID).json()
+        
         layout = QVBoxLayout()
         box = QGroupBox()
         box.setFixedSize(500, 150)
         boxLayout = QGridLayout()
         
+        #Champion Icon
         label = QLabel()
-        pixmap = QPixmap('dragontailData/14.5.1/img/item/1001.png')
+        pixmap = QPixmap(self.IMAGE_LOCATION + 'champion/' + matchData['champion_name'] + '.png')
         pixmap = pixmap.scaled(50,50)
         label.setPixmap(pixmap)
         boxLayout.addWidget(label, 0, 0, -1, 1)
         
-        label = QLabel("Victory")
+        #Loss/Win
+        if matchData['won_game']:
+            label = QLabel("Victory")
+            label.setStyleSheet("color: green")
+        else:
+            label = QLabel("Defeat")
+            label.setStyleSheet("color: red")
+        
         boxLayout.addWidget(label, 0, 1, -1, 1)
         
-        label = QLabel("0/15/0")
+        #K/D/A
+        label = QLabel(str(matchData['kills']) + '/' + str(matchData['deaths']) + '/' + str(matchData['assists']))
         boxLayout.addWidget(label, 0, 2)
         
-        label = QLabel("100cs - 40%kp")
+        #CS
+        label = QLabel('CS: ' + str(matchData['total_minions']))
         boxLayout.addWidget(label, 1, 2)
         
+        
+        #Items
         itemBox = QGroupBox()
         items = QGridLayout()
         
         label = QLabel()
-        pixmap = QPixmap('dragontailData/14.5.1/img/item/1001.png')
-        pixmap = pixmap.scaled(30,30)
+        pixmap = self.fetchItemPixmap(matchData['item0'])
         label.setPixmap(pixmap)
         items.addWidget(label, 0, 0)
         
         label = QLabel()
-        pixmap = QPixmap('dragontailData/14.5.1/img/item/1001.png')
-        pixmap = pixmap.scaled(30,30)
+        pixmap = self.fetchItemPixmap(matchData['item1'])
         label.setPixmap(pixmap)
         items.addWidget(label, 0, 1)
         
         label = QLabel()
-        pixmap = QPixmap('dragontailData/14.5.1/img/item/1001.png')
-        pixmap = pixmap.scaled(30,30)
+        pixmap = self.fetchItemPixmap(matchData['item2'])
         label.setPixmap(pixmap)
         items.addWidget(label, 0, 2)
         
         label = QLabel()
-        pixmap = QPixmap('dragontailData/14.5.1/img/item/1001.png')
-        pixmap = pixmap.scaled(30,30)
+        pixmap = self.fetchItemPixmap(matchData['item3'])
         label.setPixmap(pixmap)
         items.addWidget(label, 1, 0)
         
         label = QLabel()
-        pixmap = QPixmap('dragontailData/14.5.1/img/item/1001.png')
-        pixmap = pixmap.scaled(30,30)
+        pixmap = self.fetchItemPixmap(matchData['item4'])
         label.setPixmap(pixmap)
         items.addWidget(label, 1, 1)
         
         label = QLabel()
-        pixmap = QPixmap('dragontailData/14.5.1/img/item/1001.png')
-        pixmap = pixmap.scaled(30,30)
+        pixmap = self.fetchItemPixmap(matchData['item5'])
         label.setPixmap(pixmap)
         items.addWidget(label, 1, 2)
         
@@ -88,3 +106,13 @@ class Match(QWidget):
         box.setLayout(boxLayout)
         layout.addWidget(box)
         self.setLayout(layout)
+    
+    def fetchItemPixmap(self, itemID):
+        if itemID == 0:
+            pixmap = QPixmap(30, 30)
+            pixmap.fill(QColor(100, 100, 100))
+            return pixmap
+        
+        pixmap = QPixmap(self.IMAGE_LOCATION + 'item/' + str(itemID) + '.png').scaled(30, 30)
+        
+        return pixmap
