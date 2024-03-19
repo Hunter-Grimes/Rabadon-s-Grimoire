@@ -7,6 +7,19 @@ load_dotenv()
 api_key = os.getenv('RIOT_API_KEY')
 BASE_URL = "https://na1.api.riotgames.com/lol/"
 
+def getPUUIDByRiotID(tagLine,gameName):
+    requestURl="https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/"
+    
+    requestURl=requestURl+gameName+'/'+tagLine
+    
+    requestURl=requestURl+'?api_key='+api_key
+
+    response = requests.get(requestURl)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        apiError(response.status_code)
 
 def getSummonerByName(name):
     requestURL = BASE_URL + "summoner/v4/summoners/by-name/"
