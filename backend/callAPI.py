@@ -6,12 +6,15 @@ from HandleError import riotApiError as apiError
 load_dotenv()
 api_key = os.getenv('RIOT_API_KEY')
 
-def getPUUIDByRiotID(tagLine,gameName):
-    requestURl="https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/"
+
+def getPUUIDByRiotID(tagLine, gameName):
+    BASE_URL = "https://americas.api.riotgames.com/riot/"
     
-    requestURl=requestURl+gameName+'/'+tagLine
+    requestURl = BASE_URL + "account/v1/accounts/by-riot-id/"
     
-    requestURl=requestURl+'?api_key='+api_key
+    requestURl = requestURl + gameName + '/' + tagLine
+    
+    requestURl = requestURl + '?api_key=' + api_key
 
     response = requests.get(requestURl)
     
@@ -19,6 +22,7 @@ def getPUUIDByRiotID(tagLine,gameName):
         return response.json()
     else:
         apiError(response.status_code)
+
 
 def getSummonerByName(name):
     BASE_URL = "https://na1.api.riotgames.com/lol/"
