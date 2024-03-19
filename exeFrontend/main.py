@@ -16,7 +16,7 @@ class MainWindow(QMainWindow):
         
         tabs.addTab(ProfilePage(), "Profile")
         tabs.addTab(PatchNotesPage(), "Patch Notes")
-        with open("tabStyle.qss", "r") as f:
+        with open("exeFrontend/tabStyle.qss", "r") as f:
             _style = f.read()
             tabs.setStyleSheet(_style)
         
