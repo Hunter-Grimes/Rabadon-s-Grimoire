@@ -97,12 +97,12 @@ def getMatchXtoX(PUUID, x, y):
         apiError(response.status_code)
 
       
-def getMatchByMatchID(PUUID):
+def getMatchByMatchID(GID):
     BASE_URL = "https://americas.api.riotgames.com/lol/"
     
     requestURL = BASE_URL + "match/v5/matches/"
 
-    requestURL = requestURL + PUUID
+    requestURL = requestURL + GID
 
     requestURL = requestURL + '?api_key=' + api_key
 
