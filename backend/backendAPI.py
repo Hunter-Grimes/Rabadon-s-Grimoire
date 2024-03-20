@@ -297,7 +297,7 @@ class GameIDLast20(Resource):
 
 api.add_resource(GameIDLast20, "/game-id/last-20/<PUUID>")
 
-
+#TODO Fix to work with the addition of games more recent than those in our database
 class GameIDXtoX(Resource):
     def get(self, PUUID, x, y):
         numEntries = PlayedGame.query.filter_by(PUUID=PUUID).count()
