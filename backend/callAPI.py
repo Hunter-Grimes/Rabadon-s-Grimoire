@@ -77,6 +77,25 @@ def getMatchLast20(PUUID):
     else:
         apiError(response.status_code)
 
+
+def getMatchXtoX(PUUID, x, y):
+    BASE_URL = "https://americas.api.riotgames.com/lol/"
+    
+    requestsURL = BASE_URL + "match/v5/matches/by-puuid/"
+    
+    requestsURL = requestsURL + PUUID
+    
+    requestsURL = requestsURL + '/ids' + '?start=' + str(x) + '&count=' + str((y-x))
+    
+    requestsURL = requestsURL + '&api_key=' + api_key
+    
+    response = requests.get(requestsURL)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        apiError(response.status_code)
+
       
 def getMatchByMatchID(PUUID):
     BASE_URL = "https://americas.api.riotgames.com/lol/"
@@ -93,7 +112,8 @@ def getMatchByMatchID(PUUID):
         return response.json()
     else:
         apiError(response.status_code)
-        
+ 
+       
 def getLeagueInfoBySID(SID):
     BASE_URL = "https://na1.api.riotgames.com/lol/"
 
@@ -109,3 +129,4 @@ def getLeagueInfoBySID(SID):
         return response.json()
     else:
         apiError(response.status_code)
+       

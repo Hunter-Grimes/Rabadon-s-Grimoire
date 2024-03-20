@@ -16,17 +16,20 @@ class ProfilePage(QWidget):
         
         layout = QGridLayout()
         layout.setContentsMargins(10, 10, 10, 10)
-        scroll = QScrollArea()
-        group = QGroupBox()
         
         
-        boxlayout = QVBoxLayout()
-        for id in requests.get(self.BASE_URL + '/game-id/last-20/' + userData['PUUID']).json():
-            boxlayout.addWidget(Match(id, userData['PUUID']))
+        # scroll = QScrollArea()
+        # group = QGroupBox()
         
-        group.setLayout(boxlayout)
-        scroll.setWidget(group)
-        scroll.setFixedWidth(group.width() + 2)
+        # boxlayout = QVBoxLayout()
+        # for id in requests.get(self.BASE_URL + '/game-id/last-20/' + userData['PUUID']).json():
+        #     boxlayout.addWidget(Match(id, userData['PUUID']))
+        
+        # group.setLayout(boxlayout)
+        # scroll.setWidget(group)
+        # scroll.setFixedWidth(group.width() + 2)
+        
+        scroll = MatchHistory(userData)
         layout.addWidget(scroll, 2, 0, 1, 2)
         
         
@@ -52,7 +55,41 @@ class ProfilePage(QWidget):
         layout.addWidget(label, 1, 3)
         
         self.setLayout(layout)
+
+      
+class MatchHistory(QScrollArea):
+    BASE_URL = "http://127.0.0.1:5000"
+    IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
+    
+    def __init__(self, userData, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.userData = userData
+        self.matchIndex = 20
+        group = QGroupBox()
         
+        self.verticalScrollBar().valueChanged.connect(self.valueChanged)
+        
+        boxlayout = QVBoxLayout()
+        for id in requests.get(self.BASE_URL + '/game-id/last-20/' + self.userData['PUUID']).json():
+            boxlayout.addWidget(Match(id, self.userData['PUUID']))
+            
+        
+        group.setLayout(boxlayout)
+        self.setWidget(group)
+        self.setFixedWidth(group.width() + 2)
+        
+        
+    def valueChanged(self, value):
+        if value == self.verticalScrollBar().maximum():
+            self.add_lines(5)
+    
+    def add_lines(self, n):
+        for id in requests.get(self.BASE_URL + '/game-id/x-x/' + self.userData['PUUID'] + '/' + str(self.matchIndex) + '/' + str(self.matchIndex + n)).json():
+            self.widget().layout().addWidget(Match(id, self.userData['PUUID']))
+        self.matchIndex += n
+        self.widget().adjustSize()
+            
+             
 class Match(QWidget):
     IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
     BASE_URL = "http://127.0.0.1:5000"

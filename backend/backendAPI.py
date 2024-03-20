@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import Api, Resource, fields, marshal_with
 from flask_sqlalchemy import SQLAlchemy
-from callAPI import getMatchByMatchID, getMatchLast20, getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID
+from callAPI import getMatchByMatchID, getMatchLast20, getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getMatchXtoX
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__)) + "/data/"
@@ -299,8 +299,22 @@ class GameIDLast20(Resource):
         return result, 200
 
 api.add_resource(GameIDLast20, "/game-id/last-20/<PUUID>")
+
+
+class GameIDXtoX(Resource):
+    def get(self, PUUID, x, y):
+        numEntries = PlayedGame.query.filter_by(PUUID=PUUID).count()
+        if int(y) > numEntries:
+            addGameXtoX(PUUID, numEntries, y)
+
+        result = db.session.query(GameModel.GID).select_from(GameModel).join(PlayedGame).filter(GameModel.GID == PlayedGame.GID).filter(PlayedGame.PUUID == PUUID).order_by(GameModel.time_start.desc()).offset(x).limit(y).all()
+        result = [game[0] for game in result]
+
+        return result, 200
  
-  
+api.add_resource(GameIDXtoX, "/game-id/x-x/<PUUID>/<x>/<y>")
+
+
 class GameDataLast20(Resource):
     def put(self, PUUID):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
@@ -320,6 +334,13 @@ class GameDataLast20(Resource):
         return 201        
 
 api.add_resource(GameDataLast20, "/game-data/last-20/<PUUID>")
+
+
+class GameDataXtoX(Resource):
+    def put(self, PUUID, x, y):
+        return addGameXtoX(PUUID, x, y)
+
+api.add_resource(GameDataXtoX, "/game-data/x-x/<PUUID>/<x>/<y>")
 
 
 def addGame(gameData) -> tuple[GameModel, list[PlayedGame]]:
@@ -375,6 +396,27 @@ def addGame(gameData) -> tuple[GameModel, list[PlayedGame]]:
         newPlayedGames.append(played)
         
     return newGame, newPlayedGames
+
+def addGameXtoX(PUUID, x, y):
+    if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
+        return 404
+
+    games = getMatchXtoX(PUUID, int(x), int(y))
+    for item in games:
+        gameData = getMatchByMatchID(item)
+        if not bool(GameModel.query.filter_by(GID=gameData['metadata']['matchId']).first()):
+            
+            newGameData, newPlayedGames = addGame(gameData)
+
+            db.session.add(newGameData)
+
+            for played in newPlayedGames:
+                db.session.add(played)
+
+    db.session.commit()
+
+    return 201
+
 
 if __name__ == "__main__":
     app.run(debug = True) #CHANGE BEFORE PRODUCTION
