@@ -93,3 +93,19 @@ def getMatchByMatchID(PUUID):
         return response.json()
     else:
         apiError(response.status_code)
+        
+def getLeagueInfoBySID(SID):
+    BASE_URL = "https://na1.api.riotgames.com/lol/"
+
+    requestURL = BASE_URL + "league/v4/entries/by-summoner/"
+
+    requestURL = requestURL + SID
+
+    requestURL = requestURL + '?api_key=' + api_key
+
+    response = requests.get(requestURL)
+
+    if response.status_code == 200:
+        return response.json()
+    else:
+        apiError(response.status_code)
