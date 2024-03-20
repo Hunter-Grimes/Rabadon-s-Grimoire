@@ -70,7 +70,7 @@ class MatchHistory(QScrollArea):
 
         
     def valueChanged(self, value):
-        if value >= self.verticalScrollBar().maximum() * 0.8:
+        if value == self.verticalScrollBar().maximum():
             self.add_lines(5)
 
 

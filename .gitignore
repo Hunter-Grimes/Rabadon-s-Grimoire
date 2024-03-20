@@ -4,6 +4,6 @@ test.py
 __pycache__
 instance
 .vscode
-data
+database.db
 dragontailData
 .DS_Store

@@ -290,9 +290,6 @@ api.add_resource(GameDataByPlayer, "/game-data/by-Player/<GID>/<PUUID>")
 
 class GameIDLast20(Resource):
     def get(self, PUUID):
-        # playerGames = PlayedGame.query.filter_by(PUUID=PUUID).all()
-        # result = GameModel.query.filter_by(PUUID in playerGames).order_by(PlayedGame.time_start.desc()).limit(20).all()
-        
         result = db.session.query(GameModel.GID).select_from(GameModel).join(PlayedGame).filter(GameModel.GID == PlayedGame.GID).filter(PlayedGame.PUUID == PUUID).order_by(GameModel.time_start.desc()).limit(20).all()
         result = [game[0] for game in result]
         
@@ -311,7 +308,7 @@ class GameIDXtoX(Resource):
         result = [game[0] for game in result]
 
         return result, 200
- 
+
 api.add_resource(GameIDXtoX, "/game-id/x-x/<PUUID>/<x>/<y>")
 
 
