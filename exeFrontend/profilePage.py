@@ -18,17 +18,6 @@ class ProfilePage(QWidget):
         layout.setContentsMargins(10, 10, 10, 10)
         
         
-        # scroll = QScrollArea()
-        # group = QGroupBox()
-        
-        # boxlayout = QVBoxLayout()
-        # for id in requests.get(self.BASE_URL + '/game-id/last-20/' + userData['PUUID']).json():
-        #     boxlayout.addWidget(Match(id, userData['PUUID']))
-        
-        # group.setLayout(boxlayout)
-        # scroll.setWidget(group)
-        # scroll.setFixedWidth(group.width() + 2)
-        
         scroll = MatchHistory(userData)
         layout.addWidget(scroll, 2, 0, 1, 2)
         
@@ -67,27 +56,28 @@ class MatchHistory(QScrollArea):
         self.matchIndex = 20
         group = QGroupBox()
         
-        self.verticalScrollBar().valueChanged.connect(self.valueChanged)
+        
+        self.verticalScrollBar().valueChanged.connect(self.valueChanged, type=Qt.UniqueConnection)
         
         boxlayout = QVBoxLayout()
-        for id in requests.get(self.BASE_URL + '/game-id/last-20/' + self.userData['PUUID']).json():
+        for id in requests.get(self.BASE_URL + '/game-id/x-x/' + self.userData['PUUID'] + '/0/20').json():
             boxlayout.addWidget(Match(id, self.userData['PUUID']))
-            
-        
+
         group.setLayout(boxlayout)
         self.setWidget(group)
         self.setFixedWidth(group.width() + 2)
-        
+        self.setWidgetResizable(True)
+
         
     def valueChanged(self, value):
-        if value == self.verticalScrollBar().maximum():
+        if value >= self.verticalScrollBar().maximum() * 0.8:
             self.add_lines(5)
-    
+
+
     def add_lines(self, n):
         for id in requests.get(self.BASE_URL + '/game-id/x-x/' + self.userData['PUUID'] + '/' + str(self.matchIndex) + '/' + str(self.matchIndex + n)).json():
             self.widget().layout().addWidget(Match(id, self.userData['PUUID']))
         self.matchIndex += n
-        self.widget().adjustSize()
             
              
 class Match(QWidget):
