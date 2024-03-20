@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rabadon's Grimoire - League of Legends Companion App</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/downloadpage.css' %}"> <!-- Link to CSS file -->
+</head>
+<body>
+<!-- Header Section -->
+<header>
+    <h1>Rabadon's Grimoire</h1>
+    <!-- Navigation Links -->
+    <nav id="nav-links">
+        <ul>
+            <li><a href="{% url 'home' %}">Home</a></li>
+            <li><a href="{% url 'about' %}">About</a></li>
+            <li><a href="{% url 'contact' %}">Contact</a></li>
+        </ul>
+    </nav>
+    <!-- End of Navigation Links -->
+    <!-- End of Header Section -->
+</header>
+
+<!-- Main Content -->
+<main>
+    <!-- Introduction Section -->
+    <section id="intro">
+        <h2>Welcome to Rabadon's Grimoire</h2>
+        <p>Thank You for becoming a member!!!</p>
+    </section>
+
+    <!-- Download Section -->
+    <section id="download-section">
+        <div class="download-box">
+            <h3>Download Rabadon's Grimoire</h3>
+            <p>Click the button below to download the latest version of Rabadon's Grimoire for Windows.</p>
+            <a href="{% static 'files/RabadonsGrimoireSetup.exe' %}" download="RabadonsGrimoireSetup.exe">
+                <button type="button"> Download Now</button>
+            </a>
+        </div>
+    </section>
+    <!-- End of Download Section -->
+</main>
+
+<!-- Image Section -->
+<section id="image-section">
+    <h2 id="images-heading">App Images</h2>
+    <!-- First image with title -->
+    <div class="image-container">
+        <h3>Interface</h3>
+        <img src="{% static 'images/interface.jpg' %}" alt="App Interface" class="image">
+    </div>
+    <!-- Second image with title -->
+    <div class="image-container">
+        <h3>Pop-up</h3>
+        <img src="{% static 'images/pop-up.jpg' %}" alt="Pop-up Image" class="image">
+    </div>
+</section>
+
+<!-- Under Construction Section -->
+<section id="under-construction">
+    <h2>Under Construction</h2>
+    <img src="{% static 'images/under-construction.jpg' %}" alt="Under Construction Image">
+    <p>This page is currently under construction. Please check back later.</p>
+</section>
+
+<!-- Footer Section -->
+<footer>
+    <p>&copy; 2024 Rabadon's Grimoire. All rights reserved.</p>
+</footer>
+</body>
+</html>
