@@ -21,8 +21,8 @@ class ProfilePage(QWidget):
         
         
         boxlayout = QVBoxLayout()
-        for id in requests.get(self.BASE_URL + '/game-id/last-20/' + userData['UID']).json():
-            boxlayout.addWidget(Match(id, userData['UID']))
+        for id in requests.get(self.BASE_URL + '/game-id/last-20/' + userData['PUUID']).json():
+            boxlayout.addWidget(Match(id, userData['PUUID']))
         
         group.setLayout(boxlayout)
         scroll.setWidget(group)
