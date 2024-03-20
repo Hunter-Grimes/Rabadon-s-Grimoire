@@ -1,0 +1,43 @@
+#COPIED FROM ANOTHER PROJECT
+#!!NOT FUNCTIONAL!!
+
+version: '3.2'
+networks:
+  dem:
+
+services:
+  postgres:
+    build:
+      context: "."
+      dockerfile: Dockerfile.postgres+pgvector
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=sample_bad_password
+    ports:
+      - "5432:5432"
+    networks:
+      - dem
+    volumes:
+      - "postgres:/var/lib/postgresql/data"
+      #Temp for development
+      - type: bind
+        source: $HOST/Users/huntergrimes/VS Coding/3bxco/cordoba-python
+        target: /tmp
+  python:
+    build:
+      context: "."
+      dockerfile: Dockerfile.python
+    tty: true
+    volumes:
+      - .:/postgres_python
+    ports:
+      - 8080:8080
+    networks:
+      - dem
+    depends_on:
+      - postgres
+    
+
+volumes:
+  postgres:
+  node_modules:
