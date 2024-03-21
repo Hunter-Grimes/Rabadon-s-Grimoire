@@ -1,11 +1,12 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QScrollArea, QGroupBox
-from PySide6.QtGui import QPixmap, QColor
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QScrollArea, QGroupBox, QPushButton
+from PySide6.QtGui import QPixmap, QColor, QIcon
 from PySide6.QtCore import Qt
 import requests
 
 class ProfilePage(QWidget):
     BASE_URL = "http://127.0.0.1:5000"
     IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
+    
     def __init__(self, PUUID, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
@@ -48,7 +49,6 @@ class ProfilePage(QWidget):
       
 class MatchHistory(QScrollArea):
     BASE_URL = "http://127.0.0.1:5000"
-    IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
     
     def __init__(self, userData, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -81,8 +81,8 @@ class MatchHistory(QScrollArea):
             
              
 class Match(QWidget):
-    IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
     BASE_URL = "http://127.0.0.1:5000"
+    IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
     
     def __init__(self, GID, PUUID, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -126,32 +126,32 @@ class Match(QWidget):
         items = QGridLayout()
         
         label = QLabel()
-        pixmap = self.fetchItemPixmap(gameData[PUUID]['item0'])
+        pixmap = fetchItemPixmap(gameData[PUUID]['item0'])
         label.setPixmap(pixmap)
         items.addWidget(label, 0, 0)
         
         label = QLabel()
-        pixmap = self.fetchItemPixmap(gameData[PUUID]['item1'])
+        pixmap = fetchItemPixmap(gameData[PUUID]['item1'])
         label.setPixmap(pixmap)
         items.addWidget(label, 0, 1)
         
         label = QLabel()
-        pixmap = self.fetchItemPixmap(gameData[PUUID]['item2'])
+        pixmap = fetchItemPixmap(gameData[PUUID]['item2'])
         label.setPixmap(pixmap)
         items.addWidget(label, 0, 2)
         
         label = QLabel()
-        pixmap = self.fetchItemPixmap(gameData[PUUID]['item3'])
+        pixmap = fetchItemPixmap(gameData[PUUID]['item3'])
         label.setPixmap(pixmap)
         items.addWidget(label, 1, 0)
         
         label = QLabel()
-        pixmap = self.fetchItemPixmap(gameData[PUUID]['item4'])
+        pixmap = fetchItemPixmap(gameData[PUUID]['item4'])
         label.setPixmap(pixmap)
         items.addWidget(label, 1, 1)
         
         label = QLabel()
-        pixmap = self.fetchItemPixmap(gameData[PUUID]['item5'])
+        pixmap = fetchItemPixmap(gameData[PUUID]['item5'])
         label.setPixmap(pixmap)
         items.addWidget(label, 1, 2)
         
@@ -159,39 +159,71 @@ class Match(QWidget):
         boxLayout.addWidget(itemBox, 0, 3, -1, 1)
         
         
-        champBox = QGroupBox()
-        champs = QGridLayout()
-        
-        for i, player in enumerate(list(gameData.keys())):
-            label = QLabel()
-            pixmap = self.fetchChampPixmap(gameData[player]['champion_name'])
-            label.setPixmap(pixmap)
-            if i < 5:
-                champs.addWidget(label, 0, i)
-            else:
-                champs.addWidget(label, 1, i - 5)
-        
-        champBox.setLayout(champs)
+        champBox = ChampDisplay(gameData)
         boxLayout.addWidget(champBox, 0, 4, -1, 1)
         
         
         box.setLayout(boxLayout)
         layout.addWidget(box)
         self.setLayout(layout)
-    
-    
-    def fetchItemPixmap(self, itemID):
-        if itemID == 0:
-            pixmap = QPixmap(30, 30)
-            pixmap.fill(QColor(100, 100, 100))
-            return pixmap
-        
-        pixmap = QPixmap(self.IMAGE_LOCATION + 'item/' + str(itemID) + '.png').scaled(30, 30, mode=Qt.SmoothTransformation)
-        
-        return pixmap
-    
-    
-    def fetchChampPixmap(self, champName):
-        pixmap = QPixmap(self.IMAGE_LOCATION + 'champion/' + str(champName) + '.png').scaled(30, 30, mode=Qt.SmoothTransformation)
 
+
+class ChampDisplay(QGroupBox):
+    def __init__(self, gameData, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        champs = QGridLayout()
+        
+        for i, player in enumerate(list(gameData.keys())):
+            
+            button = PlayerButton(player, fetchChampPixmap(gameData[player]['champion_name']))
+            
+            if i < 5:
+                champs.addWidget(button, 0, i)
+            else:
+                champs.addWidget(button, 1, i - 5)
+        
+        self.setLayout(champs)
+    
+        
+      
+class PlayerButton(QPushButton):
+    def __init__(self, PUUID, pixmap, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        self.PUUID = PUUID
+        self.pixmap = pixmap
+        Icon = QIcon()
+        
+        Icon.addPixmap(self.pixmap)
+        self.setIcon(Icon)
+        
+        self.setIconSize(self.pixmap.size())
+        self.setFixedSize(self.pixmap.size())
+
+        self.clicked.connect(self.buttonClicked)
+
+
+    def buttonClicked(self):
+        print(self.PUUID)
+
+ 
+def fetchItemPixmap(itemID):
+    IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
+    
+    if itemID == 0:
+        pixmap = QPixmap(30, 30)
+        pixmap.fill(QColor(100, 100, 100))
         return pixmap
+    
+    pixmap = QPixmap(IMAGE_LOCATION + 'item/' + str(itemID) + '.png').scaled(30, 30, mode=Qt.SmoothTransformation)
+    
+    return pixmap
+
+
+def fetchChampPixmap(champName):
+    IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
+    
+    pixmap = QPixmap(IMAGE_LOCATION + 'champion/' + str(champName) + '.png').scaled(30, 30, mode=Qt.SmoothTransformation)
+
+    return pixmap
