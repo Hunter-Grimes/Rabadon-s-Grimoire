@@ -136,7 +136,7 @@ class UserByName(Resource):
         return result, 200
     """
     def put(self, tagline, gameName):
-        userData = getSummonerByName(name)
+        userData = getPUUIDByRiotID(tagLine, gameName)
         userLeagueInfo = getLeagueInfoBySID(userData['id'])
         
         if bool(UserModel.query.filter_by(PUUID=(userData['puuid'])).first()):
