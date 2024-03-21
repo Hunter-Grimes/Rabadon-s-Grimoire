@@ -87,22 +87,23 @@ class Match(QWidget):
     def __init__(self, GID, PUUID, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        matchData = requests.get(self.BASE_URL + '/game-data/by-Player/' + GID + '/' + PUUID).json()
+        #matchData = requests.get(self.BASE_URL + '/game-data/by-Player/' + GID + '/' + PUUID).json()
+        gameData = requests.get(self.BASE_URL + '/game-data/all/' + GID).json()
         
         layout = QVBoxLayout()
         box = QGroupBox()
-        box.setFixedSize(500, 150)
+        box.setFixedSize(600, 150)
         boxLayout = QGridLayout()
         
         #Champion Icon
         label = QLabel()
-        pixmap = QPixmap(self.IMAGE_LOCATION + 'champion/' + matchData['champion_name'] + '.png')
+        pixmap = QPixmap(self.IMAGE_LOCATION + 'champion/' + gameData[PUUID]['champion_name'] + '.png')
         pixmap = pixmap.scaled(50, 50, mode=Qt.SmoothTransformation)
         label.setPixmap(pixmap)
         boxLayout.addWidget(label, 0, 0, -1, 1)
         
         #Loss/Win
-        if matchData['won_game']:
+        if gameData[PUUID]['won_game']:
             label = QLabel("Victory")
             label.setStyleSheet("color: green")
         else:
@@ -112,11 +113,11 @@ class Match(QWidget):
         boxLayout.addWidget(label, 0, 1, -1, 1)
         
         #K/D/A
-        label = QLabel(str(matchData['kills']) + '/' + str(matchData['deaths']) + '/' + str(matchData['assists']))
+        label = QLabel(str(gameData[PUUID]['kills']) + '/' + str(gameData[PUUID]['deaths']) + '/' + str(gameData[PUUID]['assists']))
         boxLayout.addWidget(label, 0, 2)
         
         #CS
-        label = QLabel('CS: ' + str(matchData['total_minions']))
+        label = QLabel('CS: ' + str(gameData[PUUID]['total_minions']))
         boxLayout.addWidget(label, 1, 2)
         
         
@@ -125,32 +126,32 @@ class Match(QWidget):
         items = QGridLayout()
         
         label = QLabel()
-        pixmap = self.fetchItemPixmap(matchData['item0'])
+        pixmap = self.fetchItemPixmap(gameData[PUUID]['item0'])
         label.setPixmap(pixmap)
         items.addWidget(label, 0, 0)
         
         label = QLabel()
-        pixmap = self.fetchItemPixmap(matchData['item1'])
+        pixmap = self.fetchItemPixmap(gameData[PUUID]['item1'])
         label.setPixmap(pixmap)
         items.addWidget(label, 0, 1)
         
         label = QLabel()
-        pixmap = self.fetchItemPixmap(matchData['item2'])
+        pixmap = self.fetchItemPixmap(gameData[PUUID]['item2'])
         label.setPixmap(pixmap)
         items.addWidget(label, 0, 2)
         
         label = QLabel()
-        pixmap = self.fetchItemPixmap(matchData['item3'])
+        pixmap = self.fetchItemPixmap(gameData[PUUID]['item3'])
         label.setPixmap(pixmap)
         items.addWidget(label, 1, 0)
         
         label = QLabel()
-        pixmap = self.fetchItemPixmap(matchData['item4'])
+        pixmap = self.fetchItemPixmap(gameData[PUUID]['item4'])
         label.setPixmap(pixmap)
         items.addWidget(label, 1, 1)
         
         label = QLabel()
-        pixmap = self.fetchItemPixmap(matchData['item5'])
+        pixmap = self.fetchItemPixmap(gameData[PUUID]['item5'])
         label.setPixmap(pixmap)
         items.addWidget(label, 1, 2)
         
@@ -158,9 +159,26 @@ class Match(QWidget):
         boxLayout.addWidget(itemBox, 0, 3, -1, 1)
         
         
+        champBox = QGroupBox()
+        champs = QGridLayout()
+        
+        for i, player in enumerate(list(gameData.keys())):
+            label = QLabel()
+            pixmap = self.fetchChampPixmap(gameData[player]['champion_name'])
+            label.setPixmap(pixmap)
+            if i < 5:
+                champs.addWidget(label, 0, i)
+            else:
+                champs.addWidget(label, 1, i - 5)
+        
+        champBox.setLayout(champs)
+        boxLayout.addWidget(champBox, 0, 4, -1, 1)
+        
+        
         box.setLayout(boxLayout)
         layout.addWidget(box)
         self.setLayout(layout)
+    
     
     def fetchItemPixmap(self, itemID):
         if itemID == 0:
@@ -170,4 +188,10 @@ class Match(QWidget):
         
         pixmap = QPixmap(self.IMAGE_LOCATION + 'item/' + str(itemID) + '.png').scaled(30, 30, mode=Qt.SmoothTransformation)
         
+        return pixmap
+    
+    
+    def fetchChampPixmap(self, champName):
+        pixmap = QPixmap(self.IMAGE_LOCATION + 'champion/' + str(champName) + '.png').scaled(30, 30, mode=Qt.SmoothTransformation)
+
         return pixmap
