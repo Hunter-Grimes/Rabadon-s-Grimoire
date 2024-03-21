@@ -58,7 +58,12 @@ class UserModel(db.Model):
     __tablename__ = 'User'
     PUUID = db.Column(db.String, primary_key=True)
     SID = db.Column(db.String, nullable=False)
-    
+
+    """
+    tagLine=db.Column(db.String, nullable=False)
+    gameName=db.Column(db.String, nullable=False)
+    """
+
     name = db.Column(db.String, nullable=False)
     profileIcon = db.Column(db.Integer, nullable=True)
     
@@ -134,6 +139,18 @@ class UserByName(Resource):
         result = UserModel.query.filter_by(name=name).first()
 
         return result, 200
+    """
+    def get(self,tagline,gameName)
+        if not bool(UserModel.query.filter_by(tagLine=tagLine, gameName=gameName).first()):
+            status = self.put(tagLine,gameName)
+            if status != 201:
+                return status
+            
+        result = UserModel.query.filter_by(tagLine=tagLine, gameName=gameName).first()
+
+        return result, 200
+    """
+
     """
     def put(self, tagline, gameName):
         userData = getPUUIDByRiotID(tagLine, gameName)
