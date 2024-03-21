@@ -163,7 +163,7 @@ class UserByRiotID(Resource):
         
         return 201
     
-api.add_resource(UserByRiotID, "user/by-riotID/<tagLine>/<gameName>")
+api.add_resource(UserByRiotID, "/user/by-riotID/<tagLine>/<gameName>")
 
 
 class UserByName(Resource):
