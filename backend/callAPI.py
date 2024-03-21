@@ -24,7 +24,7 @@ def getAccountByPUUID(PUUID):
         apiError(response.status_code)
 
 
-def getPUUIDByRiotID(tagLine, gameName):
+def getACCTInfoByRiotID(tagLine, gameName):
     BASE_URL = "https://americas.api.riotgames.com/riot/"
     
     requestURl = BASE_URL + "account/v1/accounts/by-riot-id/"
@@ -36,7 +36,7 @@ def getPUUIDByRiotID(tagLine, gameName):
     response = requests.get(requestURl)
     
     if response.status_code == 200:
-        return response.json()['puuid']
+        return response.json()
     else:
         apiError(response.status_code)
 

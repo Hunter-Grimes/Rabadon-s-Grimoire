@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import Api, Resource, fields, marshal_with
 from flask_sqlalchemy import SQLAlchemy
-from callAPI import getMatchByMatchID, getMatchLast20, getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getMatchXtoX, getPUUIDByRiotID, getAccountByPUUID
+from callAPI import getMatchByMatchID, getMatchLast20, getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getMatchXtoX, getACCTInfoByRiotID, getAccountByPUUID
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__)) + "/data/"
@@ -141,11 +141,11 @@ class UserByRiotID(Resource):
 
         return result, 200
 
-   
+
     def put(self, tagLine, gameName):
-        userData = getSummonerByPUUID(getPUUIDByRiotID(tagLine, gameName))
+        userAccountInfo = getACCTInfoByRiotID(tagLine, gameName)
+        userData = getSummonerByPUUID(userAccountInfo['puuid'])
         userLeagueInfo = getLeagueInfoBySID(userData['id'])
-        userAccountInfo = getAccountByPUUID(userData['puuid'])
         
         if bool(UserModel.query.filter_by(PUUID=(userData['puuid'])).first()):
             db.session.delete(UserModel.query.filter_by(PUUID=(userData['puuid'])).first())
