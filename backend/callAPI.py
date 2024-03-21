@@ -7,6 +7,23 @@ load_dotenv()
 api_key = os.getenv('RIOT_API_KEY')
 
 
+def getAccountByPUUID(PUUID):
+    BASE_URL = "https://americas.api.riotgames.com/riot/"
+    
+    requestURl = BASE_URL + "account/v1/accounts/by-puuid/"
+    
+    requestURl = requestURl + PUUID
+    
+    requestURl = requestURl + '?api_key=' + api_key
+    
+    response = requests.get(requestURl)
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        apiError(response.status_code)
+
+
 def getPUUIDByRiotID(tagLine, gameName):
     BASE_URL = "https://americas.api.riotgames.com/riot/"
     
@@ -19,7 +36,7 @@ def getPUUIDByRiotID(tagLine, gameName):
     response = requests.get(requestURl)
     
     if response.status_code == 200:
-        return response.json()
+        return response.json()['puuid']
     else:
         apiError(response.status_code)
 

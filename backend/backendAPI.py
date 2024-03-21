@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import Api, Resource, fields, marshal_with
 from flask_sqlalchemy import SQLAlchemy
-from callAPI import getMatchByMatchID, getMatchLast20, getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getMatchXtoX
+from callAPI import getMatchByMatchID, getMatchLast20, getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getMatchXtoX, getPUUIDByRiotID, getAccountByPUUID
 import os
 
 basedir = os.path.abspath(os.path.dirname(__file__)) + "/data/"
@@ -59,10 +59,8 @@ class UserModel(db.Model):
     PUUID = db.Column(db.String, primary_key=True)
     SID = db.Column(db.String, nullable=False)
 
-    """
     tagLine=db.Column(db.String, nullable=False)
     gameName=db.Column(db.String, nullable=False)
-    """
 
     name = db.Column(db.String, nullable=False)
     profileIcon = db.Column(db.Integer, nullable=True)
@@ -111,24 +109,64 @@ class SummonerSpellModel(db.Model):
 
 with app.app_context():
     db.create_all()
+    
+resource_fields = {
+    'PUUID': fields.String,
+    'SID': fields.String,
+    
+    'tagLine': fields.String,
+    'gameName': fields.String,
+    
+    'name': fields.String,
+    'profileIcon': fields.Integer,
+    
+    'tier': fields.String,
+    'rank': fields.String,
+    
+    'wins': fields.Integer,
+    'losses': fields.Integer,
 
-#class UserByRiotID(Resource):
+    'revisionDate': fields.Integer
+}   
+
+class UserByRiotID(Resource):
+    @marshal_with(resource_fields)
+    def get(self, tagLine, gameName):
+        if not bool(UserModel.query.filter_by(tagLine=tagLine, gameName=gameName).first()):
+            status = self.put(tagLine, gameName)
+            if status != 201:
+                return status
+
+        result = UserModel.query.filter_by(tagLine=tagLine, gameName=gameName).first()
+
+        return result, 200
+
+   
+    def put(self, tagLine, gameName):
+        userData = getSummonerByPUUID(getPUUIDByRiotID(tagLine, gameName))
+        userLeagueInfo = getLeagueInfoBySID(userData['id'])
+        userAccountInfo = getAccountByPUUID(userData['puuid'])
+        
+        if bool(UserModel.query.filter_by(PUUID=(userData['puuid'])).first()):
+            db.session.delete(UserModel.query.filter_by(PUUID=(userData['puuid'])).first())
+            db.session.commit()
+        
+        for item in userLeagueInfo:
+            if item['queueType'] == 'RANKED_SOLO_5x5':
+                userLeagueInfo = item
+                break
+        
+        newUser = createUser(userData, userLeagueInfo, userAccountInfo)
+        
+        db.session.add(newUser)
+        db.session.commit()
+        
+        return 201
+    
+api.add_resource(UserByRiotID, "user/by-riotID/<tagLine>/<gameName>")
+
+
 class UserByName(Resource):
-    resource_fields = {
-        'PUUID': fields.String,
-        'SID': fields.String,
-        
-        'name': fields.String,
-        'profileIcon': fields.Integer,
-        
-        'tier': fields.String,
-        'rank': fields.String,
-        
-        'wins': fields.Integer,
-        'losses': fields.Integer,
-
-        'revisionDate': fields.Integer
-    }
     @marshal_with(resource_fields)
     def get(self, name):
         if not bool(UserModel.query.filter_by(name=name).first()):
@@ -139,83 +177,23 @@ class UserByName(Resource):
         result = UserModel.query.filter_by(name=name).first()
 
         return result, 200
-    """
-    def get(self,tagline,gameName)
-        if not bool(UserModel.query.filter_by(tagLine=tagLine, gameName=gameName).first()):
-            status = self.put(tagLine,gameName)
-            if status != 201:
-                return status
-            
-        result = UserModel.query.filter_by(tagLine=tagLine, gameName=gameName).first()
 
-        return result, 200
-    """
 
-    """
-    def put(self, tagline, gameName):
-        userData = getPUUIDByRiotID(tagLine, gameName)
-        userLeagueInfo = getLeagueInfoBySID(userData['id'])
-        
-        if bool(UserModel.query.filter_by(PUUID=(userData['puuid'])).first()):
-            db.session.delete(UserModel.query.filter_by(PUUID=(userData['puuid'])).first())
-            db.session.commit()
-        
-        
-        for item in userLeagueInfo:
-            if item['queueType'] == 'RANKED_SOLO_5x5':
-                userLeagueInfo = item
-                break
-        
-        newUser = UserModel(
-            PUUID=userData['puuid'],
-            SID=userData['id'],
-
-            name=userData['name'],
-            profileIcon=userData['profileIconId'],
-
-            tier=userLeagueInfo['tier'],
-            rank=userLeagueInfo['rank'],
-
-            wins=userLeagueInfo['wins'],
-            losses=userLeagueInfo['losses'],
-
-            revisionDate=userData['revisionDate']
-        )
-        
-        db.session.add(newUser)
-        db.session.commit()
-        
-        return 201
-    """
     def put(self, name):
         userData = getSummonerByName(name)
         userLeagueInfo = getLeagueInfoBySID(userData['id'])
+        userAccountInfo = getAccountByPUUID(userData['puuid'])
         
         if bool(UserModel.query.filter_by(PUUID=(userData['puuid'])).first()):
             db.session.delete(UserModel.query.filter_by(PUUID=(userData['puuid'])).first())
             db.session.commit()
-        
         
         for item in userLeagueInfo:
             if item['queueType'] == 'RANKED_SOLO_5x5':
                 userLeagueInfo = item
                 break
         
-        newUser = UserModel(
-            PUUID=userData['puuid'],
-            SID=userData['id'],
-
-            name=userData['name'],
-            profileIcon=userData['profileIconId'],
-
-            tier=userLeagueInfo['tier'],
-            rank=userLeagueInfo['rank'],
-
-            wins=userLeagueInfo['wins'],
-            losses=userLeagueInfo['losses'],
-
-            revisionDate=userData['revisionDate']
-        )
+        newUser = createUser(userData, userLeagueInfo, userAccountInfo)
         
         db.session.add(newUser)
         db.session.commit()
@@ -223,24 +201,9 @@ class UserByName(Resource):
         return 201
 
 api.add_resource(UserByName, "/user/by-name/<name>")
-#api.add_resource(UserByRiotID,"user/by-riotID/<tagLine>/<gameName>")
+
 
 class UserByPUUID(Resource):
-    resource_fields = {
-        'PUUID': fields.String,
-        'SID': fields.String,
-        
-        'name': fields.String,
-        'profileIcon': fields.Integer,
-        
-        'tier': fields.String,
-        'rank': fields.String,
-        
-        'wins': fields.Integer,
-        'losses': fields.Integer,
-
-        'revisionDate': fields.Integer
-    }
     @marshal_with(resource_fields)
     def get(self, PUUID):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
@@ -259,27 +222,14 @@ class UserByPUUID(Resource):
         
         userData = getSummonerByPUUID(PUUID)
         userLeagueInfo = getLeagueInfoBySID(userData['id'])
+        userAccountInfo = getAccountByPUUID(userData['puuid'])
         
         for item in userLeagueInfo:
             if item['queueType'] == 'RANKED_SOLO_5x5':
                 userLeagueInfo = item
                 break
         
-        newUser = UserModel(
-            PUUID=userData['puuid'],
-            SID=userData['id'],
-            
-            name=userData['name'],
-            profileIcon=userData['profileIconId'],
-            
-            tier=userLeagueInfo['tier'],
-            rank=userLeagueInfo['rank'],
-
-            wins=userLeagueInfo['wins'],
-            losses=userLeagueInfo['losses'],
-            
-            revisionDate=userData['revisionDate']
-        )
+        newUser = createUser(userData, userLeagueInfo, userAccountInfo)
         
         db.session.add(newUser)
         db.session.commit()
@@ -479,6 +429,7 @@ def addGame(gameData) -> tuple[GameModel, list[PlayedGame]]:
         
     return newGame, newPlayedGames
 
+
 def addGameXtoX(PUUID, x, y):
     if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
         return 404
@@ -498,6 +449,29 @@ def addGameXtoX(PUUID, x, y):
     db.session.commit()
 
     return 201
+
+
+def createUser(userData, userLeagueInfo, userAccountInfo) -> UserModel:
+    newUser = UserModel(
+            PUUID=userData['puuid'],
+            SID=userData['id'],
+
+            name=userData['name'],
+            profileIcon=userData['profileIconId'],
+            
+            tagLine=userAccountInfo['tagLine'],
+            gameName=userAccountInfo['gameName'],
+
+            tier=userLeagueInfo['tier'],
+            rank=userLeagueInfo['rank'],
+
+            wins=userLeagueInfo['wins'],
+            losses=userLeagueInfo['losses'],
+
+            revisionDate=userData['revisionDate']
+        )
+    
+    return newUser
 
 
 if __name__ == "__main__":
