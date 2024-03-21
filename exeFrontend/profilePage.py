@@ -6,12 +6,12 @@ import requests
 class ProfilePage(QWidget):
     BASE_URL = "http://127.0.0.1:5000"
     IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
-    def __init__(self, *args, **kwargs):
+    def __init__(self, PUUID, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        #HARDCODED CHANGE BEFORE DEPLOYMENT
-        userName = 'LessJnglMoreBush'
-        userData = requests.get(self.BASE_URL + '/user/by-name/' + userName).json()
+        
+        userData = requests.get(self.BASE_URL + '/user/by-PUUID/' + str(PUUID)).json()
+        requests.put(self.BASE_URL + '/update-user/' + str(PUUID))
         
         
         layout = QGridLayout()
