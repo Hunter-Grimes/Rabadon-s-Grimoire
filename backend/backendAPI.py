@@ -58,7 +58,12 @@ class UserModel(db.Model):
     __tablename__ = 'User'
     PUUID = db.Column(db.String, primary_key=True)
     SID = db.Column(db.String, nullable=False)
-    
+
+    """
+    tagLine=db.Column(db.String, nullable=False)
+    gameName=db.Column(db.String, nullable=False)
+    """
+
     name = db.Column(db.String, nullable=False)
     profileIcon = db.Column(db.Integer, nullable=True)
     
@@ -107,7 +112,7 @@ class SummonerSpellModel(db.Model):
 with app.app_context():
     db.create_all()
 
-
+#class UserByRiotID(Resource):
 class UserByName(Resource):
     resource_fields = {
         'PUUID': fields.String,
@@ -134,7 +139,54 @@ class UserByName(Resource):
         result = UserModel.query.filter_by(name=name).first()
 
         return result, 200
+    """
+    def get(self,tagline,gameName)
+        if not bool(UserModel.query.filter_by(tagLine=tagLine, gameName=gameName).first()):
+            status = self.put(tagLine,gameName)
+            if status != 201:
+                return status
+            
+        result = UserModel.query.filter_by(tagLine=tagLine, gameName=gameName).first()
 
+        return result, 200
+    """
+
+    """
+    def put(self, tagline, gameName):
+        userData = getPUUIDByRiotID(tagLine, gameName)
+        userLeagueInfo = getLeagueInfoBySID(userData['id'])
+        
+        if bool(UserModel.query.filter_by(PUUID=(userData['puuid'])).first()):
+            db.session.delete(UserModel.query.filter_by(PUUID=(userData['puuid'])).first())
+            db.session.commit()
+        
+        
+        for item in userLeagueInfo:
+            if item['queueType'] == 'RANKED_SOLO_5x5':
+                userLeagueInfo = item
+                break
+        
+        newUser = UserModel(
+            PUUID=userData['puuid'],
+            SID=userData['id'],
+
+            name=userData['name'],
+            profileIcon=userData['profileIconId'],
+
+            tier=userLeagueInfo['tier'],
+            rank=userLeagueInfo['rank'],
+
+            wins=userLeagueInfo['wins'],
+            losses=userLeagueInfo['losses'],
+
+            revisionDate=userData['revisionDate']
+        )
+        
+        db.session.add(newUser)
+        db.session.commit()
+        
+        return 201
+    """
     def put(self, name):
         userData = getSummonerByName(name)
         userLeagueInfo = getLeagueInfoBySID(userData['id'])
@@ -171,7 +223,7 @@ class UserByName(Resource):
         return 201
 
 api.add_resource(UserByName, "/user/by-name/<name>")
-
+#api.add_resource(UserByRiotID,"user/by-riotID/<tagLine>/<gameName>")
 
 class UserByPUUID(Resource):
     resource_fields = {
