@@ -1,9 +1,10 @@
 QTabWidget::tab-bar {
-    left: 0px; 
+    left: 5px; 
 }
 
 QTabWidget::pane {
-  top:0px;
+  top: 0px;
+  left: 5px;
 }
 
 QTabBar::tab {
