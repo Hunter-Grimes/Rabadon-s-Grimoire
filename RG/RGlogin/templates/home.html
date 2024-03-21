@@ -1,3 +1,5 @@
+<!-- home.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,15 +14,15 @@
     <header>
         <h1>Rabadon's Grimoire</h1>
         <!-- Navigation Links -->
-            <nav id="nav-links">
-                <ul>
-                    <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'about' %}">About</a></li>
-                    <li><a href="{% url 'contact' %}">Contact</a></li>
-                    <li><a href="{% url 'download' %}">Download</a></li>
-                </ul>
-            </nav>
-            <!-- End of Navigation Links -->
+        <nav id="nav-links">
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'about' %}">About</a></li>
+                <li><a href="{% url 'contact' %}">Contact</a></li>
+                <li><a href="{% url 'download' %}">Download</a></li>
+            </ul>
+        </nav>
+        <!-- End of Navigation Links -->
         <!-- End of Header Section -->
     </header>
 
@@ -32,18 +34,12 @@
             <p>A League of Legends companion app for a better and healthy gaming experience.</p>
         </section>
 
-        <!-- Login Section -->
-        <section id="login-section">
-            <div class="login-box">
-                <h3>Login</h3>
-                <form id="login-form">
-                    <input type="text" placeholder="Username" name="username">
-                    <input type="password" placeholder="Password" name="password">
-                    <button type="submit">Login</button>
-                </form>
-            </div>
+        <!-- Login and Signup Buttons -->
+        <section id="login-signup-buttons">
+            <a href="{% url 'index' %}" class="login-button">Login</a>
+            <a href="{% url 'signup' %}" class="signup-button">Signup</a>
         </section>
-        <!-- End of Login Section -->
+        <!-- End of Login and Signup Buttons -->
     </main>
     
     <!-- Image Section -->
