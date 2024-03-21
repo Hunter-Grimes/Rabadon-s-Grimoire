@@ -247,47 +247,34 @@ class GameDataByPlayer(Resource):
         gameData = GameModel.query.filter_by(GID=GID).first()
         playerData = PlayedGame.query.filter_by(GID=GID, PUUID=PUUID).first()
         
-        playerStats = {
-            'patch': getattr(gameData, 'patch'),
-            'time_start': getattr(gameData, 'time_start'),
-            'time_end': getattr(gameData, 'time_end'),
-            
-            'item0': getattr(playerData, 'item0'),
-            'item1': getattr(playerData, 'item1'),
-            'item2': getattr(playerData, 'item2'),
-            'item3': getattr(playerData, 'item3'),
-            'item4': getattr(playerData, 'item4'),
-            'item5': getattr(playerData, 'item5'),
-            'item6': getattr(playerData, 'item6'),
-            
-            'summoner1ID': getattr(playerData, 'summoner1ID'),
-            'summoner2ID': getattr(playerData, 'summoner2ID'),
-            
-            'kills': getattr(playerData, 'kills'),
-            'deaths': getattr(playerData, 'deaths'),
-            'assists': getattr(playerData, 'assists'),
-            
-            'true_damage': getattr(playerData, 'true_damage'),
-            'ad_damage': getattr(playerData, 'ad_damage'),
-            'magic_damage': getattr(playerData, 'magic_damage'),
-            
-            'position': getattr(playerData, 'position'),
-            
-            'gold_earned': getattr(playerData, 'gold_earned'),
-            'gold_spent': getattr(playerData, 'gold_spent'),
-            
-            'CID': getattr(playerData, 'CID'),
-            'champion_name': getattr(playerData, 'champion_name'),
-            
-            'total_minions': getattr(playerData, 'total_minions'),
-            
-            'vision_score': getattr(playerData, 'vision_score'),
-            
-            'won_game': getattr(playerData, "won_game")
-        }
+        playerStats = getPlayerStats(gameData, playerData)
+        
         return playerStats, 200      
 
 api.add_resource(GameDataByPlayer, "/game-data/by-Player/<GID>/<PUUID>")
+
+
+class GameDataAll(Resource):
+    def get(self, GID):
+        if not bool(GameModel.query.filter_by(GID=GID).first()):
+            return 404
+        
+        players = getPlayersInGame(GID)
+        
+        gameData = GameModel.query.filter_by(GID=GID).first()
+        
+        allGameData = {}
+        
+        for player in players:
+            
+            playerData = PlayedGame.query.filter_by(GID=GID, PUUID=player).first()
+            playerDataDict = getPlayerStats(gameData, playerData)
+            
+            allGameData[player] = playerDataDict
+        
+        return allGameData, 200
+     
+api.add_resource(GameDataAll, "/game-data/all/<GID>")
 
 
 class GameIDLast20(Resource):
@@ -373,6 +360,13 @@ class UpdateUser(Resource):
         return 201
 
 api.add_resource(UpdateUser, "/update-user/<PUUID>")
+
+
+def getPlayersInGame(GID):
+    result = PlayedGame.query.filter_by(GID=GID).all()
+    result = [user.PUUID for user in result]
+
+    return result
 
 
 def addGame(gameData) -> tuple[GameModel, list[PlayedGame]]:
@@ -472,6 +466,48 @@ def createUser(userData, userLeagueInfo, userAccountInfo) -> UserModel:
         )
     
     return newUser
+
+def getPlayerStats(gameData, playerData) -> dict:
+    playerStats = {
+        'patch': getattr(gameData, 'patch'),
+        'time_start': getattr(gameData, 'time_start'),
+        'time_end': getattr(gameData, 'time_end'),
+        
+        'item0': getattr(playerData, 'item0'),
+        'item1': getattr(playerData, 'item1'),
+        'item2': getattr(playerData, 'item2'),
+        'item3': getattr(playerData, 'item3'),
+        'item4': getattr(playerData, 'item4'),
+        'item5': getattr(playerData, 'item5'),
+        'item6': getattr(playerData, 'item6'),
+        
+        'summoner1ID': getattr(playerData, 'summoner1ID'),
+        'summoner2ID': getattr(playerData, 'summoner2ID'),
+        
+        'kills': getattr(playerData, 'kills'),
+        'deaths': getattr(playerData, 'deaths'),
+        'assists': getattr(playerData, 'assists'),
+        
+        'true_damage': getattr(playerData, 'true_damage'),
+        'ad_damage': getattr(playerData, 'ad_damage'),
+        'magic_damage': getattr(playerData, 'magic_damage'),
+        
+        'position': getattr(playerData, 'position'),
+        
+        'gold_earned': getattr(playerData, 'gold_earned'),
+        'gold_spent': getattr(playerData, 'gold_spent'),
+        
+        'CID': getattr(playerData, 'CID'),
+        'champion_name': getattr(playerData, 'champion_name'),
+        
+        'total_minions': getattr(playerData, 'total_minions'),
+        
+        'vision_score': getattr(playerData, 'vision_score'),
+        
+        'won_game': getattr(playerData, "won_game")
+    }
+    
+    return playerStats
 
 
 if __name__ == "__main__":
