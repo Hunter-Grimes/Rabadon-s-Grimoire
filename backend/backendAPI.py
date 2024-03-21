@@ -340,6 +340,39 @@ class GameDataXtoX(Resource):
 api.add_resource(GameDataXtoX, "/game-data/x-x/<PUUID>/<x>/<y>")
 
 
+class UpdateUser(Resource):
+    def put(self, PUUID):
+        if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
+            return 404
+        
+        if not bool(PlayedGame.query.filter_by(PUUID=PUUID).first()):
+            addGameXtoX(PUUID, 0, 20)
+            return 201
+        
+        toUpdate = []
+        
+        updateIndex = 0
+        gettingNew = True
+        while(gettingNew):
+            games = getMatchXtoX(PUUID, updateIndex, updateIndex + 20)
+            for item in games:
+                if not GameModel.query.filter_by(GID=item).first():
+                    toUpdate.append(item)
+                    updateIndex += 1
+                else:
+                    gettingNew = False
+                    break
+            if(updateIndex == 100):
+                gettingNew = False
+        
+        if updateIndex != 0:
+            addGameXtoX(PUUID, 0, updateIndex)
+        
+        return 201
+
+api.add_resource(UpdateUser, "/update-user/<PUUID>")
+
+
 def addGame(gameData) -> tuple[GameModel, list[PlayedGame]]:
     newGame = GameModel(
         GID=gameData['metadata']['matchId'],
