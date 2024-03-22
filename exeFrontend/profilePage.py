@@ -189,7 +189,7 @@ class PlayerButton(QPushButton):
 
         self.clicked.connect(self.buttonClicked)
 
-
+    #TODO link to changing current profile page
     def buttonClicked(self):
         print(self.PUUID)
 
