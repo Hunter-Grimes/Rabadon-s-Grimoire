@@ -33,6 +33,7 @@ class ProfilePage(QWidget):
         label = QLabel(userData['name'])
         layout.addWidget(label, 1, 0)
         
+        
         label = QLabel()
         pixmap = QPixmap(self.IMAGE_LOCATION + 'ranks/rank=' + userData['tier'] + '.png')
         pixmap = pixmap.scaled(150, 150, mode=Qt.SmoothTransformation)
@@ -40,9 +41,11 @@ class ProfilePage(QWidget):
         label.setAlignment(Qt.AlignCenter)
         layout.addWidget(label, 0, 3)
         
+        
         label = QLabel(userData['tier'] + ' ' + userData['rank'])
         label.setAlignment(Qt.AlignCenter)
         layout.addWidget(label, 1, 3)
+        
         
         self.setLayout(layout)
 
@@ -86,8 +89,7 @@ class Match(QWidget):
     
     def __init__(self, GID, PUUID, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        #matchData = requests.get(self.BASE_URL + '/game-data/by-Player/' + GID + '/' + PUUID).json()
+
         gameData = requests.get(self.BASE_URL + '/game-data/all/' + GID).json()
         
         layout = QVBoxLayout()
