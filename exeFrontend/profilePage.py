@@ -122,43 +122,11 @@ class Match(QWidget):
         
         
         #Items
-        itemBox = QGroupBox()
-        items = QGridLayout()
-        
-        label = QLabel()
-        pixmap = fetchItemPixmap(gameData[PUUID]['item0'])
-        label.setPixmap(pixmap)
-        items.addWidget(label, 0, 0)
-        
-        label = QLabel()
-        pixmap = fetchItemPixmap(gameData[PUUID]['item1'])
-        label.setPixmap(pixmap)
-        items.addWidget(label, 0, 1)
-        
-        label = QLabel()
-        pixmap = fetchItemPixmap(gameData[PUUID]['item2'])
-        label.setPixmap(pixmap)
-        items.addWidget(label, 0, 2)
-        
-        label = QLabel()
-        pixmap = fetchItemPixmap(gameData[PUUID]['item3'])
-        label.setPixmap(pixmap)
-        items.addWidget(label, 1, 0)
-        
-        label = QLabel()
-        pixmap = fetchItemPixmap(gameData[PUUID]['item4'])
-        label.setPixmap(pixmap)
-        items.addWidget(label, 1, 1)
-        
-        label = QLabel()
-        pixmap = fetchItemPixmap(gameData[PUUID]['item5'])
-        label.setPixmap(pixmap)
-        items.addWidget(label, 1, 2)
-        
-        itemBox.setLayout(items)
+        itemBox = ItemDisplay(PUUID, gameData)
         boxLayout.addWidget(itemBox, 0, 3, -1, 1)
         
         
+        #Champions
         champBox = ChampDisplay(gameData)
         boxLayout.addWidget(champBox, 0, 4, -1, 1)
         
@@ -166,6 +134,24 @@ class Match(QWidget):
         box.setLayout(boxLayout)
         layout.addWidget(box)
         self.setLayout(layout)
+        
+
+class ItemDisplay(QGroupBox):
+    def __init__(self, PUUID, gameData, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        items = QGridLayout()
+        
+        for item in range(6):
+            label = QLabel()
+            pixmap = fetchItemPixmap(gameData[PUUID]['item' + str(item)])
+            label.setPixmap(pixmap)
+            
+            if item < 3:
+                items.addWidget(label, 0, item)
+            else:
+                items.addWidget(label, 1, item - 3)
+        
+        self.setLayout(items)
 
 
 class ChampDisplay(QGroupBox):
