@@ -17,6 +17,8 @@ class PlayedGame(db.Model):
     PUUID = db.Column(db.String, db.ForeignKey('User.PUUID'), primary_key=True)
     GID = db.Column(db.String, db.ForeignKey('Game.GID'), primary_key=True)
     
+    name = db.Column(db.String, nullable=False)
+    
     item0 = db.Column(db.Integer, db.ForeignKey('Item.IID'), nullable=True)
     item1 = db.Column(db.Integer, db.ForeignKey('Item.IID'), nullable=True)
     item2 = db.Column(db.Integer, db.ForeignKey('Item.IID'), nullable=True)
@@ -287,6 +289,7 @@ class GameIDLast20(Resource):
 api.add_resource(GameIDLast20, "/game-id/last-20/<PUUID>")
 
 #TODO Fix to work with the addition of games more recent than those in our database
+#UPDATE FUNCTION ADDED MAY FIX THIS
 class GameIDXtoX(Resource):
     def get(self, PUUID, x, y):
         numEntries = PlayedGame.query.filter_by(PUUID=PUUID).count()
@@ -385,6 +388,8 @@ def addGame(gameData) -> tuple[GameModel, list[PlayedGame]]:
             PUUID=gameData['info']['participants'][player]['puuid'],
             GID=gameData['metadata']['matchId'],
             
+            name=gameData['info']['participants'][player]['summonerName'],
+            
             item0=gameData['info']['participants'][player]['item0'],
             item1=gameData['info']['participants'][player]['item1'],
             item2=gameData['info']['participants'][player]['item2'],
@@ -472,6 +477,8 @@ def getPlayerStats(gameData, playerData) -> dict:
         'patch': getattr(gameData, 'patch'),
         'time_start': getattr(gameData, 'time_start'),
         'time_end': getattr(gameData, 'time_end'),
+        
+        'name': getattr(playerData, 'name'),
         
         'item0': getattr(playerData, 'item0'),
         'item1': getattr(playerData, 'item1'),

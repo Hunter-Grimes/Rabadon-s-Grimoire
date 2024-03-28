@@ -1,15 +1,60 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QScrollArea, QGroupBox, QPushButton
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QScrollArea, QGroupBox, QPushButton, QStackedLayout
 from PySide6.QtGui import QPixmap, QColor, QIcon
 from PySide6.QtCore import Qt
 import requests
 
-class ProfilePage(QWidget):
-    BASE_URL = "http://127.0.0.1:5000"
-    IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
-    
-    def __init__(self, PUUID, *args, **kwargs):
+
+class ProfilePageManager(QWidget):
+    def __init__(self, PUUID, BASE_URL, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.layout = QGridLayout()
+        self.BASE_URL = BASE_URL
+        self.IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
         
+        nextPage = QPushButton("Next")
+        prevPage = QPushButton("Back")
+        
+        nextPage.clicked.connect(self.advancePage)
+        prevPage.clicked.connect(self.retreatPage)
+        
+        
+        self.layout.addWidget(prevPage, 0, 0)
+        self.layout.addWidget(nextPage, 0, 1)
+        
+        self.profileWindow = QWidget()
+        profileWindowLayout = QStackedLayout()
+        self.profileWindow.setLayout(profileWindowLayout)
+        self.profileWindow.layout().addWidget(ProfilePage(PUUID, self, self.BASE_URL, self.IMAGE_LOCATION))
+        
+        self.layout.addWidget(self.profileWindow, 1, 0, 1, -1)
+        
+        self.setLayout(self.layout)
+        
+
+    def addPage(self, page):
+        self.profileWindow.layout().insertWidget(self.profileWindow.layout().currentIndex() + 1, page)
+        self.profileWindow.layout().setCurrentIndex(self.profileWindow.layout().currentIndex() + 1)
+        
+        if (self.profileWindow.layout().count() - 1) > self.profileWindow.layout().currentIndex():
+            for i in range(self.profileWindow.layout().currentIndex() + 1, self.profileWindow.layout().count() - 1):
+                self.profileWindow.layout().removeWidget(self.profileWindow.layout().itemAt(i).widget())
+                self.profileWindow.layout().removeItem(self.profileWindow.layout().itemAt(i))
+            
+        
+    def advancePage(self):
+        self.profileWindow.layout().setCurrentIndex(self.profileWindow.layout().currentIndex() + 1)
+    
+        
+    def retreatPage(self):
+        self.profileWindow.layout().setCurrentIndex(self.profileWindow.layout().currentIndex() - 1)
+
+
+class ProfilePage(QWidget):
+    def __init__(self, PUUID, manager, BASE_URL, IMAGE_LOCATION, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.manager = manager
+        self.BASE_URL = BASE_URL
+        self.IMAGE_LOCATION = IMAGE_LOCATION
         
         userData = requests.get(self.BASE_URL + '/user/by-PUUID/' + str(PUUID)).json()
         requests.put(self.BASE_URL + '/update-user/' + str(PUUID))
@@ -19,7 +64,7 @@ class ProfilePage(QWidget):
         layout.setContentsMargins(10, 10, 10, 10)
         
         
-        scroll = MatchHistory(userData)
+        scroll = MatchHistory(userData, self.manager, self.BASE_URL, self.IMAGE_LOCATION)
         layout.addWidget(scroll, 2, 0, 1, 2)
         
         
@@ -51,10 +96,12 @@ class ProfilePage(QWidget):
 
       
 class MatchHistory(QScrollArea):
-    BASE_URL = "http://127.0.0.1:5000"
-    
-    def __init__(self, userData, *args, **kwargs):
+    def __init__(self, userData, manager, BASE_URL, IMAGE_LOCATION, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.manager = manager
+        self.BASE_URL = BASE_URL
+        self.IMAGE_LOCATION = IMAGE_LOCATION
+        
         self.userData = userData
         self.matchIndex = 20
         group = QGroupBox()
@@ -64,7 +111,7 @@ class MatchHistory(QScrollArea):
         
         boxlayout = QVBoxLayout()
         for id in requests.get(self.BASE_URL + '/game-id/x-x/' + self.userData['PUUID'] + '/0/20').json():
-            boxlayout.addWidget(Match(id, self.userData['PUUID']))
+            boxlayout.addWidget(Match(id, self.userData['PUUID'], self.manager, self.BASE_URL, self.IMAGE_LOCATION))
 
         group.setLayout(boxlayout)
         self.setWidget(group)
@@ -79,16 +126,16 @@ class MatchHistory(QScrollArea):
 
     def add_lines(self, n):
         for id in requests.get(self.BASE_URL + '/game-id/x-x/' + self.userData['PUUID'] + '/' + str(self.matchIndex) + '/' + str(self.matchIndex + n)).json():
-            self.widget().layout().addWidget(Match(id, self.userData['PUUID']))
+            self.widget().layout().addWidget(Match(id, self.userData['PUUID'], self.manager, self.BASE_URL, self.IMAGE_LOCATION))
         self.matchIndex += n
             
              
-class Match(QWidget):
-    BASE_URL = "http://127.0.0.1:5000"
-    IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
-    
-    def __init__(self, GID, PUUID, *args, **kwargs):
+class Match(QWidget):    
+    def __init__(self, GID, PUUID, manager, BASE_URL, IMAGE_LOCATION, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.manager = manager
+        self.BASE_URL = BASE_URL
+        self.IMAGE_LOCATION = IMAGE_LOCATION
 
         gameData = requests.get(self.BASE_URL + '/game-data/all/' + GID).json()
         
@@ -124,12 +171,12 @@ class Match(QWidget):
         
         
         #Items
-        itemBox = ItemDisplay(PUUID, gameData)
+        itemBox = ItemDisplay(PUUID, gameData, self.manager, self.BASE_URL, self.IMAGE_LOCATION)
         boxLayout.addWidget(itemBox, 0, 3, -1, 1)
         
         
         #Champions
-        champBox = ChampDisplay(gameData)
+        champBox = ChampDisplay(gameData, self.manager, self.BASE_URL, self.IMAGE_LOCATION)
         boxLayout.addWidget(champBox, 0, 4, -1, 1)
         
         
@@ -139,13 +186,17 @@ class Match(QWidget):
         
 
 class ItemDisplay(QGroupBox):
-    def __init__(self, PUUID, gameData, *args, **kwargs):
+    def __init__(self, PUUID, gameData, manager, BASE_URL, IMAGE_LOCATION, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.manager = manager
+        self.BASE_URL = BASE_URL
+        self.IMAGE_LOCATION = IMAGE_LOCATION
+        
         items = QGridLayout()
         
         for item in range(6):
             label = QLabel()
-            pixmap = fetchItemPixmap(gameData[PUUID]['item' + str(item)])
+            pixmap = fetchItemPixmap(gameData[PUUID]['item' + str(item)], self.IMAGE_LOCATION)
             label.setPixmap(pixmap)
             
             if item < 3:
@@ -157,14 +208,17 @@ class ItemDisplay(QGroupBox):
 
 
 class ChampDisplay(QGroupBox):
-    def __init__(self, gameData, *args, **kwargs):
+    def __init__(self, gameData, manager, BASE_URL, IMAGE_LOCATION, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
+        self.manager = manager
+        self.BASE_URL = BASE_URL
+        self.IMAGE_LOCATION = IMAGE_LOCATION
+        
         champs = QGridLayout()
         
         for i, player in enumerate(list(gameData.keys())):
             
-            button = PlayerButton(player, fetchChampPixmap(gameData[player]['champion_name']))
+            button = PlayerButton(player, gameData, fetchChampPixmap(gameData[player]['champion_name'], self.IMAGE_LOCATION), self.manager, self.BASE_URL, self.IMAGE_LOCATION)
             
             if i < 5:
                 champs.addWidget(button, 0, i)
@@ -176,8 +230,14 @@ class ChampDisplay(QGroupBox):
         
       
 class PlayerButton(QPushButton):
-    def __init__(self, PUUID, pixmap, *args, **kwargs):
+    def __init__(self, PUUID, gameData, pixmap, manager, BASE_URL, IMAGE_LOCATION, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.manager = manager
+        self.BASE_URL = BASE_URL
+        self.IMAGE_LOCATION = IMAGE_LOCATION
+        
+        self.playerName = gameData[PUUID]['name']
+        self.setToolTip(self.playerName)
         
         self.PUUID = PUUID
         self.pixmap = pixmap
@@ -191,14 +251,11 @@ class PlayerButton(QPushButton):
 
         self.clicked.connect(self.buttonClicked)
 
-    #TODO link to changing current profile page
     def buttonClicked(self):
-        print(self.PUUID)
+        self.manager.addPage(ProfilePage(self.PUUID, self.manager, self.BASE_URL, self.IMAGE_LOCATION))
 
  
-def fetchItemPixmap(itemID):
-    IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
-    
+def fetchItemPixmap(itemID, IMAGE_LOCATION):
     if itemID == 0:
         pixmap = QPixmap(30, 30)
         pixmap.fill(QColor(100, 100, 100))
@@ -209,9 +266,7 @@ def fetchItemPixmap(itemID):
     return pixmap
 
 
-def fetchChampPixmap(champName):
-    IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
-    
+def fetchChampPixmap(champName, IMAGE_LOCATION):
     pixmap = QPixmap(IMAGE_LOCATION + 'champion/' + str(champName) + '.png').scaled(30, 30, mode=Qt.SmoothTransformation)
 
     return pixmap

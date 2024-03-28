@@ -1,7 +1,7 @@
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget
 
-from profilePage import ProfilePage
+from profilePage import ProfilePageManager
 from patchNotesPage import PatchNotesPage
 
 import requests
@@ -17,7 +17,7 @@ class MainWindow(QMainWindow):
         myName = 'LessJnglMoreBush'
         myPUUID = requests.get(self.BASE_URL + '/user/by-name/' + myName).json()['PUUID']
         
-        tabs.addTab(ProfilePage(myPUUID), "Profile")
+        tabs.addTab(ProfilePageManager(myPUUID, self.BASE_URL), "Profile")
         tabs.addTab(PatchNotesPage(), "Patch Notes")
         with open("exeFrontend/tabStyle.qss", "r") as f:
             _style = f.read()
