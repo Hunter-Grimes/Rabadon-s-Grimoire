@@ -17,9 +17,11 @@ Including another URLconf
 from django.urls import include, path
 from django.contrib import admin
 from django.views.generic.base import TemplateView
+from RGlogin.myapp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('RGlogin.myapp.urls')),
+    path('accounts/logout/', views.custom_logout, name='logout'),
     path('accounts/', include('django.contrib.auth.urls')),
 ]

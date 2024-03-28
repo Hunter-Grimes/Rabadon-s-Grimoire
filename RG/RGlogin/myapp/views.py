@@ -35,7 +35,7 @@ def custom_login(request):
 # View for the logout page
 def custom_logout(request):
     logout(request)
-    return redirect('home')
+    return render(request, 'home.html')
 
 # View for user signup
 def signup(request):
