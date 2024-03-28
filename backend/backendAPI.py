@@ -111,7 +111,8 @@ class SummonerSpellModel(db.Model):
 
 with app.app_context():
     db.create_all()
-    
+
+  
 resource_fields = {
     'PUUID': fields.String,
     'SID': fields.String,
@@ -131,6 +132,7 @@ resource_fields = {
     'revisionDate': fields.Integer
 }   
 
+
 class UserByRiotID(Resource):
     @marshal_with(resource_fields)
     def get(self, tagLine, gameName):
@@ -142,7 +144,6 @@ class UserByRiotID(Resource):
         result = UserModel.query.filter_by(tagLine=tagLine, gameName=gameName).first()
 
         return result, 200
-
 
     def put(self, tagLine, gameName):
         userAccountInfo = getACCTInfoByRiotID(tagLine, gameName)
@@ -179,7 +180,6 @@ class UserByName(Resource):
         result = UserModel.query.filter_by(name=name).first()
 
         return result, 200
-
 
     def put(self, name):
         userData = getSummonerByName(name)
@@ -287,6 +287,7 @@ class GameIDLast20(Resource):
         return result, 200
 
 api.add_resource(GameIDLast20, "/game-id/last-20/<PUUID>")
+
 
 #TODO Fix to work with the addition of games more recent than those in our database
 #UPDATE FUNCTION ADDED MAY FIX THIS
@@ -471,6 +472,7 @@ def createUser(userData, userLeagueInfo, userAccountInfo) -> UserModel:
         )
     
     return newUser
+
 
 def getPlayerStats(gameData, playerData) -> dict:
     playerStats = {

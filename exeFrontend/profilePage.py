@@ -17,7 +17,6 @@ class ProfilePageManager(QWidget):
         nextPage.clicked.connect(self.advancePage)
         prevPage.clicked.connect(self.retreatPage)
         
-        
         self.layout.addWidget(prevPage, 0, 0)
         self.layout.addWidget(nextPage, 0, 1)
         
@@ -38,12 +37,10 @@ class ProfilePageManager(QWidget):
         if (self.profileWindow.layout().count() - 1) > self.profileWindow.layout().currentIndex():
             for i in range(self.profileWindow.layout().currentIndex() + 1, self.profileWindow.layout().count() - 1):
                 self.profileWindow.layout().removeWidget(self.profileWindow.layout().itemAt(i).widget())
-                self.profileWindow.layout().removeItem(self.profileWindow.layout().itemAt(i))
-            
+                self.profileWindow.layout().removeItem(self.profileWindow.layout().itemAt(i))     
         
     def advancePage(self):
         self.profileWindow.layout().setCurrentIndex(self.profileWindow.layout().currentIndex() + 1)
-    
         
     def retreatPage(self):
         self.profileWindow.layout().setCurrentIndex(self.profileWindow.layout().currentIndex() - 1)
@@ -59,14 +56,11 @@ class ProfilePage(QWidget):
         userData = requests.get(self.BASE_URL + '/user/by-PUUID/' + str(PUUID)).json()
         requests.put(self.BASE_URL + '/update-user/' + str(PUUID))
         
-        
         layout = QGridLayout()
         layout.setContentsMargins(10, 10, 10, 10)
         
-        
         scroll = MatchHistory(userData, self.manager, self.BASE_URL, self.IMAGE_LOCATION)
         layout.addWidget(scroll, 2, 0, 1, 2)
-        
         
         label = QLabel()
         pixmap = QPixmap(self.IMAGE_LOCATION + 'profileicon/' + str(userData['profileIcon']) + '.png')
@@ -74,10 +68,8 @@ class ProfilePage(QWidget):
         label.setPixmap(pixmap)
         layout.addWidget(label, 0, 0)
         
-        
         label = QLabel(userData['name'])
         layout.addWidget(label, 1, 0)
-        
         
         label = QLabel()
         pixmap = QPixmap(self.IMAGE_LOCATION + 'ranks/rank=' + userData['tier'] + '.png')
@@ -86,11 +78,9 @@ class ProfilePage(QWidget):
         label.setAlignment(Qt.AlignCenter)
         layout.addWidget(label, 0, 3)
         
-        
         label = QLabel(userData['tier'] + ' ' + userData['rank'])
         label.setAlignment(Qt.AlignCenter)
         layout.addWidget(label, 1, 3)
-        
         
         self.setLayout(layout)
 
@@ -106,7 +96,6 @@ class MatchHistory(QScrollArea):
         self.matchIndex = 20
         group = QGroupBox()
         
-        
         self.verticalScrollBar().valueChanged.connect(self.valueChanged, type=Qt.UniqueConnection)
         
         boxlayout = QVBoxLayout()
@@ -117,12 +106,10 @@ class MatchHistory(QScrollArea):
         self.setWidget(group)
         self.setFixedWidth(group.width() + 2)
         self.setWidgetResizable(True)
-
         
     def valueChanged(self, value):
         if value == self.verticalScrollBar().maximum():
             self.add_lines(5)
-
 
     def add_lines(self, n):
         for id in requests.get(self.BASE_URL + '/game-id/x-x/' + self.userData['PUUID'] + '/' + str(self.matchIndex) + '/' + str(self.matchIndex + n)).json():
@@ -169,16 +156,13 @@ class Match(QWidget):
         label = QLabel('CS: ' + str(gameData[PUUID]['total_minions']))
         boxLayout.addWidget(label, 1, 2)
         
-        
         #Items
         itemBox = ItemDisplay(PUUID, gameData, self.manager, self.BASE_URL, self.IMAGE_LOCATION)
         boxLayout.addWidget(itemBox, 0, 3, -1, 1)
         
-        
         #Champions
         champBox = ChampDisplay(gameData, self.manager, self.BASE_URL, self.IMAGE_LOCATION)
         boxLayout.addWidget(champBox, 0, 4, -1, 1)
-        
         
         box.setLayout(boxLayout)
         layout.addWidget(box)
@@ -226,7 +210,6 @@ class ChampDisplay(QGroupBox):
                 champs.addWidget(button, 1, i - 5)
         
         self.setLayout(champs)
-    
         
       
 class PlayerButton(QPushButton):
