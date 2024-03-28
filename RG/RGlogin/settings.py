@@ -16,6 +16,8 @@ from pathlib import Path
 # Define the login URL where users will be redirected to log in
 LOGIN_URL = '/login/'
 
+LOGIN_REDIRECT_URL = 'home'
+
 # Define the logout URL where users will be redirected after logging out
 LOGOUT_URL = '/logout/'
 

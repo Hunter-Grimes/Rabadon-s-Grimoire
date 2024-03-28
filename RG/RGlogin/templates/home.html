@@ -20,6 +20,12 @@
                 <li><a href="{% url 'about' %}">About</a></li>
                 <li><a href="{% url 'contact' %}">Contact</a></li>
                 <li><a href="{% url 'download' %}">Download</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                    <li><a href="{% url 'signup' %}">Signup</a></li>
+                {% endif %}
             </ul>
         </nav>
         <!-- End of Navigation Links -->
@@ -33,14 +39,6 @@
             <h2>Welcome to Rabadon's Grimoire</h2>
             <p>A League of Legends companion app for a better and healthy gaming experience.</p>
         </section>
-
-        <!-- Login and Signup Buttons -->
-        <section id="login-signup-buttons">
-            <a href="{% url 'index' %}" class="login-button">Login</a>
-            <a href="{% url 'signup' %}" class="signup-button">Signup</a>
-        </section>
-        <!-- End of Login and Signup Buttons -->
-    </main>
     
     <!-- Image Section -->
     <section id="image-section">

@@ -11,15 +11,22 @@
     <header>
         <h1>Rabadon's Grimoire</h1>
         <!-- Navigation Links -->
-            <nav id="nav-links">
-                <ul>
-                    <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'about' %}">About</a></li>
-                    <li><a href="{% url 'contact' %}">Contact</a></li>
-                    <li><a href="{% url 'download' %}">Download</a></li>
-                </ul>
-            </nav>
-            <!-- End of Navigation Links -->
+        <nav id="nav-links">
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'about' %}">About</a></li>
+                <li><a href="{% url 'contact' %}">Contact</a></li>
+                <li><a href="{% url 'download' %}">Download</a></li>
+                <!-- Display login and signup buttons based on user authentication -->
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                    <li><a href="{% url 'signup' %}">Signup</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        <!-- End of Navigation Links -->
         <!-- End of Header Section -->
     </header>
 

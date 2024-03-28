@@ -53,36 +53,36 @@ section {
 }
 /***************************/
 
-/* Login section styles */
+/* Authentication section styles */
 /***************************/
-#login-section {
+#authentication-section {
     display: flex; /* Added to make login box a flex container */
     flex-direction: column; /* Added to stack children vertically */
     align-items: flex-start; /* Added to align items at the start of the cross axis */
 }
 
-.login-box {
+.authentication-box {
     background-color: #f0f0f0;
     border-radius: 10px;
     padding: 20px;
 }
 
-.login-box h3 {
+.authentication-box h3 {
     margin-bottom: 10px;
 }
 
-#login-section form {
+#authentication-section form {
     display: flex;
     flex-direction: column;
 }
 
-#login-section input[type="text"],
-#login-section input[type="password"],
-#login-section button {
+#authentication-section input[type="text"],
+#authentication-section input[type="password"],
+#authentication-section button {
     margin-bottom: 10px;
 }
 
-#login-section button {
+#authentication-section button {
     height: 40px; /* Adjust as needed */
 }
 /***************************/
