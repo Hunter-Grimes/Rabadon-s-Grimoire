@@ -21,6 +21,8 @@ LOGIN_REDIRECT_URL = 'home'
 # Define the logout URL where users will be redirected after logging out
 LOGOUT_URL = '/logout/'
 
+LOGOUT_REDIRECT_URL = 'home'
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 

@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('RGlogin.myapp.urls')),
     path('accounts/logout/', views.custom_logout, name='logout'),
+    path("", TemplateView.as_view(template_name="home.html"), name="home"),
     path('accounts/', include('django.contrib.auth.urls')),
 ]
