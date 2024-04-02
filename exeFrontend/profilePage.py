@@ -8,6 +8,12 @@ class ProfilePageManager(QWidget):
     def __init__(self, PUUID, BASE_URL, threadpool, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.threadPool = threadpool
+        
+        self.fetchingPlayer = False
+        self.playerWorker = None
+        
+        self.fetchingGames = False
+        
         self.BASE_URL = BASE_URL
         self.IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
         
@@ -25,7 +31,7 @@ class ProfilePageManager(QWidget):
         self.layout.addWidget(prevPage, 0, 0)
         self.layout.addWidget(nextPage, 0, 1)
         
-        self.loadingIndicator = LoadingIndicator()
+        self.loadingIndicator = LoadingIndicator(self)
         self.layout.addWidget(self.loadingIndicator, 0, 10)
         
         self.profileWindow = QWidget()
@@ -36,11 +42,22 @@ class ProfilePageManager(QWidget):
         self.layout.addWidget(self.profileWindow, 1, 0, 1, -1)
         
         self.setLayout(self.layout)
+    
+    def setFetchPlayer(self):
+        self.fetchingPlayer = False
+    
+    def setFetchGame(self):
+        self.fetchingGames = False
 
     def createPage(self, PUUID):
         self.loadingIndicator.startAnimation()
+        
         worker = Worker(fetchProfileInfo, PUUID, self.BASE_URL)
+        self.fetchingPlayer = True
+        self.playerWorker = worker
+        
         worker.signals.result.connect(self.createPageHelper)
+        worker.signals.finished.connect(self.setFetchPlayer)
         worker.signals.finished.connect(self.loadingIndicator.stopAnimation)
         
         self.threadPool.start(worker)
@@ -66,8 +83,10 @@ class ProfilePageManager(QWidget):
 
 
 class LoadingIndicator(QLabel):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, manager, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.manager = manager
+        
         self.setFixedSize(20, 20)
         self.movie = QMovie('exeFrontend/loading.gif')
         self.movie.setScaledSize(self.size())
@@ -78,13 +97,15 @@ class LoadingIndicator(QLabel):
         self.movie.start()
         
     def stopAnimation(self):
-        self.movie.stop()
-        self.hide()
+        if (not self.manager.fetchingPlayer) and (not self.manager.fetchingGames):
+            self.movie.stop()
+            self.hide()
 
 
 class ProfilePage(QWidget):
     def __init__(self, info, manager, IMAGE_LOCATION, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.info = info
         self.manager = manager
         self.IMAGE_LOCATION = IMAGE_LOCATION
         
@@ -147,8 +168,12 @@ class MatchHistory(QScrollArea):
 
     def add_lines(self, n):
         self.manager.loadingIndicator.startAnimation()
+        self.manager.fetchingGames = True
+        
         worker = Worker(fetchGameInfo, self.userData, self.manager.BASE_URL, '/' + str(self.matchIndex) + '/' + str(self.matchIndex + n))
         worker.signals.result.connect(self.add_lines_finished)
+        
+        worker.signals.finished.connect(self.manager.setFetchGame)
         worker.signals.finished.connect(self.manager.loadingIndicator.stopAnimation)
         worker.signals.finished.connect(self.incrementMatchIndex(n))
         
