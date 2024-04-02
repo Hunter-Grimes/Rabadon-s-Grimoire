@@ -42,21 +42,21 @@ def signup(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.email = form.cleaned_data['email']
+            user = form.save()
+            user.refresh_from_db()  
+            # load the profile instance created by the signal
             user.save()
+            raw_password = form.cleaned_data.get('password1')
 
-            # Retrieve the entered username or email
-            identifier = form.cleaned_data['username_or_email']
-            
-            # Authenticate user with either username or email
-            user = authenticate(request, identifier=identifier, password=form.cleaned_data['password1'])
-            if user is not None:
-                login(request, user)
-                return redirect('home')
+            # login user after signing up
+            user = authenticate(username=user.username, password=raw_password)
+            login(request, user)
+
+            # redirect user to home page
+            return redirect('home')
     else:
         form = SignupForm()
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'signup.html', {'form': form}) 
 
 # View for initiating password reset
 class CustomPasswordResetView(PasswordResetView):
