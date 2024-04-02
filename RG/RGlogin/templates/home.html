@@ -21,7 +21,11 @@
                 <li><a href="{% url 'contact' %}">Contact</a></li>
                 {% if user.is_authenticated %}
                 <li><a href="{% url 'download' %}">Download</a></li>
-                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                Hi {{ user.username }}!
+                <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">Log Out</button>
+                </form>
                 {% else %}
                     <li><a href="{% url 'login' %}">Login</a></li>
                     <li><a href="{% url 'signup' %}">Signup</a></li>
@@ -39,16 +43,17 @@
             <h2>Welcome to Rabadon's Grimoire</h2>
             <p>A League of Legends companion app for a better and healthy gaming experience.</p>
         </section>
+    </main>
     
     <!-- Image Section -->
     <section id="image-section">
         <h2 id="images-heading">App Images</h2>
-        <!-- First image with title -->
+        <!-- First image -->
         <div class="image-container">
             <h3>Interface</h3>
             <img src="{% static 'images/interface.jpg' %}" alt="App Interface" class="image">
         </div>
-        <!-- Second image with title -->
+        <!-- Second image -->
         <div class="image-container">
             <h3>Pop-up</h3>
             <img src="{% static 'images/pop-up.jpg' %}" alt="Pop-up Image" class="image">
