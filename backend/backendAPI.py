@@ -452,6 +452,13 @@ def addGameXtoX(PUUID, x, y):
 
 
 def createUser(userData, userLeagueInfo, userAccountInfo) -> UserModel:
+    if userLeagueInfo == []:
+        userLeagueInfo = {
+            'tier': 'UNRANKED',
+            'rank': 'UNRANKED',
+            'wins': 0,
+            'losses': 0
+        }
     newUser = UserModel(
             PUUID=userData['puuid'],
             SID=userData['id'],
@@ -520,4 +527,4 @@ def getPlayerStats(gameData, playerData) -> dict:
 
 
 if __name__ == "__main__":
-    app.run(debug = True) #CHANGE BEFORE PRODUCTION
+    app.run(debug = True) #TODO CHANGE BEFORE PRODUCTION
