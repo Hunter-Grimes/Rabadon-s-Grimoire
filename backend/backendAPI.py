@@ -1,8 +1,10 @@
 from flask import Flask
 from flask_restful import Api, Resource, fields, marshal_with
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import update
 from callAPI import getMatchByMatchID, getMatchLast20, getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getMatchXtoX, getACCTInfoByRiotID, getAccountByPUUID
 import os
+from sqlalchemy import func
 
 basedir = os.path.abspath(os.path.dirname(__file__)) + "/data/"
 
@@ -76,6 +78,26 @@ class UserModel(db.Model):
     revisionDate = db.Column(db.Integer, nullable=False)
     
     games = db.relationship('PlayedGame', back_populates = 'user')
+    
+    def to_dict(self):
+        return {
+            'PUUID': self.PUUID,
+            'SID': self.SID,
+
+            'tagLine': self.tagLine,
+            'gameName': self.gameName,
+
+            'name': self.name,
+            'profileIcon': self.profileIcon,
+
+            'tier': self.tier,
+            'rank': self.rank,
+
+            'wins': self.wins,
+            'losses': self.losses,
+
+            'revisionDate': self.revisionDate
+        }
 
 
 class GameModel(db.Model):
@@ -342,6 +364,21 @@ class UpdateUser(Resource):
             addGameXtoX(PUUID, 0, 20)
             return 201
         
+        userData = getSummonerByPUUID(PUUID)
+        userLeagueInfo = getLeagueInfoBySID(userData['id'])
+        userAccountInfo = getAccountByPUUID(PUUID)
+        
+        for item in userLeagueInfo:
+            if item['queueType'] == 'RANKED_SOLO_5x5':
+                userLeagueInfo = item
+                break
+
+        updatedUser = createUser(userData, userLeagueInfo, userAccountInfo)
+        db.session.execute(
+            update(UserModel).where(UserModel.PUUID == PUUID).values(updatedUser.to_dict())
+        )
+        db.session.commit()
+
         toUpdate = []
         
         updateIndex = 0
@@ -364,6 +401,63 @@ class UpdateUser(Resource):
         return 201
 
 api.add_resource(UpdateUser, "/update-user/<PUUID>")
+
+
+class generalChampStats(Resource):
+    def get(self, PUUID):
+        if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
+            return 404
+
+        UpdateUser().put(PUUID)
+        
+        #TODO Gets all user games from the current season, unimplementable due to rate limits
+        
+        # userData = UserModel.query.filter_by(PUUID=PUUID).first()
+        
+        # neededGames = int(userData.wins) + int(userData.losses)
+        
+        # knownGames = PlayedGame.query.filter_by(PUUID=PUUID).count()
+        
+        # while(knownGames < neededGames):
+        #     if (neededGames - knownGames) >= 100:
+        #         addGameXtoX(PUUID, knownGames, knownGames + 100)
+        #         knownGames += 100
+        #     else:
+        #         addGameXtoX(PUUID, neededGames - knownGames, neededGames)
+        #         knownGames = neededGames
+        
+        champStats = dict()
+        playedChamps = db.session.query(PlayedGame.champion_name, PlayedGame.CID).filter_by(PUUID=PUUID).distinct().all()
+        
+        for champ in playedChamps:
+            stats = dict()
+            
+            stats['champID'] = champ[1]
+            
+            stats['wins'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, champion_name=champ[0]).filter(PlayedGame.won_game).count()
+            stats['losses'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, champion_name=champ[0]).filter(not PlayedGame.won_game).count()
+            stats['gamesPlayed'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, champion_name=champ[0]).count()
+            stats['avgKill'] = round(db.session.query(func.avg(PlayedGame.kills)).filter_by(PUUID=PUUID, champion_name=champ[0]).scalar(), 1)
+            stats['avgDeath'] = round(db.session.query(func.avg(PlayedGame.deaths)).filter_by(PUUID=PUUID, champion_name=champ[0]).scalar(), 1)
+            stats['avgAssist'] = round(db.session.query(func.avg(PlayedGame.assists)).filter_by(PUUID=PUUID, champion_name=champ[0]).scalar(), 1)
+        
+            champStats[champ[0]] = stats
+
+        return champStats, 200
+
+api.add_resource(generalChampStats, "/champ-stats/<PUUID>")
+
+
+class getUserGamesPlayed(Resource):
+    def get(self, PUUID):
+        if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
+            return 404
+
+        result = PlayedGame.query.filter_by(PUUID=PUUID).count()
+
+        return result, 200
+
+api.add_resource(getUserGamesPlayed, "/user/games-played/<PUUID>")
 
 
 def getPlayersInGame(GID):
@@ -452,7 +546,7 @@ def addGameXtoX(PUUID, x, y):
 
 
 def createUser(userData, userLeagueInfo, userAccountInfo) -> UserModel:
-    if userLeagueInfo == []:
+    if not userLeagueInfo:
         userLeagueInfo = {
             'tier': 'UNRANKED',
             'rank': 'UNRANKED',
