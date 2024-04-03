@@ -14,7 +14,7 @@
         <nav id="nav-links">
             <ul>
                 <li><a href="{% url 'home' %}">Home</a></li>
-                <li><a href="{% url 'about' %}">About</a></li>
+                <li><a href="{% url 'about' %}">About us</a></li>
                 <li><a href="{% url 'contact' %}">Contact</a></li>
                 {% if user.is_authenticated %}
                 <li><a href="{% url 'download' %}">Download</a></li>
@@ -39,16 +39,21 @@
         <section id="about">
             <h2>About Rabadon's Grimoire</h2>
             <p>Introducing our League of Legends Companion App - Rabadon’s Grimoire - the ultimate tool for dedicated players who demand peak performance. Unlike other apps weighed down by unnecessary bloatware, our app will be aiming for lightning-fast system processing. Stay ahead of the game with real-time match stats, customizable builds, and strategic insights at your fingertips. Elevate your gameplay experience by just one click and join the league of efficient gamers!</p>
+
+            <p>&nbsp;</p>
+
+            <h2>About our Team</h2>
+            <p>We are Rabadon's Grimoire.</p>
         </section>
     </main>
-        
+
     <!-- Under Construction Section -->
     <section id="under-construction">
         <h2>Under Construction</h2>
         <img src="{% static 'images/under-construction.jpg' %}" alt="Under Construction Image">
         <p>This page is currently under construction. Please check back later.</p>
     </section>
-        
+
     <!-- Footer Section -->
     <footer>
         <p>&copy; 2024 Rabadon's Grimoire. All rights reserved.</p>
