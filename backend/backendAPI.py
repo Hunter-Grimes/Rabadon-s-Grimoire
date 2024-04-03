@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api, Resource, fields, marshal_with
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import update
-from callAPI import getMatchByMatchID, getMatchLast20, getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getMatchXtoX, getACCTInfoByRiotID, getAccountByPUUID
+from accessRiotApi import getMatchByMatchID, getMatchLast20, getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getMatchXtoX, getACCTInfoByRiotID, getAccountByPUUID
 import os
 from sqlalchemy import func
 
@@ -361,12 +361,17 @@ class UpdateUser(Resource):
             return 404
         
         if not bool(PlayedGame.query.filter_by(PUUID=PUUID).first()):
-            addGameXtoX(PUUID, 0, 20)
+            try:
+                addGameXtoX(PUUID, 0, 20)
+            except Exception:
+                return 500
             return 201
-        
-        userData = getSummonerByPUUID(PUUID)
-        userLeagueInfo = getLeagueInfoBySID(userData['id'])
-        userAccountInfo = getAccountByPUUID(PUUID)
+        try:
+            userData = getSummonerByPUUID(PUUID)
+            userLeagueInfo = getLeagueInfoBySID(userData['id'])
+            userAccountInfo = getAccountByPUUID(PUUID)
+        except Exception:
+            return 500
         
         for item in userLeagueInfo:
             if item['queueType'] == 'RANKED_SOLO_5x5':
@@ -384,7 +389,11 @@ class UpdateUser(Resource):
         updateIndex = 0
         gettingNew = True
         while(gettingNew):
-            games = getMatchXtoX(PUUID, updateIndex, updateIndex + 20)
+            try:
+                games = getMatchXtoX(PUUID, updateIndex, updateIndex + 20)
+            except Exception:
+                return 500
+            
             for item in games:
                 if not GameModel.query.filter_by(GID=item).first():
                     toUpdate.append(item)
@@ -396,7 +405,10 @@ class UpdateUser(Resource):
                 gettingNew = False
         
         if updateIndex != 0:
-            addGameXtoX(PUUID, 0, updateIndex)
+            try:
+                addGameXtoX(PUUID, 0, updateIndex)
+            except Exception:
+                return 500
         
         return 201
 
@@ -407,7 +419,7 @@ class generalChampStats(Resource):
     def get(self, PUUID):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
             return 404
-
+        
         UpdateUser().put(PUUID)
         
         #TODO Gets all user games from the current season, unimplementable due to rate limits
@@ -442,7 +454,7 @@ class generalChampStats(Resource):
             stats['avgAssist'] = round(db.session.query(func.avg(PlayedGame.assists)).filter_by(PUUID=PUUID, champion_name=champ[0]).scalar(), 1)
         
             champStats[champ[0]] = stats
-
+        
         return champStats, 200
 
 api.add_resource(generalChampStats, "/champ-stats/<PUUID>")

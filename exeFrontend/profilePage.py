@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QScrollArea, QGroupBox, QPushButton, QStackedLayout, QProgressBar
-from PySide6.QtGui import QPixmap, QColor, QIcon, QMovie
+from PySide6.QtGui import QPixmap, QColor, QIcon, QMovie, QFont
 from PySide6.QtCore import Qt
 import requests
 from asyncWorker import Worker
@@ -115,18 +115,22 @@ class ProfilePage(QWidget):
         layout = QGridLayout()
         layout.setContentsMargins(10, 10, 10, 10)
         
+        #Match History
         scroll = MatchHistory(info, self.manager, self.IMAGE_LOCATION)
         layout.addWidget(scroll, 2, 0, 1, 2)
         
+        #Profile Icon
         label = QLabel()
         pixmap = QPixmap(self.IMAGE_LOCATION + 'profileicon/' + str(userData['profileIcon']) + '.png')
         pixmap = pixmap.scaled(150, 150, mode=Qt.SmoothTransformation)
         label.setPixmap(pixmap)
         layout.addWidget(label, 0, 0)
         
+        #Username
         label = QLabel(userData['name'])
         layout.addWidget(label, 1, 0)
         
+        #Rank Icon
         label = QLabel()
         pixmap = QPixmap(self.IMAGE_LOCATION + 'ranks/rank=' + userData['tier'] + '.png')
         pixmap = pixmap.scaled(150, 150, mode=Qt.SmoothTransformation)
@@ -134,11 +138,21 @@ class ProfilePage(QWidget):
         label.setAlignment(Qt.AlignCenter)
         layout.addWidget(label, 0, 3)
         
+        #Rank Name
         label = QLabel(userData['tier'] + ' ' + userData['rank'])
         label.setAlignment(Qt.AlignCenter)
         layout.addWidget(label, 1, 3)
+       
+        #Placeholder for Champion Stats
+        self.champStats = QWidget()
+        self.champStats.setLayout(QVBoxLayout())
+        loading = LoadingIndicator(self.manager)
+        self.champStats.layout().addWidget(loading)
+        self.champStats.layout().setAlignment(Qt.AlignCenter)
+        loading.startAnimation()
+        self.champStats.setFixedWidth(320)
         
-        self.champStats = QScrollArea()
+        #Real Champion Stats
         layout.addWidget(self.champStats, 2, 3, 1, 1)
         worker = Worker(fetchChampInfo, userData['PUUID'], self.manager.BASE_URL)
         worker.signals.result.connect(self.champStatsReady)
@@ -148,9 +162,9 @@ class ProfilePage(QWidget):
     
     def champStatsReady(self, info):
         gamesPlayed = info[0]
-        champStats = info[1]
-        self.champStats = championStatsHandler(gamesPlayed, champStats, self.manager, self.IMAGE_LOCATION)
-        self.layout().addWidget(self.champStats, 2, 3, 1, 1)
+        championStats = info[1]
+        champStats = championStatsHandler(gamesPlayed, championStats, self.manager, self.IMAGE_LOCATION)
+        self.layout().replaceWidget(self.champStats, champStats)
 
 
 class championStatsHandler(QWidget):
@@ -158,6 +172,8 @@ class championStatsHandler(QWidget):
         super().__init__(*args, **kwargs)
         self.championStats = championStats(totalGames, champStats, manager, IMAGE_LOCATION)
         layout = QGridLayout()
+        layout.setContentsMargins(1, 2, 1, 2)
+        layout.setVerticalSpacing(5)
         
         self.sortedBy = None
         
@@ -172,11 +188,13 @@ class championStatsHandler(QWidget):
         layout.addWidget(self.champNameButton, 0, 0)
         layout.addWidget(self.gamesPlayedButton, 0, 1)
         layout.addWidget(self.winPercentageButton, 0, 2)
+        
         layout.addWidget(self.championStats, 1, 0, 1, -1)
         
         self.sortByGamesPlayed()
         
         self.setLayout(layout)
+        self.setFixedWidth(self.championStats.width())
         
     def sortByName(self):
         order = []
@@ -278,6 +296,10 @@ class championStats(QScrollArea):
 class champStatsChip(QWidget):
     def __init__(self, totalGames, championName, stats, manager, IMAGE_LOCATION, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        self.myFont = QFont()
+        self.myFont.setPointSize(10)
+        
         self.totalGames = totalGames
         
         self.championName = championName
@@ -289,6 +311,8 @@ class champStatsChip(QWidget):
         self.IMAGE_LOCATION = IMAGE_LOCATION
         
         layout = QVBoxLayout()
+        layout.setContentsMargins(1, 1, 1, 1)
+        
         box = QGroupBox()
         box.setFixedSize(300, 85)
         boxLayout = QGridLayout()
@@ -302,12 +326,14 @@ class champStatsChip(QWidget):
         
         #Champion Name
         label = QLabel(self.championName)
+        label.setFont(self.myFont)
         label.setAlignment(Qt.AlignCenter)
         boxLayout.addWidget(label, 1, 1, 1, 1, alignment=Qt.AlignCenter)
         
         #KDA
         kda = str(self.stats['avgKill']) + '/' + str(self.stats['avgDeath']) + '/' + str(self.stats['avgAssist'])
         label = QLabel(kda)
+        label.setFont(self.myFont)
         label.setAlignment(Qt.AlignCenter)
         boxLayout.addWidget(label, 2, 1, 1, 1, alignment=Qt.AlignCenter)
         
@@ -318,6 +344,7 @@ class champStatsChip(QWidget):
         boxLayout.addWidget(gamesPlayed, 1, 2, 1, 1, alignment=Qt.AlignCenter)
         
         numGamesPlayed = QLabel(str(self.stats['gamesPlayed']))
+        numGamesPlayed.setFont(self.myFont)
         numGamesPlayed.setAlignment(Qt.AlignCenter)
         boxLayout.addWidget(numGamesPlayed, 2, 2, 1, 1, alignment=Qt.AlignCenter)
         
@@ -327,7 +354,8 @@ class champStatsChip(QWidget):
         gamesWon.setValue(self.stats['wins'])
         boxLayout.addWidget(gamesWon, 1, 3, 1, 1, alignment=Qt.AlignCenter)
         
-        numGamesWon = QLabel(str(round(self.stats['wins'] / self.stats['gamesPlayed'], 4) * 100) + '%')
+        numGamesWon = QLabel(str(round((self.stats['wins'] / self.stats['gamesPlayed']) * 100, 2)) + '%')
+        numGamesWon.setFont(self.myFont)
         numGamesWon.setAlignment(Qt.AlignCenter)
         boxLayout.addWidget(numGamesWon, 2, 3, 1, 1, alignment=Qt.AlignCenter)
         

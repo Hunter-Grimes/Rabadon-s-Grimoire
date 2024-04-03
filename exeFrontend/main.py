@@ -28,10 +28,13 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(tabs)
 
 
-if __name__ == '__main__':
+def main():
     app = QApplication([])
-    loader = QUiLoader()
+    loader = QUiLoader()  # noqa: F841
     window = MainWindow()
     window.setWindowTitle("Rabadon's Grimoire")
     window.show()
     app.exec()
+
+if __name__ == '__main__':
+    main()
