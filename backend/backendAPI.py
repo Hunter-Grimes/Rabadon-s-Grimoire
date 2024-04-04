@@ -460,6 +460,23 @@ class generalChampStats(Resource):
 api.add_resource(generalChampStats, "/champ-stats/<PUUID>")
 
 
+class userTags(Resource):
+    def get(self, PUUID):
+        if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
+            return 404
+        
+        tags = dict()
+        playedChamps = db.session.query(PlayedGame.champion_name, PlayedGame.CID).filter_by(PUUID=PUUID).distinct().all()
+        for champ in playedChamps:
+            playedGames = db.session.query(PlayedGame).filter_by(PUUID=PUUID, champion_name=champ[0]).count()
+            if playedGames >= 20:
+                tags[champ[0] + ' lover'] = playedGames
+        
+        return tags, 200
+    
+api.add_resource(userTags, "/user/tags/<PUUID>")
+
+
 class getUserGamesPlayed(Resource):
     def get(self, PUUID):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):

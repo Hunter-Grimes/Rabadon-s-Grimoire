@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QScroll
 from PySide6.QtGui import QPixmap, QColor, QIcon, QMovie, QFont
 from PySide6.QtCore import Qt
 import requests
+from userTags import userTagsDisplay
 from asyncWorker import Worker
 
 class ProfilePageManager(QWidget):
@@ -117,10 +118,11 @@ class ProfilePage(QWidget):
         
         #Match History
         scroll = MatchHistory(info, self.manager, self.IMAGE_LOCATION)
-        layout.addWidget(scroll, 2, 0, 1, 2)
+        layout.addWidget(scroll, 2, 0, 3, 2)
         
         #Profile Icon
         label = QLabel()
+        label.setFixedSize(150, 150)
         pixmap = QPixmap(self.IMAGE_LOCATION + 'profileicon/' + str(userData['profileIcon']) + '.png')
         pixmap = pixmap.scaled(150, 150, mode=Qt.SmoothTransformation)
         label.setPixmap(pixmap)
@@ -128,7 +130,12 @@ class ProfilePage(QWidget):
         
         #Username
         label = QLabel(userData['name'])
+        label.setAlignment(Qt.AlignCenter)
         layout.addWidget(label, 1, 0)
+        
+        #Tags
+        tags = userTagsDisplay(userData['PUUID'], self.manager.BASE_URL, self.threadPool)
+        layout.addWidget(tags, 0, 1, 1, 1, Qt.AlignLeft)
         
         #Rank Icon
         label = QLabel()
@@ -136,12 +143,12 @@ class ProfilePage(QWidget):
         pixmap = pixmap.scaled(150, 150, mode=Qt.SmoothTransformation)
         label.setPixmap(pixmap)
         label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(label, 0, 3)
+        layout.addWidget(label, 0, 4)
         
         #Rank Name
         label = QLabel(userData['tier'] + ' ' + userData['rank'])
         label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(label, 1, 3)
+        layout.addWidget(label, 1, 4)
        
         #Placeholder for Champion Stats
         self.champStats = QWidget()
@@ -153,7 +160,7 @@ class ProfilePage(QWidget):
         self.champStats.setFixedWidth(320)
         
         #Real Champion Stats
-        layout.addWidget(self.champStats, 2, 3, 1, 1)
+        layout.addWidget(self.champStats, 2, 4, 1, 1)
         worker = Worker(fetchChampInfo, userData['PUUID'], self.manager.BASE_URL)
         worker.signals.result.connect(self.champStatsReady)
         self.threadPool.start(worker)
@@ -165,6 +172,8 @@ class ProfilePage(QWidget):
         championStats = info[1]
         champStats = championStatsHandler(gamesPlayed, championStats, self.manager, self.IMAGE_LOCATION)
         self.layout().replaceWidget(self.champStats, champStats)
+        self.champStats.deleteLater()
+        self.champStats = champStats
 
 
 class championStatsHandler(QWidget):
