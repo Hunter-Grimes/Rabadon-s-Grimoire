@@ -107,6 +107,7 @@ class ProfilePage(QWidget):
         
         #Profile Icon
         label = QLabel()
+        label.setStyleSheet("border: 3px solid black;")
         label.setFixedSize(150, 150)
         pixmap = QPixmap(self.IMAGE_LOCATION + 'profileicon/' + str(userData['profileIcon']) + '.png')
         pixmap = pixmap.scaled(150, 150, mode=Qt.SmoothTransformation)
