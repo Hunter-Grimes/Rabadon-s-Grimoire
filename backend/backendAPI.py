@@ -8,7 +8,8 @@ from sqlalchemy import func
 
 import os
 
-from accessRiotApi import getMatchByMatchID, getMatchLast20, getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getMatchXtoX, getACCTInfoByRiotID, getAccountByPUUID, getMatchTimeLineByMatchID
+from accessRiotApi import getMatchByMatchID, getMatchLast20, getMatchXtoX, getMatchTimeLineByMatchID
+from accessRiotApi import getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getACCTInfoByRiotID, getAccountByPUUID
 
 
 basedir = os.path.abspath(os.path.dirname(__file__)) + "/data/"
