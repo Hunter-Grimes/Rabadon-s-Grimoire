@@ -1,10 +1,15 @@
 from flask import Flask
+
 from flask_restful import Api, Resource, fields, marshal_with
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import update
-from accessRiotApi import getMatchByMatchID, getMatchLast20, getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getMatchXtoX, getACCTInfoByRiotID, getAccountByPUUID
-import os
 from sqlalchemy import func
+
+import os
+
+from accessRiotApi import getMatchByMatchID, getMatchLast20, getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getMatchXtoX, getACCTInfoByRiotID, getAccountByPUUID
+
 
 basedir = os.path.abspath(os.path.dirname(__file__)) + "/data/"
 
