@@ -13,6 +13,9 @@ api = Api(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
 db = SQLAlchemy(app)
 
+#
+#Database Declarations
+#
 
 class PlayedGame(db.Model):
     __tablename__ = 'Played_Game'
@@ -134,7 +137,12 @@ class SummonerSpellModel(db.Model):
 with app.app_context():
     db.create_all()
 
-  
+
+#
+#Api Methods
+#
+
+
 resource_fields = {
     'PUUID': fields.String,
     'SID': fields.String,
@@ -488,6 +496,10 @@ class getUserGamesPlayed(Resource):
 
 api.add_resource(getUserGamesPlayed, "/user/games-played/<PUUID>")
 
+
+#
+#Helper Methods
+#
 
 def getPlayersInGame(GID):
     result = PlayedGame.query.filter_by(GID=GID).all()
