@@ -26,14 +26,23 @@ class userTagsDisplay(QWidget):
     
     def displayTags(self, tags):
         for tag in tags.keys():
-            if 'lover' in tag:
-                self.loverTag(tag, tags[tag])
+            self.tag(tag, tags[tag])
+    
+    def tag(self, champ, info):
+        tag = QLabel(champ)
+        tag.setToolTip(info[1])
+        tag.setAlignment(Qt.AlignCenter)
+        tag.setFixedHeight(25)
+        tag.setFixedWidth(100)
+        
+        match info[0]:
+            case 0:
+                tag.setStyleSheet("background-color: transparent; color: green; border: 2px solid green; border-radius: 10px;")
+            case 1:
+                tag.setStyleSheet("background-color: transparent; color: red; border: 2px solid red; border-radius: 10px;")
+            case 2:
+                tag.setStyleSheet("background-color: transparent; color: gray; border: 2px solid gray; border-radius: 10px;")
+            case _:
+                pass
             
-    def loverTag(self, champ, numGames):
-        loverTag = QLabel(champ)
-        loverTag.setToolTip("This player has played " + str(numGames) + " games of " + (champ.removesuffix(" lover")))
-        loverTag.setAlignment(Qt.AlignCenter)
-        loverTag.setFixedHeight(25)
-        loverTag.setFixedWidth(100)
-        loverTag.setStyleSheet("background-color: transparent; color: green; border: 2px solid green; border-radius: 10px;")
-        self.layout().addWidget(loverTag)
+        self.layout().addWidget(tag)
