@@ -7,6 +7,7 @@ from sqlalchemy import update
 from sqlalchemy import func
 
 import os
+import time
 
 from accessRiotApi import getMatchByMatchID, getMatchLast20, getMatchXtoX, getMatchTimeLineByMatchID
 from accessRiotApi import getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getACCTInfoByRiotID, getAccountByPUUID
@@ -22,6 +23,10 @@ db = SQLAlchemy(app)
 #
 #Database Declarations
 #
+class Season(db.Model):
+    __tablename__ = 'Season'
+    SID = db.Column(db.Integer, primary_key=True)
+
 
 class PlayedGame(db.Model):
     __tablename__ = 'Played_Game'
@@ -484,7 +489,6 @@ class UpdateUser(Resource):
     def put(self, PUUID):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
             return 404
-        
         if not bool(PlayedGame.query.filter_by(PUUID=PUUID).first()):
             try:
                 addGameXtoX(PUUID, 0, 20)
@@ -538,6 +542,90 @@ class UpdateUser(Resource):
         return 201
 
 api.add_resource(UpdateUser, "/update-user/<PUUID>")
+
+
+class AsyncUpdateUser(Resource):
+    maxCalls = 50
+    currCalls = 0
+    
+    def put(self, PUUID):
+        if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
+            return 404
+        try:
+            userData = getSummonerByPUUID(PUUID)
+            userLeagueInfo = getLeagueInfoBySID(userData['id'])
+            userAccountInfo = getAccountByPUUID(PUUID)
+        except Exception:
+            return 500
+        
+        for item in userLeagueInfo:
+            if item['queueType'] == 'RANKED_SOLO_5x5':
+                userLeagueInfo = item
+                break
+
+        updatedUser = createUser(userData, userLeagueInfo, userAccountInfo)
+        db.session.execute(
+            update(UserModel).where(UserModel.PUUID == PUUID).values(updatedUser.to_dict())
+        )
+        db.session.commit()
+        
+        #Getting matches
+        
+        currSeason = Season.query(Season.season_id).order_by(Season.season_id.desc()).first()
+        numCurrSeasonGames = db.session.query(GameModel.GID).select_from(PlayedGame).join(GameModel).filter(PlayedGame.PUUID == PUUID).filter(int(GameModel.patch.split('.')[0]) == currSeason).count()
+        
+        updateIndex = 0
+        gettingNew = True
+        needPrev = True
+        while(gettingNew):
+            try:
+                games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
+                self.limHandler(1)
+            except Exception:
+                return 500
+            
+            for item in games:
+                if not db.session.query(GameModel.GID).select_from(PlayedGame).join(GameModel).filter(PlayedGame.PUUID == PUUID).filter(GameModel.GID==item).first():
+                    game = asyncAddGame(item)
+                    self.limHandler(2)
+                    if int(game.patch.split('.')[0]) != currSeason.season_id:
+                        gettingNew = False
+                        needPrev = False
+                        break
+                else:
+                    gettingNew = False
+                    break
+
+        if needPrev:
+            gettingNew = True
+            updateIndex += numCurrSeasonGames
+        
+        while(gettingNew):
+            try:
+                games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
+                self.limHandler(1)
+            except Exception:
+                return 500
+            
+            for item in games:
+                if not db.session.query(GameModel.GID).select_from(PlayedGame).join(GameModel).filter(PlayedGame.PUUID == PUUID).filter(GameModel.GID==item).first():
+                    game = asyncAddGame(item)
+                    self.limHandler(2)
+                    if int(game.patch.split('.')[0]) != currSeason.season_id:
+                        gettingNew = False
+                        break
+                else:
+                    gettingNew = False
+                    break
+        return 201
+    
+    def limHandler(self, numCalls):
+        self.currCalls += numCalls
+        if self.currCalls >= self.maxCalls:
+            self.currCalls = 0
+            time.sleep(120)
+
+api.add_resource(AsyncUpdateUser, "/update-user/async/<PUUID>")
 
 
 class generalChampStats(Resource):
@@ -845,7 +933,7 @@ def makeTimeLine(timeLineData):
     return timeline
             
 
-def addGameXtoX(PUUID, x, y):
+def addGameXtoX(PUUID, x, y): #TODO fix double calling getmatchXtoX getting id's with update user and potentially other functions
     if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
         return 404
 
@@ -864,6 +952,34 @@ def addGameXtoX(PUUID, x, y):
     db.session.commit()
 
     return 201
+
+
+def asyncAddGame(GID):
+    gameData = getMatchByMatchID(GID)
+    timeLineData = getMatchTimeLineByMatchID(GID)
+    if not bool(GameModel.query.filter_by(GID=gameData['metadata']['matchId']).first()):
+        newGameData, newPlayedGames = addGame(gameData)
+        timeLine = makeTimeLine(timeLineData)
+        
+        db.session.add(newGameData)
+
+        for played in newPlayedGames:
+            db.session.add(played)
+        
+        db.session.add(timeLine['timeline'])
+        
+        for entry in timeLine['entries']:
+            db.session.add(entry['entry'])
+
+            for frame in entry['frames']:
+                db.session.add(frame)
+
+            for event in entry['events']:
+                db.session.add(event)
+
+    db.session.commit()
+    
+    return newGameData
 
 
 def createUser(userData, userLeagueInfo, userAccountInfo) -> UserModel:
@@ -943,4 +1059,4 @@ def getPlayerStats(gameData, playerData) -> dict:
 
 
 if __name__ == "__main__":
-    app.run(debug = True) #TODO CHANGE BEFORE PRODUCTION
+    app.run(debug=True, processes=5) #TODO CHANGE BEFORE PRODUCTION
