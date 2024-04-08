@@ -1,8 +1,16 @@
 from flask import Flask
+
 from flask_restful import Api, Resource, fields, marshal_with
+
 from flask_sqlalchemy import SQLAlchemy
-from callAPI import getMatchByMatchID, getMatchLast20, getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getMatchXtoX, getACCTInfoByRiotID, getAccountByPUUID
+from sqlalchemy import update
+from sqlalchemy import func
+
 import os
+
+from accessRiotApi import getMatchByMatchID, getMatchLast20, getMatchXtoX, getMatchTimeLineByMatchID
+from accessRiotApi import getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getACCTInfoByRiotID, getAccountByPUUID
+
 
 basedir = os.path.abspath(os.path.dirname(__file__)) + "/data/"
 
@@ -11,11 +19,16 @@ api = Api(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
 db = SQLAlchemy(app)
 
+#
+#Database Declarations
+#
 
 class PlayedGame(db.Model):
     __tablename__ = 'Played_Game'
     PUUID = db.Column(db.String, db.ForeignKey('User.PUUID'), primary_key=True)
     GID = db.Column(db.String, db.ForeignKey('Game.GID'), primary_key=True)
+    
+    name = db.Column(db.String, nullable=False)
     
     item0 = db.Column(db.Integer, db.ForeignKey('Item.IID'), nullable=True)
     item1 = db.Column(db.Integer, db.ForeignKey('Item.IID'), nullable=True)
@@ -74,6 +87,28 @@ class UserModel(db.Model):
     revisionDate = db.Column(db.Integer, nullable=False)
     
     games = db.relationship('PlayedGame', back_populates = 'user')
+    player_frame = db.relationship('PlayerFrame', back_populates = 'user')
+    
+    
+    def to_dict(self):
+        return {
+            'PUUID': self.PUUID,
+            'SID': self.SID,
+
+            'tagLine': self.tagLine,
+            'gameName': self.gameName,
+
+            'name': self.name,
+            'profileIcon': self.profileIcon,
+
+            'tier': self.tier,
+            'rank': self.rank,
+
+            'wins': self.wins,
+            'losses': self.losses,
+
+            'revisionDate': self.revisionDate
+        }
 
 
 class GameModel(db.Model):
@@ -86,6 +121,115 @@ class GameModel(db.Model):
     patch = db.Column(db.String, nullable=False)
     
     users = db.relationship('PlayedGame', back_populates = 'game')
+    time_line = db.relationship('GameTimeLine', back_populates = 'game')
+    entry_number = db.relationship('TimeLineEntry', back_populates = 'game')
+    player_frame = db.relationship('PlayerFrame', back_populates = 'game')
+    event = db.relationship('Event', back_populates = 'game')
+
+  
+class GameTimeLine(db.Model):
+    __tablename__ = 'Time_Line'
+    GID = db.Column(db.String, db.ForeignKey('Game.GID'), primary_key=True)
+    
+    dataVersion = db.Column(db.Integer, nullable=False)
+    
+    frameInterval = db.Column(db.Integer, nullable=False)
+    numFrames = db.Column(db.Integer, nullable=False)
+    
+    game = db.relationship('GameModel', back_populates = 'time_line')
+
+
+class TimeLineEntry(db.Model):
+    __tablename__ = 'Time_Line_Entry'
+    GID = db.Column(db.String, db.ForeignKey('Game.GID'), primary_key=True)
+    entryNumber = db.Column(db.Integer, primary_key=True)
+    
+    timeStamp = db.Column(db.Integer, nullable=False)
+    
+    game = db.relationship('GameModel', back_populates = 'entry_number')
+    player_frame = db.relationship('PlayerFrame', back_populates = 'entry_number')
+    event = db.relationship('Event', back_populates = 'entry_number')
+
+
+class PlayerFrame(db.Model):
+    __tablename__ = 'Player_Frame'
+    GID = db.Column(db.String, db.ForeignKey('Game.GID'), primary_key=True)
+    entryNumber = db.Column(db.Integer, db.ForeignKey('Time_Line_Entry.entryNumber'), primary_key=True)
+    PUUID = db.Column(db.String, db.ForeignKey('User.PUUID'), primary_key=True)
+    
+    #Personal Stats
+    abilityHaste = db.Column(db.Integer, nullable=True)
+    abilityPower = db.Column(db.Integer, nullable=True)
+    armor = db.Column(db.Integer, nullable=True)
+    armorPen = db.Column(db.Integer, nullable=True)
+    armorPenPercent = db.Column(db.Integer, nullable=True)
+    attackDamage = db.Column(db.Integer, nullable=True)
+    attackSpeed = db.Column(db.Integer, nullable=True)
+    bonusArmorPenPercent = db.Column(db.Integer, nullable=True)
+    bonusMagicPenPercent = db.Column(db.Integer, nullable=True)
+    ccReduction = db.Column(db.Integer, nullable=True)
+    cooldownReduction = db.Column(db.Integer, nullable=True)
+    health = db.Column(db.Integer, nullable=True)
+    healthMax = db.Column(db.Integer, nullable=True)
+    healthRegen = db.Column(db.Integer, nullable=True)
+    lifesteal = db.Column(db.Integer, nullable=True)
+    magicPen = db.Column(db.Integer, nullable=True)
+    magicPenPercent = db.Column(db.Integer, nullable=True)
+    magicResist = db.Column(db.Integer, nullable=True)
+    movementSpeed = db.Column(db.Integer, nullable=True)
+    omnivamp = db.Column(db.Integer, nullable=True)
+    physicalVamp = db.Column(db.Integer, nullable=True)
+    power = db.Column(db.Integer, nullable=True)
+    powerMax = db.Column(db.Integer, nullable=True)
+    powerRegen = db.Column(db.Integer, nullable=True)
+    spellVamp = db.Column(db.Integer, nullable=True)
+    
+    #Damage Stats
+    magicDamageDone = db.Column(db.Integer, nullable=True)
+    magicDamageDoneToChampions = db.Column(db.Integer, nullable=True)
+    magicDamageTaken = db.Column(db.Integer, nullable=True)
+    
+    physicalDamageDone = db.Column(db.Integer, nullable=True)
+    physicalDamageDoneToChampions = db.Column(db.Integer, nullable=True)
+    physicalDamageTaken = db.Column(db.Integer, nullable=True)
+    
+    trueDamageDone = db.Column(db.Integer, nullable=True)
+    trueDamageDoneToChampions = db.Column(db.Integer, nullable=True)
+    trueDamageTaken = db.Column(db.Integer, nullable=True)
+    
+    totalDamageDone = db.Column(db.Integer, nullable=True)
+    totalDamageDoneToChampions = db.Column(db.Integer, nullable=True)
+    totalDamageTaken = db.Column(db.Integer, nullable=True)
+    
+    #Other Stats
+    currentGold = db.Column(db.Integer, nullable=True)
+    goldPerSecond = db.Column(db.Integer, nullable=True)
+    totalGold = db.Column(db.Integer, nullable=True)
+    
+    jungleMinionsKilled = db.Column(db.Integer, nullable=True)
+    minionsKilled = db.Column(db.Integer, nullable=True)
+    
+    level = db.Column(db.Integer, nullable=True)
+    xp = db.Column(db.Integer, nullable=True)
+    
+    timeEnemySpentControlled = db.Column(db.Integer, nullable=True)
+    
+    game = db.relationship('GameModel', back_populates = 'player_frame')
+    user = db.relationship('UserModel', back_populates = 'player_frame')
+    entry_number = db.relationship('TimeLineEntry', back_populates = 'player_frame')
+
+  
+class Event(db.Model):
+    __tablename__ = 'Event'
+    GID = db.Column(db.String, db.ForeignKey('Game.GID'), primary_key=True)
+    entryNumber = db.Column(db.Integer, db.ForeignKey('Time_Line_Entry.entryNumber'), primary_key=True)
+    eventNumber = db.Column(db.Integer, primary_key=True)
+    
+    timeStamp = db.Column(db.String, nullable=False)
+    type = db.Column(db.String, nullable=False)
+
+    game = db.relationship('GameModel', back_populates = 'event')
+    entry_number = db.relationship('TimeLineEntry', back_populates = 'event')
 
 
 class ItemModel(db.Model):
@@ -109,7 +253,13 @@ class SummonerSpellModel(db.Model):
 
 with app.app_context():
     db.create_all()
-    
+
+
+#
+#Api Methods
+#
+
+
 resource_fields = {
     'PUUID': fields.String,
     'SID': fields.String,
@@ -129,6 +279,7 @@ resource_fields = {
     'revisionDate': fields.Integer
 }   
 
+
 class UserByRiotID(Resource):
     @marshal_with(resource_fields)
     def get(self, tagLine, gameName):
@@ -140,7 +291,6 @@ class UserByRiotID(Resource):
         result = UserModel.query.filter_by(tagLine=tagLine, gameName=gameName).first()
 
         return result, 200
-
 
     def put(self, tagLine, gameName):
         userAccountInfo = getACCTInfoByRiotID(tagLine, gameName)
@@ -177,7 +327,6 @@ class UserByName(Resource):
         result = UserModel.query.filter_by(name=name).first()
 
         return result, 200
-
 
     def put(self, name):
         userData = getSummonerByName(name)
@@ -286,7 +435,9 @@ class GameIDLast20(Resource):
 
 api.add_resource(GameIDLast20, "/game-id/last-20/<PUUID>")
 
+
 #TODO Fix to work with the addition of games more recent than those in our database
+#UPDATE FUNCTION ADDED MAY FIX THIS
 class GameIDXtoX(Resource):
     def get(self, PUUID, x, y):
         numEntries = PlayedGame.query.filter_by(PUUID=PUUID).count()
@@ -335,15 +486,39 @@ class UpdateUser(Resource):
             return 404
         
         if not bool(PlayedGame.query.filter_by(PUUID=PUUID).first()):
-            addGameXtoX(PUUID, 0, 20)
+            try:
+                addGameXtoX(PUUID, 0, 20)
+            except Exception:
+                return 500
             return 201
+        try:
+            userData = getSummonerByPUUID(PUUID)
+            userLeagueInfo = getLeagueInfoBySID(userData['id'])
+            userAccountInfo = getAccountByPUUID(PUUID)
+        except Exception:
+            return 500
         
+        for item in userLeagueInfo:
+            if item['queueType'] == 'RANKED_SOLO_5x5':
+                userLeagueInfo = item
+                break
+
+        updatedUser = createUser(userData, userLeagueInfo, userAccountInfo)
+        db.session.execute(
+            update(UserModel).where(UserModel.PUUID == PUUID).values(updatedUser.to_dict())
+        )
+        db.session.commit()
+
         toUpdate = []
         
         updateIndex = 0
         gettingNew = True
         while(gettingNew):
-            games = getMatchXtoX(PUUID, updateIndex, updateIndex + 20)
+            try:
+                games = getMatchXtoX(PUUID, updateIndex, updateIndex + 20)
+            except Exception:
+                return 500
+            
             for item in games:
                 if not GameModel.query.filter_by(GID=item).first():
                     toUpdate.append(item)
@@ -355,12 +530,136 @@ class UpdateUser(Resource):
                 gettingNew = False
         
         if updateIndex != 0:
-            addGameXtoX(PUUID, 0, updateIndex)
+            try:
+                addGameXtoX(PUUID, 0, updateIndex)
+            except Exception:
+                return 500
         
         return 201
 
 api.add_resource(UpdateUser, "/update-user/<PUUID>")
 
+
+class generalChampStats(Resource):
+    def get(self, PUUID):
+        if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
+            return 404
+        
+        UpdateUser().put(PUUID)
+        
+        #TODO Gets all user games from the current season, unimplementable due to rate limits
+        
+        # userData = UserModel.query.filter_by(PUUID=PUUID).first()
+        
+        # neededGames = int(userData.wins) + int(userData.losses)
+        
+        # knownGames = PlayedGame.query.filter_by(PUUID=PUUID).count()
+        
+        # while(knownGames < neededGames):
+        #     if (neededGames - knownGames) >= 100:
+        #         addGameXtoX(PUUID, knownGames, knownGames + 100)
+        #         knownGames += 100
+        #     else:
+        #         addGameXtoX(PUUID, neededGames - knownGames, neededGames)
+        #         knownGames = neededGames
+        
+        champStats = dict()
+        playedChamps = db.session.query(PlayedGame.champion_name, PlayedGame.CID).filter_by(PUUID=PUUID).distinct().all()
+        
+        for champ in playedChamps:
+            stats = dict()
+            
+            stats['champID'] = champ[1]
+            
+            stats['wins'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, champion_name=champ[0]).filter(PlayedGame.won_game).count()
+            stats['losses'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, champion_name=champ[0]).filter(not PlayedGame.won_game).count()
+            stats['gamesPlayed'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, champion_name=champ[0]).count()
+            stats['avgKill'] = round(db.session.query(func.avg(PlayedGame.kills)).filter_by(PUUID=PUUID, champion_name=champ[0]).scalar(), 1)
+            stats['avgDeath'] = round(db.session.query(func.avg(PlayedGame.deaths)).filter_by(PUUID=PUUID, champion_name=champ[0]).scalar(), 1)
+            stats['avgAssist'] = round(db.session.query(func.avg(PlayedGame.assists)).filter_by(PUUID=PUUID, champion_name=champ[0]).scalar(), 1)
+        
+            champStats[champ[0]] = stats
+        
+        return champStats, 200
+
+api.add_resource(generalChampStats, "/champ-stats/<PUUID>")
+
+
+class userTags(Resource):
+    def get(self, PUUID):
+        if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
+            return 404
+        
+        tags = dict()
+        
+        #Champ Lover
+        playedChamps = db.session.query(PlayedGame.champion_name, PlayedGame.CID).filter_by(PUUID=PUUID).distinct().all()
+        for champ in playedChamps:
+            playedGames = db.session.query(PlayedGame).filter_by(PUUID=PUUID, champion_name=champ[0]).count()
+            if playedGames >= 20:
+                tags[champ[0] + ' lover'] = (0, "This player has played " + str(playedGames) + " of " + champ[0])
+                
+        #Streak
+        streak = None
+        streakGames = 0
+        for game in db.session.query(PlayedGame.won_game).select_from(PlayedGame).join(GameModel).filter(GameModel.GID == PlayedGame.GID).filter(PlayedGame.PUUID == PUUID).order_by(GameModel.time_start.desc()).all():
+            if streak is None:
+                streak = game[0]
+            else:
+                if streak != game[0]:
+                    break
+            streakGames += 1
+        
+        if streakGames >= 3:
+            if streak:
+                tags['Win Streak'] = (0, "This player has won " + str(streakGames) + " games in a row")
+            else:
+                tags['Loss Streak'] = (1, "This player has lost " + str(streakGames) + " games in a row")
+                
+        #Role Tag
+        totalGames = db.session.query(PlayedGame).filter_by(PUUID=PUUID).count()
+        
+        topGames = db.session.query(PlayedGame).filter_by(PUUID=PUUID).filter(PlayedGame.position == 'TOP').count()
+        jgGames = db.session.query(PlayedGame).filter_by(PUUID=PUUID).filter(PlayedGame.position == 'JUNGLE').count()
+        midGames = db.session.query(PlayedGame).filter_by(PUUID=PUUID).filter(PlayedGame.position == 'MIDDLE').count()
+        adcGames = db.session.query(PlayedGame).filter_by(PUUID=PUUID).filter(PlayedGame.position == 'BOTTOM').count()
+        supGames = db.session.query(PlayedGame).filter_by(PUUID=PUUID).filter(PlayedGame.position == 'UTILITY').count()
+        
+        if topGames >= totalGames * 0.5:
+            tags['Top Player'] = (2, "This player mostly plays top lane")
+        
+        if jgGames >= totalGames * 0.5:
+            tags['Jungle Player'] = (2, "This player mostly plays jungle")
+        
+        if midGames >= totalGames * 0.5:
+            tags['Mid Player'] = (2, "This player mostly plays mid lane")
+            
+        if adcGames >= totalGames * 0.5:
+            tags['ADC Player'] = (2, "This player mostly plays adc")
+        
+        if supGames >= totalGames * 0.5:
+            tags['Support Player'] = (2, "This player mostly plays support")
+        
+        return tags, 200
+
+api.add_resource(userTags, "/user/tags/<PUUID>")
+
+
+class getUserGamesPlayed(Resource):
+    def get(self, PUUID):
+        if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
+            return 404
+
+        result = PlayedGame.query.filter_by(PUUID=PUUID).count()
+
+        return result, 200
+
+api.add_resource(getUserGamesPlayed, "/user/games-played/<PUUID>")
+
+
+#
+#Helper Methods
+#
 
 def getPlayersInGame(GID):
     result = PlayedGame.query.filter_by(GID=GID).all()
@@ -384,6 +683,8 @@ def addGame(gameData) -> tuple[GameModel, list[PlayedGame]]:
         played = PlayedGame(
             PUUID=gameData['info']['participants'][player]['puuid'],
             GID=gameData['metadata']['matchId'],
+            
+            name=gameData['info']['participants'][player]['summonerName'],
             
             item0=gameData['info']['participants'][player]['item0'],
             item1=gameData['info']['participants'][player]['item1'],
@@ -424,6 +725,126 @@ def addGame(gameData) -> tuple[GameModel, list[PlayedGame]]:
     return newGame, newPlayedGames
 
 
+def makeTimeLine(timeLineData):
+    puuidData = dict()
+    for participants in timeLineData['info']['participants']:
+        puuidData[participants['participantId']] = participants['PUUID']
+    
+    timeline = {
+        'timeline': None,
+        'entries': []
+    }
+    
+    timeLineObj = GameTimeLine(
+        GID=timeLineData['metadata']['matchId'],
+        
+        dataVersion=timeLineData['metadata']['dataVersion'],
+        
+        frameInterval=timeLineData['info']['frameInterval'],
+        numFrames=len(timeLineData['info']['frames'])
+    )
+    
+    timeline['timeline'] = timeLineObj
+    
+    for i, entry in enumerate(timeLineData['info']['frames']):
+        entry = {
+            'entry': None,
+            'frames': [],
+            'events': []
+        }
+        
+        entryObj = TimeLineEntry(
+            GID=timeLineData['metadata']['matchId'],
+            entryNumber=i,
+            
+            timestamp=entry['timestamp']
+        )
+        
+        entry['entry'] = entryObj
+        
+        for j, event in enumerate(entry['events']):
+            eventObj = Event(
+                GID=timeLineData['metadata']['matchId'],
+                entryNumber=i,
+                eventNumber=j,
+
+                timestamp=event['timestamp'],
+                type=event['type'],
+            )
+
+            entry['events'].append(eventObj)
+            
+        for playerKey, playerData in entry['participantFrames'].items():
+            playerObj = PlayerFrame(
+                GID = timeLineData['metadata']['matchId'],
+                entryNumber = i,
+                PUUID = puuidData[playerKey],
+                
+                #Personal Stats
+                abilityHaste = playerData['championStats']['abilityHaste'],
+                abilityPower = playerData['championStats']['abilityPower'],
+                armor = playerData['championStats']['armor'],
+                armorPen = playerData['championStats']['armorPen'],
+                armorPenPercent = playerData['championStats']['armorPenPercent'],
+                attackDamage = playerData['championStats']['attackDamage'],
+                attackSpeed = playerData['championStats']['attackSpeed'],
+                bonusArmorPenPercent = playerData['championStats']['bonusArmorPenPercent'],
+                bonusMagicPenPercent = playerData['championStats']['bonusMagicPenPercent'],
+                ccReduction = playerData['championStats']['ccReduction'],
+                cooldownReduction = playerData['championStats']['cooldownReduction'],
+                health = playerData['championStats']['health'],
+                healthMax = playerData['championStats']['healthMax'],
+                healthRegen = playerData['championStats']['healthRegen'],
+                lifesteal = playerData['championStats']['lifesteal'],
+                magicPen = playerData['championStats']['magicPen'],
+                magicPenPercent = playerData['championStats']['magicPenPercent'],
+                magicResist = playerData['championStats']['magicResist'],
+                movementSpeed = playerData['championStats']['movementSpeed'],
+                omnivamp = playerData['championStats']['omnivamp'],
+                physicalVamp = playerData['championStats']['physicalVamp'],
+                power = playerData['championStats']['power'],
+                powerMax = playerData['championStats']['powerMax'],
+                powerRegen = playerData['championStats']['powerRegen'],
+                spellVamp = playerData['championStats']['spellVamp'],
+                
+                #Damage Stats
+                magicDamageDone = playerData['damageStats']['magicDamageDone'],
+                magicDamageDoneToChampions = playerData['damageStats']['magicDamageDoneToChampions'],
+                magicDamageTaken = playerData['damageStats']['magicDamageTaken'],
+                
+                physicalDamageDone = playerData['damageStats']['physicalDamageDone'],
+                physicalDamageDoneToChampions = playerData['damageStats']['physicalDamageDoneToChampions'],
+                physicalDamageTaken = playerData['damageStats']['physicalDamageTaken'],
+                
+                trueDamageDone = playerData['damageStats']['trueDamageDone'],
+                trueDamageDoneToChampions = playerData['damageStats']['trueDamageDoneToChampions'],
+                trueDamageTaken = playerData['damageStats']['trueDamageTaken'],
+                
+                totalDamageDone = playerData['damageStats']['totalDamageDone'],
+                totalDamageDoneToChampions = playerData['damageStats']['totalDamageDoneToChampions'],
+                totalDamageTaken = playerData['damageStats']['totalDamageTaken'],
+                
+                #Other Stats
+                currentGold = playerData['currentGold'],
+                goldPerSecond = playerData['goldPerSecond'],
+                totalGold = playerData['totalGold'],
+                
+                jungleMinionsKilled = playerData['jungleMinionsKilled'],
+                minionsKilled = playerData['minionsKilled'],
+                
+                level = playerData['level'],
+                xp = playerData['xp'],
+                
+                timeEnemySpentControlled = playerData['timeEnemySpentControlled']
+            )
+
+            entry['frames'].append(playerObj)
+            
+        timeline['entries'].append(entry)
+    
+    return timeline
+            
+
 def addGameXtoX(PUUID, x, y):
     if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
         return 404
@@ -446,6 +867,14 @@ def addGameXtoX(PUUID, x, y):
 
 
 def createUser(userData, userLeagueInfo, userAccountInfo) -> UserModel:
+    if not userLeagueInfo:
+        userLeagueInfo = {
+            'tier': 'UNRANKED',
+            'rank': 'UNRANKED',
+            'wins': 0,
+            'losses': 0
+        }
+        
     newUser = UserModel(
             PUUID=userData['puuid'],
             SID=userData['id'],
@@ -467,11 +896,14 @@ def createUser(userData, userLeagueInfo, userAccountInfo) -> UserModel:
     
     return newUser
 
+
 def getPlayerStats(gameData, playerData) -> dict:
     playerStats = {
         'patch': getattr(gameData, 'patch'),
         'time_start': getattr(gameData, 'time_start'),
         'time_end': getattr(gameData, 'time_end'),
+        
+        'name': getattr(playerData, 'name'),
         
         'item0': getattr(playerData, 'item0'),
         'item1': getattr(playerData, 'item1'),
@@ -511,4 +943,4 @@ def getPlayerStats(gameData, playerData) -> dict:
 
 
 if __name__ == "__main__":
-    app.run(debug = True) #CHANGE BEFORE PRODUCTION
+    app.run(debug = True) #TODO CHANGE BEFORE PRODUCTION

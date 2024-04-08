@@ -1,7 +1,8 @@
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget
+from PySide6.QtCore import QThreadPool
 
-from profilePage import ProfilePage
+from profilePage import ProfilePageManager
 from patchNotesPage import PatchNotesPage
 
 import requests
@@ -11,13 +12,14 @@ class MainWindow(QMainWindow):
     
     def __init__(self):
         super().__init__()
+        self.threadPool = QThreadPool()
         
         tabs = QTabWidget()
         
         myName = 'LessJnglMoreBush'
         myPUUID = requests.get(self.BASE_URL + '/user/by-name/' + myName).json()['PUUID']
         
-        tabs.addTab(ProfilePage(myPUUID), "Profile")
+        tabs.addTab(ProfilePageManager(myPUUID, self.BASE_URL, self.threadPool), "Profile")
         tabs.addTab(PatchNotesPage(), "Patch Notes")
         with open("exeFrontend/tabStyle.qss", "r") as f:
             _style = f.read()
@@ -26,10 +28,13 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(tabs)
 
 
-if __name__ == '__main__':
+def main():
     app = QApplication([])
-    loader = QUiLoader()
+    loader = QUiLoader()  # noqa: F841
     window = MainWindow()
     window.setWindowTitle("Rabadon's Grimoire")
     window.show()
     app.exec()
+
+if __name__ == '__main__':
+    main()

@@ -129,8 +129,27 @@ def getMatchByMatchID(GID):
         return response.json()
     else:
         apiError(response.status_code)
- 
-       
+        
+
+def getMatchTimeLineByMatchID(GID):
+    BASE_URL = "https://americas.api.riotgames.com/lol/"
+
+    requestURL = BASE_URL + "match/v5/matches/"
+
+    requestURL = requestURL + GID
+
+    requestURL = requestURL + '/timeline'
+
+    requestURL = requestURL + '?api_key=' + api_key
+
+    response = requests.get(requestURL)
+
+    if response.status_code == 200:
+        return response.json()
+    else:
+        apiError(response.status_code)
+
+  
 def getLeagueInfoBySID(SID):
     BASE_URL = "https://na1.api.riotgames.com/lol/"
 
