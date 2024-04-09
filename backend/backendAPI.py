@@ -624,7 +624,7 @@ api.add_resource(UpdateUser, "/update-user/<PUUID>")
 
 
 class AsyncUpdateUser(Resource):
-    maxCalls = 80
+    maxCalls = 50
     callIndex = 0
     callLookup = dict()
     
