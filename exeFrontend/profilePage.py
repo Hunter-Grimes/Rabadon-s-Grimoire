@@ -7,7 +7,7 @@ from userTags import userTagsDisplay
 from asyncWorker import Worker
 from championStats import championStatsHandler
 from matchHistory import matchHistory
-from fetchData import fetchProfileInfo, fetchChampInfo
+from fetchData import fetchProfileInfo, fetchChampInfo, asyncUpdatePlayer
 
 
 class ProfilePageManager(QWidget):
@@ -39,6 +39,11 @@ class ProfilePageManager(QWidget):
         
         self.loadingIndicator = LoadingIndicator(self)
         self.layout.addWidget(self.loadingIndicator, 0, 10)
+        
+        #user update button
+        updateUserBtn = QPushButton("Update User")
+        updateUserBtn.clicked.connect(self.updateBtnHandler)
+        self.layout.addWidget(updateUserBtn, 0, 9)
         
         self.profileWindow = QWidget()
         profileWindowLayout = QStackedLayout()
@@ -86,7 +91,37 @@ class ProfilePageManager(QWidget):
         
     def retreatPage(self):
         self.profileWindow.layout().setCurrentIndex(self.profileWindow.layout().currentIndex() - 1)
+    
+    def updateBtnHandler(self):
+        page = self.profileWindow.layout().itemAt(self.profileWindow.layout().currentIndex()).widget()
+        PUUID = page.info['userData']['PUUID']
+        self.loadingIndicator.startAnimation()
+        worker = Worker(asyncUpdatePlayer, PUUID, self.BASE_URL)
+        self.fetchingPlayer = True
+        self.playerWorker = worker
+        
+        worker.signals.result.connect(lambda: self.updatePage(PUUID))
 
+        self.threadPool.start(worker)
+       
+    def updatePage(self, PUUID):
+        self.loadingIndicator.startAnimation()
+        
+        worker = Worker(fetchProfileInfo, PUUID, self.BASE_URL)
+        self.fetchingPlayer = True
+        self.playerWorker = worker
+        
+        worker.signals.result.connect(lambda info: self.updatePageHelper(info, self.profileWindow.layout().currentIndex()))
+        worker.signals.finished.connect(self.setFetchPlayer)
+        worker.signals.finished.connect(self.loadingIndicator.stopAnimation)
+        
+        self.threadPool.start(worker)
+    
+    def updatePageHelper(self, info, index):
+        self.profileWindow.layout().itemAt(index).widget().deleteLater()
+        newPage = ProfilePage(info, self, self.IMAGE_LOCATION)
+        self.profileWindow.layout().insertWidget(index, newPage)
+        
 
 class ProfilePage(QWidget):
     def __init__(self, info, manager, IMAGE_LOCATION, *args, **kwargs):
@@ -144,9 +179,9 @@ class ProfilePage(QWidget):
         self.champStats.layout().setAlignment(Qt.AlignCenter)
         loading.startAnimation()
         self.champStats.setFixedWidth(320)
+        layout.addWidget(self.champStats, 2, 4, 1, 1)
         
         #Real Champion Stats
-        layout.addWidget(self.champStats, 2, 4, 1, 1)
         worker = Worker(fetchChampInfo, userData['PUUID'], self.manager.BASE_URL)
         worker.signals.result.connect(self.champStatsReady)
         self.threadPool.start(worker)

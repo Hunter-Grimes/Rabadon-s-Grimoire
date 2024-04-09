@@ -47,3 +47,6 @@ def fetchChampInfo(PUUID, BASE_URL):
     gamesPlayed = requests.get(BASE_URL + '/user/games-played/' + PUUID).json()
 
     return gamesPlayed, champStats
+
+def asyncUpdatePlayer(PUUID, BASE_URL):
+    return requests.put(BASE_URL + '/update-user/async/' + PUUID)

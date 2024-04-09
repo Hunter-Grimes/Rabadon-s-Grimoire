@@ -8,7 +8,7 @@ from patchNotesPage import PatchNotesPage
 import requests
 
 class MainWindow(QMainWindow):
-    BASE_URL = "http://127.0.0.1:5000"
+    BASE_URL = "http://127.0.0.1:8080"
     
     def __init__(self):
         super().__init__()

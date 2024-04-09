@@ -66,13 +66,13 @@ class Match(QWidget):
         
         #Champion Icon
         label = QLabel()
-        pixmap = QPixmap(self.IMAGE_LOCATION + 'champion/' + gameData[PUUID]['champion_name'] + '.png')
+        pixmap = QPixmap(self.IMAGE_LOCATION + 'champion/' + gameData[PUUID]['championName'] + '.png')
         pixmap = pixmap.scaled(50, 50, mode=Qt.SmoothTransformation)
         label.setPixmap(pixmap)
         boxLayout.addWidget(label, 0, 0, -1, 1)
         
         #Loss/Win
-        if gameData[PUUID]['won_game']:
+        if gameData[PUUID]['won']:
             label = QLabel("Victory")
             label.setStyleSheet("color: green")
         else:
@@ -86,7 +86,7 @@ class Match(QWidget):
         boxLayout.addWidget(label, 0, 2)
         
         #CS
-        label = QLabel('CS: ' + str(gameData[PUUID]['total_minions']))
+        label = QLabel('CS: ' + str(gameData[PUUID]['totalMinionsKilled']))
         boxLayout.addWidget(label, 1, 2)
         
         #Items
@@ -133,7 +133,7 @@ class ChampDisplay(QGroupBox):
         
         for i, player in enumerate(list(gameData.keys())):
             
-            button = PlayerButton(player, gameData, fetchChampPixmap(gameData[player]['champion_name'], self.IMAGE_LOCATION), self.manager, self.IMAGE_LOCATION)
+            button = PlayerButton(player, gameData, fetchChampPixmap(gameData[player]['championName'], self.IMAGE_LOCATION), self.manager, self.IMAGE_LOCATION)
             
             if i < 5:
                 champs.addWidget(button, 0, i)

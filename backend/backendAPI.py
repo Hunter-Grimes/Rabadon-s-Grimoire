@@ -8,10 +8,12 @@ from sqlalchemy import func
 
 import os
 import time
+import sys
 
-from accessRiotApi import getMatchByMatchID, getMatchLast20, getMatchXtoX, getMatchTimeLineByMatchID
-from accessRiotApi import getSummonerByName, getSummonerByPUUID, getLeagueInfoBySID, getACCTInfoByRiotID, getAccountByPUUID
-
+from accessRiotApi import (
+    getMatchByMatchID, getMatchXtoX, getMatchTimeLineByMatchID, getSummonerByName, 
+    getSummonerByPUUID, getLeagueInfoBySID, getACCTInfoByRiotID, getAccountByPUUID
+)
 
 basedir = os.path.abspath(os.path.dirname(__file__)) + "/data/"
 
@@ -23,17 +25,126 @@ db = SQLAlchemy(app)
 #
 #Database Declarations
 #
-class Season(db.Model):
-    __tablename__ = 'Season'
-    SID = db.Column(db.Integer, primary_key=True)
-
-
 class PlayedGame(db.Model):
     __tablename__ = 'Played_Game'
     PUUID = db.Column(db.String, db.ForeignKey('User.PUUID'), primary_key=True)
     GID = db.Column(db.String, db.ForeignKey('Game.GID'), primary_key=True)
     
     name = db.Column(db.String, nullable=False)
+    
+    riotIdGameName = db.Column(db.String, nullable=False)
+    riotIdTagline = db.Column(db.String, nullable=False)
+    
+    summonerId = db.Column(db.Integer, nullable=True)
+    summonerLevel = db.Column(db.Integer, nullable=True)
+    
+    firstBloodAssist = db.Column(db.Boolean, nullable=True)
+    firstBloodKill = db.Column(db.Boolean, nullable=True)
+    
+    firstTowerAssist = db.Column(db.Boolean, nullable=True)
+    firstTowerKill = db.Column(db.Boolean, nullable=True)
+    
+    bountyLevel = db.Column(db.Integer, nullable=True)
+    longestTimeSpentLiving = db.Column(db.Integer, nullable=True)
+    
+    killingSprees = db.Column(db.Integer, nullable=True)
+    largestKillingSpree = db.Column(db.Integer, nullable=True)
+    largestMultiKill = db.Column(db.Integer, nullable=True)
+    
+    doubleKills = db.Column(db.Integer, nullable=True)
+    tripleKills = db.Column(db.Integer, nullable=True)
+    quadraKills = db.Column(db.Integer, nullable=True)
+    pentaKills = db.Column(db.Integer, nullable=True)
+    unrealKills = db.Column(db.Integer, nullable=True)
+    
+    largestCriticalStrike = db.Column(db.Integer, nullable=True)
+    
+    damageDealtToBuildings = db.Column(db.Integer, nullable=True)
+    damageDealtToObjectives = db.Column(db.Integer, nullable=True)
+    damageDealtToTurrets = db.Column(db.Integer, nullable=True)
+    
+    damageSelfMitigated = db.Column(db.Integer, nullable=True)
+    
+    magicDamageDealt = db.Column(db.Integer, nullable=True)
+    magicDamageDealtToChampions = db.Column(db.Integer, nullable=True)
+    magicDamageTaken = db.Column(db.Integer, nullable=True)
+    
+    physicalDamageDealt = db.Column(db.Integer, nullable=True)
+    physicalDamageDealtToChampions = db.Column(db.Integer, nullable=True)
+    physicalDamageTaken = db.Column(db.Integer, nullable=True)
+    
+    trueDamageDealt = db.Column(db.Integer, nullable=True)
+    trueDamageDealtToChampions = db.Column(db.Integer, nullable=True)
+    trueDamageTaken = db.Column(db.Integer, nullable=True)
+    
+    totalDamageDealt = db.Column(db.Integer, nullable=True)
+    totalDamageDealtToChampions = db.Column(db.Integer, nullable=True)
+    totalDamageTaken = db.Column(db.Integer, nullable=True)
+    totalDamageShieldedOnTeammates = db.Column(db.Integer, nullable=True)
+    
+    totalHeal = db.Column(db.Integer, nullable=True)
+    totalHealsOnTeammates = db.Column(db.Integer, nullable=True)
+    totalUnitsHealed = db.Column(db.Integer, nullable=True)
+    
+    timeCCingOthers = db.Column(db.Integer, nullable=True)
+    totalTimeCCDealt = db.Column(db.Integer, nullable=True)
+    totalTimeSpentDead = db.Column(db.Integer, nullable=True)
+    
+    spell1Casts = db.Column(db.Integer, nullable=True)
+    spell2Casts = db.Column(db.Integer, nullable=True)
+    spell3Casts = db.Column(db.Integer, nullable=True)
+    spell4Casts = db.Column(db.Integer, nullable=True)
+    
+    summoner1Casts = db.Column(db.Integer, nullable=True)
+    summoner1Id = db.Column(db.Integer, nullable=True)
+    
+    summoner2Casts = db.Column(db.Integer, nullable=True)
+    summoner2Id = db.Column(db.Integer, nullable=True)
+
+    neutralMinionsKilled = db.Column(db.Integer, nullable=True)
+    totalMinionsKilled = db.Column(db.Integer, nullable=True)
+
+    baronKills = db.Column(db.Integer, nullable=True)
+    dragonKills = db.Column(db.Integer, nullable=True)
+    
+    inhibitorKills = db.Column(db.Integer, nullable=True)
+    inhibitorTakedowns = db.Column(db.Integer, nullable=True)
+    inhibitorsLost = db.Column(db.Integer, nullable=True)
+
+    turretKills = db.Column(db.Integer, nullable=True)
+    turretTakedowns = db.Column(db.Integer, nullable=True)
+    turretsLost = db.Column(db.Integer, nullable=True)
+    
+    nexusKills = db.Column(db.Integer, nullable=True)
+    nexusTakedowns = db.Column(db.Integer, nullable=True)
+    nexusLost = db.Column(db.Integer, nullable=True)
+    
+    objectivesStolen = db.Column(db.Integer, nullable=True)
+    objectivesStolenAssists = db.Column(db.Integer, nullable=True)
+    
+    visionScore = db.Column(db.Integer, nullable=True)
+    visionWardsBoughtInGame = db.Column(db.Integer, nullable=True)
+    wardsKilled = db.Column(db.Integer, nullable=True)
+    wardsPlaced = db.Column(db.Integer, nullable=True)
+    detectorWardsPlaced = db.Column(db.Integer, nullable=True)
+    sightWardsBoughtInGame = db.Column(db.Integer, nullable=True)
+    
+    position = db.Column(db.String, nullable=False)
+    CID = db.Column(db.Integer, db.ForeignKey('Champion.CID'), nullable=False)
+    championName = db.Column(db.String, nullable=True)
+    
+    champExperience = db.Column(db.Integer, nullable=True)
+    champLevel = db.Column(db.Integer, nullable=True)
+    
+    kills = db.Column(db.Integer, nullable=False)
+    deaths = db.Column(db.Integer, nullable=False)
+    assists = db.Column(db.Integer, nullable=False)
+    
+    goldEarned = db.Column(db.Integer, nullable=False)
+    goldSpent = db.Column(db.Integer, nullable=False)
+    
+    itemsPurchased = db.Column(db.Integer, nullable=True)
+    consumablesPurchased = db.Column(db.Integer, nullable=True)
     
     item0 = db.Column(db.Integer, db.ForeignKey('Item.IID'), nullable=True)
     item1 = db.Column(db.Integer, db.ForeignKey('Item.IID'), nullable=True)
@@ -43,30 +154,13 @@ class PlayedGame(db.Model):
     item5 = db.Column(db.Integer, db.ForeignKey('Item.IID'), nullable=True)
     item6 = db.Column(db.Integer, db.ForeignKey('Item.IID'), nullable=True)
     
-    summoner1ID = db.Column(db.Integer, db.ForeignKey('SummonerSpell.SID'), nullable=True)
-    summoner2ID = db.Column(db.Integer, db.ForeignKey('SummonerSpell.SID'), nullable=True)
+    timePlayed = db.Column(db.Integer, nullable=True)
     
-    kills = db.Column(db.Integer, nullable=False)
-    deaths = db.Column(db.Integer, nullable=False)
-    assists = db.Column(db.Integer, nullable=False)
+    gameEndedInEarlySurrender = db.Column(db.Boolean, nullable=True)
+    gameEndedInSurrender = db.Column(db.Boolean, nullable=True)
+    teamEarlySurrendered = db.Column(db.Integer, nullable=True)
     
-    true_damage = db.Column(db.Integer, nullable=True)
-    ad_damage = db.Column(db.Integer, nullable=True)
-    magic_damage = db.Column(db.Integer, nullable=True)
-    
-    position = db.Column(db.String, nullable=False)
-    
-    gold_earned = db.Column(db.Integer, nullable=False)
-    gold_spent = db.Column(db.Integer, nullable=False)
-    
-    CID = db.Column(db.Integer, db.ForeignKey('Champion.CID'), nullable=False)
-    champion_name = db.Column(db.String, nullable=True)
-    
-    total_minions = db.Column(db.Integer, nullable=True)
-    
-    vision_score = db.Column(db.Integer, nullable=True)
-    
-    won_game = db.Column(db.Boolean, nullable=False)
+    won = db.Column(db.Boolean, nullable=True)
 
     user = db.relationship('UserModel', back_populates = 'games')
     game = db.relationship('GameModel', back_populates = 'users')
@@ -123,6 +217,7 @@ class GameModel(db.Model):
     time_start = db.Column(db.Integer, nullable=False)
     time_end = db.Column(db.Integer, nullable=True)
     
+    season = db.Column(db.Integer, nullable=False)
     patch = db.Column(db.String, nullable=False)
     
     users = db.relationship('PlayedGame', back_populates = 'game')
@@ -149,7 +244,7 @@ class TimeLineEntry(db.Model):
     GID = db.Column(db.String, db.ForeignKey('Game.GID'), primary_key=True)
     entryNumber = db.Column(db.Integer, primary_key=True)
     
-    timeStamp = db.Column(db.Integer, nullable=False)
+    timestamp = db.Column(db.Integer, nullable=False)
     
     game = db.relationship('GameModel', back_populates = 'entry_number')
     player_frame = db.relationship('PlayerFrame', back_populates = 'entry_number')
@@ -230,7 +325,7 @@ class Event(db.Model):
     entryNumber = db.Column(db.Integer, db.ForeignKey('Time_Line_Entry.entryNumber'), primary_key=True)
     eventNumber = db.Column(db.Integer, primary_key=True)
     
-    timeStamp = db.Column(db.String, nullable=False)
+    timestamp = db.Column(db.String, nullable=False)
     type = db.Column(db.String, nullable=False)
 
     game = db.relationship('GameModel', back_populates = 'event')
@@ -447,7 +542,8 @@ class GameIDXtoX(Resource):
     def get(self, PUUID, x, y):
         numEntries = PlayedGame.query.filter_by(PUUID=PUUID).count()
         if int(y) > numEntries:
-            addGameXtoX(PUUID, numEntries, y)
+            matchIds = getMatchXtoX(PUUID, int(numEntries), int(y))
+            addGames(matchIds)
 
         result = db.session.query(GameModel.GID).select_from(GameModel).join(PlayedGame).filter(GameModel.GID == PlayedGame.GID).filter(PlayedGame.PUUID == PUUID).order_by(GameModel.time_start.desc()).offset(x).limit(y).all()
         result = [game[0] for game in result]
@@ -457,30 +553,10 @@ class GameIDXtoX(Resource):
 api.add_resource(GameIDXtoX, "/game-id/x-x/<PUUID>/<x>/<y>")
 
 
-class GameDataLast20(Resource):
-    def put(self, PUUID):
-        if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
-            return 404
-
-        games = getMatchLast20(PUUID)
-        for item in games:
-            gameData = getMatchByMatchID(item)
-            if not bool(GameModel.query.filter_by(GID=gameData['metadata']['matchId']).first()):
-                newGameData, newPlayedGames = addGame(gameData)
-                
-                db.session.add(newGameData)
-                for played in newPlayedGames:
-                    db.session.add(played)
-                
-        db.session.commit()
-        return 201        
-
-api.add_resource(GameDataLast20, "/game-data/last-20/<PUUID>")
-
-
 class GameDataXtoX(Resource):
     def put(self, PUUID, x, y):
-        return addGameXtoX(PUUID, x, y)
+        gameIds = getMatchXtoX(PUUID, int(x), int(y))
+        return addGames(gameIds)
 
 api.add_resource(GameDataXtoX, "/game-data/x-x/<PUUID>/<x>/<y>")
 
@@ -489,12 +565,15 @@ class UpdateUser(Resource):
     def put(self, PUUID):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
             return 404
+        
         if not bool(PlayedGame.query.filter_by(PUUID=PUUID).first()):
             try:
-                addGameXtoX(PUUID, 0, 20)
+                gameIds = getMatchXtoX(PUUID, 0, 20)
+                addGames(gameIds)
             except Exception:
                 return 500
             return 201
+        
         try:
             userData = getSummonerByPUUID(PUUID)
             userLeagueInfo = getLeagueInfoBySID(userData['id'])
@@ -513,18 +592,19 @@ class UpdateUser(Resource):
         )
         db.session.commit()
 
+        #Get Game Data
         toUpdate = []
         
         updateIndex = 0
         gettingNew = True
         while(gettingNew):
             try:
-                games = getMatchXtoX(PUUID, updateIndex, updateIndex + 20)
+                games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
             except Exception:
                 return 500
             
             for item in games:
-                if not GameModel.query.filter_by(GID=item).first():
+                if not db.session.query(GameModel.GID).select_from(PlayedGame).join(GameModel).filter(PlayedGame.PUUID == PUUID).filter(GameModel.GID==item).first():
                     toUpdate.append(item)
                     updateIndex += 1
                 else:
@@ -532,10 +612,9 @@ class UpdateUser(Resource):
                     break
             if(updateIndex == 100):
                 gettingNew = False
-        
         if updateIndex != 0:
             try:
-                addGameXtoX(PUUID, 0, updateIndex)
+                addGames(toUpdate)
             except Exception:
                 return 500
         
@@ -545,8 +624,9 @@ api.add_resource(UpdateUser, "/update-user/<PUUID>")
 
 
 class AsyncUpdateUser(Resource):
-    maxCalls = 50
-    currCalls = 0
+    maxCalls = 80
+    callIndex = 0
+    callLookup = dict()
     
     def put(self, PUUID):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
@@ -570,14 +650,14 @@ class AsyncUpdateUser(Resource):
         db.session.commit()
         
         #Getting matches
-        
-        currSeason = Season.query(Season.season_id).order_by(Season.season_id.desc()).first()
-        numCurrSeasonGames = db.session.query(GameModel.GID).select_from(PlayedGame).join(GameModel).filter(PlayedGame.PUUID == PUUID).filter(int(GameModel.patch.split('.')[0]) == currSeason).count()
+        currSeason = db.session.query(GameModel.season).order_by(GameModel.season.desc()).first()[0]
+        numCurrSeasonGames = db.session.query(GameModel.GID).select_from(PlayedGame).join(GameModel).filter(PlayedGame.PUUID == PUUID).filter(GameModel.season == currSeason).count()
         
         updateIndex = 0
         gettingNew = True
         needPrev = True
         while(gettingNew):
+            print("checking to " + str(updateIndex), file=sys.stderr)
             try:
                 games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
                 self.limHandler(1)
@@ -586,21 +666,28 @@ class AsyncUpdateUser(Resource):
             
             for item in games:
                 if not db.session.query(GameModel.GID).select_from(PlayedGame).join(GameModel).filter(PlayedGame.PUUID == PUUID).filter(GameModel.GID==item).first():
-                    game = asyncAddGame(item)
-                    self.limHandler(2)
-                    if int(game.patch.split('.')[0]) != currSeason.season_id:
-                        gettingNew = False
-                        needPrev = False
-                        break
+                    game = addGame(item)
+                    
+                    if game == 409:
+                        pass
+                    else:
+                        self.limHandler(2)
+                        if int(game.season) != currSeason:
+                            gettingNew = False
+                            needPrev = False
+                            break
+                        else:
+                            updateIndex += 1
                 else:
                     gettingNew = False
                     break
-
+            
         if needPrev:
             gettingNew = True
-            updateIndex += numCurrSeasonGames
+        updateIndex += numCurrSeasonGames
         
         while(gettingNew):
+            print("checking to " + str(updateIndex), file=sys.stderr)
             try:
                 games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
                 self.limHandler(1)
@@ -609,21 +696,37 @@ class AsyncUpdateUser(Resource):
             
             for item in games:
                 if not db.session.query(GameModel.GID).select_from(PlayedGame).join(GameModel).filter(PlayedGame.PUUID == PUUID).filter(GameModel.GID==item).first():
-                    game = asyncAddGame(item)
-                    self.limHandler(2)
-                    if int(game.patch.split('.')[0]) != currSeason.season_id:
-                        gettingNew = False
-                        break
+                    game = addGame(item)
+                    
+                    if game == 409:
+                        pass
+                    else:
+                        self.limHandler(2)
+                        if int(game.season) != currSeason:
+                            gettingNew = False
+                            break
+                        else:
+                            updateIndex += 1
                 else:
                     gettingNew = False
                     break
         return 201
     
+    
     def limHandler(self, numCalls):
-        self.currCalls += numCalls
-        if self.currCalls >= self.maxCalls:
-            self.currCalls = 0
-            time.sleep(120)
+        for call in range(numCalls):
+            if self.callIndex == self.maxCalls:
+                self.callIndex = 0
+            
+            self.callIndex += 1
+            
+            if self.callIndex in self.callLookup:
+                timeSinceCall = (time.time() - self.callLookup[self.callIndex])
+                if timeSinceCall < 120:
+                    print("sleeping for " + str(120 - timeSinceCall), file=sys.stderr)
+                    time.sleep(120 - timeSinceCall)
+            
+            self.callLookup[self.callIndex] = time.time()
 
 api.add_resource(AsyncUpdateUser, "/update-user/async/<PUUID>")
 
@@ -635,36 +738,20 @@ class generalChampStats(Resource):
         
         UpdateUser().put(PUUID)
         
-        #TODO Gets all user games from the current season, unimplementable due to rate limits
-        
-        # userData = UserModel.query.filter_by(PUUID=PUUID).first()
-        
-        # neededGames = int(userData.wins) + int(userData.losses)
-        
-        # knownGames = PlayedGame.query.filter_by(PUUID=PUUID).count()
-        
-        # while(knownGames < neededGames):
-        #     if (neededGames - knownGames) >= 100:
-        #         addGameXtoX(PUUID, knownGames, knownGames + 100)
-        #         knownGames += 100
-        #     else:
-        #         addGameXtoX(PUUID, neededGames - knownGames, neededGames)
-        #         knownGames = neededGames
-        
         champStats = dict()
-        playedChamps = db.session.query(PlayedGame.champion_name, PlayedGame.CID).filter_by(PUUID=PUUID).distinct().all()
+        playedChamps = db.session.query(PlayedGame.championName, PlayedGame.CID).filter_by(PUUID=PUUID).distinct().all()
         
         for champ in playedChamps:
             stats = dict()
             
             stats['champID'] = champ[1]
             
-            stats['wins'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, champion_name=champ[0]).filter(PlayedGame.won_game).count()
-            stats['losses'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, champion_name=champ[0]).filter(not PlayedGame.won_game).count()
-            stats['gamesPlayed'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, champion_name=champ[0]).count()
-            stats['avgKill'] = round(db.session.query(func.avg(PlayedGame.kills)).filter_by(PUUID=PUUID, champion_name=champ[0]).scalar(), 1)
-            stats['avgDeath'] = round(db.session.query(func.avg(PlayedGame.deaths)).filter_by(PUUID=PUUID, champion_name=champ[0]).scalar(), 1)
-            stats['avgAssist'] = round(db.session.query(func.avg(PlayedGame.assists)).filter_by(PUUID=PUUID, champion_name=champ[0]).scalar(), 1)
+            stats['wins'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, championName=champ[0]).filter(PlayedGame.won).count()
+            stats['losses'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, championName=champ[0]).filter(not PlayedGame.won).count()
+            stats['gamesPlayed'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, championName=champ[0]).count()
+            stats['avgKill'] = round(db.session.query(func.avg(PlayedGame.kills)).filter_by(PUUID=PUUID, championName=champ[0]).scalar(), 1)
+            stats['avgDeath'] = round(db.session.query(func.avg(PlayedGame.deaths)).filter_by(PUUID=PUUID, championName=champ[0]).scalar(), 1)
+            stats['avgAssist'] = round(db.session.query(func.avg(PlayedGame.assists)).filter_by(PUUID=PUUID, championName=champ[0]).scalar(), 1)
         
             champStats[champ[0]] = stats
         
@@ -681,16 +768,16 @@ class userTags(Resource):
         tags = dict()
         
         #Champ Lover
-        playedChamps = db.session.query(PlayedGame.champion_name, PlayedGame.CID).filter_by(PUUID=PUUID).distinct().all()
+        playedChamps = db.session.query(PlayedGame.championName, PlayedGame.CID).filter_by(PUUID=PUUID).distinct().all()
         for champ in playedChamps:
-            playedGames = db.session.query(PlayedGame).filter_by(PUUID=PUUID, champion_name=champ[0]).count()
+            playedGames = db.session.query(PlayedGame).filter_by(PUUID=PUUID, championName=champ[0]).count()
             if playedGames >= 20:
                 tags[champ[0] + ' lover'] = (0, "This player has played " + str(playedGames) + " of " + champ[0])
                 
         #Streak
         streak = None
         streakGames = 0
-        for game in db.session.query(PlayedGame.won_game).select_from(PlayedGame).join(GameModel).filter(GameModel.GID == PlayedGame.GID).filter(PlayedGame.PUUID == PUUID).order_by(GameModel.time_start.desc()).all():
+        for game in db.session.query(PlayedGame.won).select_from(PlayedGame).join(GameModel).filter(GameModel.GID == PlayedGame.GID).filter(PlayedGame.PUUID == PUUID).order_by(GameModel.time_start.desc()).all():
             if streak is None:
                 streak = game[0]
             else:
@@ -756,10 +843,12 @@ def getPlayersInGame(GID):
     return result
 
 
-def addGame(gameData) -> tuple[GameModel, list[PlayedGame]]:
+def parseGameData(gameData) -> tuple[GameModel, list[PlayedGame]]:
     newGame = GameModel(
         GID=gameData['metadata']['matchId'],
-        patch=gameData['info']['gameVersion'],
+        
+        season=int(gameData['info']['gameVersion'].split('.')[0]),
+        patch=str('.'.join(gameData['info']['gameVersion'].split('.')[1:])),
                     
         time_start=gameData['info']['gameStartTimestamp'],
         time_end=gameData['info']['gameEndTimestamp'],
@@ -767,13 +856,126 @@ def addGame(gameData) -> tuple[GameModel, list[PlayedGame]]:
     
     newPlayedGames = []
     
-    for player in range(10):
+    for player in range(len(gameData['info']['participants'])):
         played = PlayedGame(
             PUUID=gameData['info']['participants'][player]['puuid'],
             GID=gameData['metadata']['matchId'],
             
             name=gameData['info']['participants'][player]['summonerName'],
             
+            riotIdGameName=gameData['info']['participants'][player]['riotIdGameName'],
+            riotIdTagline=gameData['info']['participants'][player]['riotIdTagline'],
+            
+            summonerId=gameData['info']['participants'][player]['summonerId'],
+            summonerLevel=gameData['info']['participants'][player]['summonerLevel'],
+            
+            firstBloodAssist=gameData['info']['participants'][player]['firstBloodAssist'],
+            firstBloodKill=gameData['info']['participants'][player]['firstBloodKill'],
+            
+            firstTowerAssist=gameData['info']['participants'][player]['firstTowerAssist'],
+            firstTowerKill=gameData['info']['participants'][player]['firstTowerKill'],
+            
+            bountyLevel=gameData['info']['participants'][player]['bountyLevel'],
+            longestTimeSpentLiving=gameData['info']['participants'][player]['longestTimeSpentLiving'],
+            
+            killingSprees=gameData['info']['participants'][player]['killingSprees'],
+            largestKillingSpree=gameData['info']['participants'][player]['largestKillingSpree'],
+            largestMultiKill=gameData['info']['participants'][player]['largestMultiKill'],
+
+            doubleKills=gameData['info']['participants'][player]['doubleKills'],
+            tripleKills=gameData['info']['participants'][player]['tripleKills'],
+            quadraKills=gameData['info']['participants'][player]['quadraKills'],
+            pentaKills=gameData['info']['participants'][player]['pentaKills'],
+            unrealKills=gameData['info']['participants'][player]['unrealKills'],
+            
+            largestCriticalStrike=gameData['info']['participants'][player]['largestCriticalStrike'],
+
+            damageDealtToBuildings=gameData['info']['participants'][player]['damageDealtToBuildings'],
+            damageDealtToObjectives=gameData['info']['participants'][player]['damageDealtToObjectives'],
+            damageDealtToTurrets=gameData['info']['participants'][player]['damageDealtToTurrets'],
+            
+            damageSelfMitigated=gameData['info']['participants'][player]['damageSelfMitigated'],
+            
+            magicDamageDealt=gameData['info']['participants'][player]['magicDamageDealt'],
+            magicDamageDealtToChampions=gameData['info']['participants'][player]['magicDamageDealtToChampions'],
+            magicDamageTaken=gameData['info']['participants'][player]['magicDamageTaken'],
+            
+            physicalDamageDealt=gameData['info']['participants'][player]['physicalDamageDealt'],
+            physicalDamageDealtToChampions=gameData['info']['participants'][player]['physicalDamageDealtToChampions'],
+            physicalDamageTaken=gameData['info']['participants'][player]['physicalDamageTaken'],
+            
+            trueDamageDealt=gameData['info']['participants'][player]['trueDamageDealt'],
+            trueDamageDealtToChampions=gameData['info']['participants'][player]['trueDamageDealtToChampions'],
+            trueDamageTaken=gameData['info']['participants'][player]['trueDamageTaken'],
+            
+            totalDamageDealt=gameData['info']['participants'][player]['totalDamageDealt'],
+            totalDamageDealtToChampions=gameData['info']['participants'][player]['totalDamageDealtToChampions'],
+            totalDamageTaken=gameData['info']['participants'][player]['totalDamageTaken'],
+            
+            totalHeal=gameData['info']['participants'][player]['totalHeal'],
+            totalHealsOnTeammates=gameData['info']['participants'][player]['totalHealsOnTeammates'],
+            totalUnitsHealed=gameData['info']['participants'][player]['totalUnitsHealed'],
+
+            timeCCingOthers=gameData['info']['participants'][player]['timeCCingOthers'],
+            totalTimeCCDealt=gameData['info']['participants'][player]['totalTimeCCDealt'],
+            totalTimeSpentDead=gameData['info']['participants'][player]['totalTimeSpentDead'],
+            
+            spell1Casts=gameData['info']['participants'][player]['spell1Casts'],
+            spell2Casts=gameData['info']['participants'][player]['spell2Casts'],
+            spell3Casts=gameData['info']['participants'][player]['spell3Casts'],
+            spell4Casts=gameData['info']['participants'][player]['spell4Casts'],
+            
+            summoner1Casts=gameData['info']['participants'][player]['summoner1Casts'],
+            summoner1Id=gameData['info']['participants'][player]['summoner1Id'],
+            
+            summoner2Casts=gameData['info']['participants'][player]['summoner2Casts'],
+            summoner2Id=gameData['info']['participants'][player]['summoner2Id'],
+            
+            neutralMinionsKilled=gameData['info']['participants'][player]['neutralMinionsKilled'],
+            totalMinionsKilled=gameData['info']['participants'][player]['totalMinionsKilled'],
+            
+            baronKills=gameData['info']['participants'][player]['baronKills'],
+            dragonKills=gameData['info']['participants'][player]['dragonKills'],
+            
+            inhibitorKills=gameData['info']['participants'][player]['inhibitorKills'],
+            inhibitorTakedowns=gameData['info']['participants'][player]['inhibitorTakedowns'],
+            inhibitorsLost=gameData['info']['participants'][player]['inhibitorsLost'],
+
+            turretKills=gameData['info']['participants'][player]['turretKills'],
+            turretTakedowns=gameData['info']['participants'][player]['turretTakedowns'],
+            turretsLost=gameData['info']['participants'][player]['turretsLost'],
+            
+            nexusKills=gameData['info']['participants'][player]['nexusKills'],
+            nexusTakedowns=gameData['info']['participants'][player]['nexusTakedowns'],
+            nexusLost=gameData['info']['participants'][player]['nexusLost'],
+            
+            objectivesStolen=gameData['info']['participants'][player]['objectivesStolen'],
+            objectivesStolenAssists=gameData['info']['participants'][player]['objectivesStolenAssists'],
+            
+            visionScore=gameData['info']['participants'][player]['visionScore'],
+            visionWardsBoughtInGame=gameData['info']['participants'][player]['visionWardsBoughtInGame'],
+            wardsKilled=gameData['info']['participants'][player]['wardsKilled'],
+            wardsPlaced=gameData['info']['participants'][player]['wardsPlaced'],
+            detectorWardsPlaced=gameData['info']['participants'][player]['detectorWardsPlaced'],
+            sightWardsBoughtInGame=gameData['info']['participants'][player]['sightWardsBoughtInGame'],
+            
+            position=gameData['info']['participants'][player]['teamPosition'],
+            CID=gameData['info']['participants'][player]['championId'],
+            championName=gameData['info']['participants'][player]['championName'],
+            
+            champExperience=gameData['info']['participants'][player]['champExperience'],
+            champLevel=gameData['info']['participants'][player]['champLevel'],
+            
+            kills=gameData['info']['participants'][player]['kills'],
+            deaths=gameData['info']['participants'][player]['deaths'],
+            assists=gameData['info']['participants'][player]['assists'],
+            
+            goldEarned=gameData['info']['participants'][player]['goldEarned'],
+            goldSpent=gameData['info']['participants'][player]['goldSpent'],
+            
+            itemsPurchased=gameData['info']['participants'][player]['itemsPurchased'],
+            consumablesPurchased=gameData['info']['participants'][player]['consumablesPurchased'],
+
             item0=gameData['info']['participants'][player]['item0'],
             item1=gameData['info']['participants'][player]['item1'],
             item2=gameData['info']['participants'][player]['item2'],
@@ -781,31 +983,14 @@ def addGame(gameData) -> tuple[GameModel, list[PlayedGame]]:
             item4=gameData['info']['participants'][player]['item4'],
             item5=gameData['info']['participants'][player]['item5'],
             item6=gameData['info']['participants'][player]['item6'],
-
-            summoner1ID=gameData['info']['participants'][player]['summoner1Id'],
-            summoner2ID=gameData['info']['participants'][player]['summoner2Id'],
-
-            kills=gameData['info']['participants'][player]['kills'],
-            deaths=gameData['info']['participants'][player]['deaths'],
-            assists=gameData['info']['participants'][player]['assists'],
             
-            true_damage=gameData['info']['participants'][player]['trueDamageDealtToChampions'],
-            ad_damage=gameData['info']['participants'][player]['totalDamageDealtToChampions'],
-            magic_damage=gameData['info']['participants'][player]['magicDamageDealtToChampions'],
-
-            position=gameData['info']['participants'][player]['teamPosition'],
-
-            gold_earned=gameData['info']['participants'][player]['goldEarned'],
-            gold_spent=gameData['info']['participants'][player]['goldSpent'],
-
-            CID=gameData['info']['participants'][player]['championId'],
-            champion_name=gameData['info']['participants'][player]['championName'],
-
-            total_minions=gameData['info']['participants'][player]['totalMinionsKilled'],
-
-            vision_score=gameData['info']['participants'][player]['visionScore'],
+            timePlayed=gameData['info']['participants'][player]['timePlayed'],
             
-            won_game=gameData['info']['participants'][player]['win'],
+            gameEndedInEarlySurrender=gameData['info']['participants'][player]['gameEndedInEarlySurrender'],
+            gameEndedInSurrender=gameData['info']['participants'][player]['gameEndedInSurrender'],
+            teamEarlySurrendered=gameData['info']['participants'][player]['teamEarlySurrendered'],
+
+            won=gameData['info']['participants'][player]['win'],
         )
         
         newPlayedGames.append(played)
@@ -816,7 +1001,7 @@ def addGame(gameData) -> tuple[GameModel, list[PlayedGame]]:
 def makeTimeLine(timeLineData):
     puuidData = dict()
     for participants in timeLineData['info']['participants']:
-        puuidData[participants['participantId']] = participants['PUUID']
+        puuidData[int(participants['participantId'])] = participants['puuid']
     
     timeline = {
         'timeline': None,
@@ -835,7 +1020,7 @@ def makeTimeLine(timeLineData):
     timeline['timeline'] = timeLineObj
     
     for i, entry in enumerate(timeLineData['info']['frames']):
-        entry = {
+        entryData = {
             'entry': None,
             'frames': [],
             'events': []
@@ -844,11 +1029,10 @@ def makeTimeLine(timeLineData):
         entryObj = TimeLineEntry(
             GID=timeLineData['metadata']['matchId'],
             entryNumber=i,
-            
             timestamp=entry['timestamp']
         )
         
-        entry['entry'] = entryObj
+        entryData['entry'] = entryObj
         
         for j, event in enumerate(entry['events']):
             eventObj = Event(
@@ -860,13 +1044,13 @@ def makeTimeLine(timeLineData):
                 type=event['type'],
             )
 
-            entry['events'].append(eventObj)
+            entryData['events'].append(eventObj)
             
         for playerKey, playerData in entry['participantFrames'].items():
             playerObj = PlayerFrame(
                 GID = timeLineData['metadata']['matchId'],
                 entryNumber = i,
-                PUUID = puuidData[playerKey],
+                PUUID = puuidData[int(playerKey)],
                 
                 #Personal Stats
                 abilityHaste = playerData['championStats']['abilityHaste'],
@@ -926,39 +1110,26 @@ def makeTimeLine(timeLineData):
                 timeEnemySpentControlled = playerData['timeEnemySpentControlled']
             )
 
-            entry['frames'].append(playerObj)
+            entryData['frames'].append(playerObj)
             
-        timeline['entries'].append(entry)
+        timeline['entries'].append(entryData)
     
     return timeline
-            
 
-def addGameXtoX(PUUID, x, y): #TODO fix double calling getmatchXtoX getting id's with update user and potentially other functions
-    if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
-        return 404
 
-    games = getMatchXtoX(PUUID, int(x), int(y))
+def addGames(games):
     for item in games:
-        gameData = getMatchByMatchID(item)
-        if not bool(GameModel.query.filter_by(GID=gameData['metadata']['matchId']).first()):
-            
-            newGameData, newPlayedGames = addGame(gameData)
-
-            db.session.add(newGameData)
-
-            for played in newPlayedGames:
-                db.session.add(played)
-
-    db.session.commit()
+        addGame(item)
 
     return 201
 
 
-def asyncAddGame(GID):
-    gameData = getMatchByMatchID(GID)
-    timeLineData = getMatchTimeLineByMatchID(GID)
-    if not bool(GameModel.query.filter_by(GID=gameData['metadata']['matchId']).first()):
-        newGameData, newPlayedGames = addGame(gameData)
+def addGame(GID): 
+    if not bool(GameModel.query.filter_by(GID=GID).first()):
+        gameData = getMatchByMatchID(GID)
+        timeLineData = getMatchTimeLineByMatchID(GID)
+        
+        newGameData, newPlayedGames = parseGameData(gameData)
         timeLine = makeTimeLine(timeLineData)
         
         db.session.add(newGameData)
@@ -977,7 +1148,9 @@ def asyncAddGame(GID):
             for event in entry['events']:
                 db.session.add(event)
 
-    db.session.commit()
+        db.session.commit()
+    else:
+        return 409
     
     return newGameData
 
@@ -1015,12 +1188,132 @@ def createUser(userData, userLeagueInfo, userAccountInfo) -> UserModel:
 
 def getPlayerStats(gameData, playerData) -> dict:
     playerStats = {
+        #GameInfo
         'patch': getattr(gameData, 'patch'),
         'time_start': getattr(gameData, 'time_start'),
         'time_end': getattr(gameData, 'time_end'),
         
+        #PlayerInfo
+        'PUUID': getattr(playerData, 'PUUID'),
+        
+        'GID': getattr(playerData, 'GID'),
+        
         'name': getattr(playerData, 'name'),
         
+        'riotIdGameName': getattr(playerData, 'riotIdGameName'),
+        'riotIdTagline': getattr(playerData, 'riotIdTagline'),
+
+        'summonerId': getattr(playerData, 'summonerId'),
+        'summonerLevel': getattr(playerData, 'summonerLevel'),
+        
+        'firstBloodAssist': getattr(playerData, 'firstBloodAssist'),
+        'firstBloodKill': getattr(playerData, 'firstBloodKill'),
+
+        'firstTowerAssist': getattr(playerData, 'firstTowerAssist'),
+        'firstTowerKill': getattr(playerData, 'firstTowerKill'),
+
+        'bountyLevel': getattr(playerData, 'bountyLevel'),
+        'longestTimeSpentLiving': getattr(playerData, 'longestTimeSpentLiving'),
+
+        'killingSprees': getattr(playerData, 'killingSprees'),
+        'largestKillingSpree': getattr(playerData, 'largestKillingSpree'),
+        'largestMultiKill': getattr(playerData, 'largestMultiKill'),
+
+        'doubleKills': getattr(playerData, 'doubleKills'),
+        'tripleKills': getattr(playerData, 'tripleKills'),
+        'quadraKills': getattr(playerData, 'quadraKills'),
+        'pentaKills': getattr(playerData, 'pentaKills'),
+        'unrealKills': getattr(playerData, 'unrealKills'),
+
+        'largestCriticalStrike': getattr(playerData, 'largestCriticalStrike'),
+        
+        'damageDealtToBuildings': getattr(playerData, 'damageDealtToBuildings'),
+        'damageDealtToObjectives': getattr(playerData, 'damageDealtToObjectives'),
+        'damageDealtToTurrets': getattr(playerData, 'damageDealtToTurrets'),
+
+        'damageSelfMitigated': getattr(playerData, 'damageSelfMitigated'),
+
+        'magicDamageDealt': getattr(playerData, 'magicDamageDealt'),
+        'magicDamageDealtToChampions': getattr(playerData, 'magicDamageDealtToChampions'),
+        'magicDamageTaken': getattr(playerData, 'magicDamageTaken'),
+        
+        'physicalDamageDealt': getattr(playerData, 'physicalDamageDealt'),
+        'physicalDamageDealtToChampions': getattr(playerData, 'physicalDamageDealtToChampions'),
+        'physicalDamageTaken': getattr(playerData, 'physicalDamageTaken'),
+        
+        'trueDamageDealt': getattr(playerData, 'trueDamageDealt'),
+        'trueDamageDealtToChampions': getattr(playerData, 'trueDamageDealtToChampions'),
+        'trueDamageTaken': getattr(playerData, 'trueDamageTaken'),
+        
+        'totalDamageDealt': getattr(playerData, 'totalDamageDealt'),
+        'totalDamageDealtToChampions': getattr(playerData, 'totalDamageDealtToChampions'),
+        'totalDamageTaken': getattr(playerData, 'totalDamageTaken'),
+        'totalDamageShieldedOnTeammates': getattr(playerData, 'totalDamageShieldedOnTeammates'),
+
+        'totalHeal': getattr(playerData, 'totalHeal'),
+        'totalHealsOnTeammates': getattr(playerData, 'totalHealsOnTeammates'),
+        'totalUnitsHealed': getattr(playerData, 'totalUnitsHealed'),
+
+        'timeCCingOthers': getattr(playerData, 'timeCCingOthers'),
+        'totalTimeCCDealt': getattr(playerData, 'totalTimeCCDealt'),
+        'totalTimeSpentDead': getattr(playerData, 'totalTimeSpentDead'),
+
+        'spell1Casts': getattr(playerData, 'spell1Casts'),
+        'spell2Casts': getattr(playerData, 'spell2Casts'),
+        'spell3Casts': getattr(playerData, 'spell3Casts'),
+        'spell4Casts': getattr(playerData, 'spell4Casts'),
+        
+        'summoner1Casts': getattr(playerData, 'summoner1Casts'),
+        'summoner1Id': getattr(playerData, 'summoner1Id'),
+
+        'summoner2Casts': getattr(playerData, 'summoner2Casts'),
+        'summoner2Id': getattr(playerData, 'summoner2Id'),
+
+        'neutralMinionsKilled': getattr(playerData, 'neutralMinionsKilled'),
+        'totalMinionsKilled': getattr(playerData, 'totalMinionsKilled'),
+
+        'baronKills': getattr(playerData, 'baronKills'),
+        'dragonKills': getattr(playerData, 'dragonKills'),
+        
+        'inhibitorKills': getattr(playerData, 'inhibitorKills'),
+        'inhibitorTakedowns': getattr(playerData, 'inhibitorTakedowns'),
+        'inhibitorsLost': getattr(playerData, 'inhibitorsLost'),
+
+        'turretKills': getattr(playerData, 'turretKills'),
+        'turretTakedowns': getattr(playerData, 'turretTakedowns'),
+        'turretsLost': getattr(playerData, 'turretsLost'),
+
+        'nexusKills': getattr(playerData, 'nexusKills'),
+        'nexusTakedowns': getattr(playerData, 'nexusTakedowns'),
+        'nexusLost': getattr(playerData, 'nexusLost'),
+
+        'objectivesStolen': getattr(playerData, 'objectivesStolen'),
+        'objectivesStolenAssists': getattr(playerData, 'objectivesStolenAssists'),
+
+        'visionScore': getattr(playerData, 'visionScore'),
+        'visionWardsBoughtInGame': getattr(playerData, 'visionWardsBoughtInGame'),
+        'wardsKilled': getattr(playerData, 'wardsKilled'),
+        'wardsPlaced': getattr(playerData, 'wardsPlaced'),
+        'detectorWardsPlaced': getattr(playerData, 'detectorWardsPlaced'),
+        'sightWardsBoughtInGame': getattr(playerData, 'sightWardsBoughtInGame'),
+
+        'position': getattr(playerData, 'position'),
+        'CID': getattr(playerData, 'CID'),
+        'championName': getattr(playerData, 'championName'),
+
+        'champExperience': getattr(playerData, 'champExperience'),
+        'champLevel': getattr(playerData, 'champLevel'),
+
+        'kills': getattr(playerData, 'kills'),
+        'deaths': getattr(playerData, 'deaths'),
+        'assists': getattr(playerData, 'assists'),
+        
+        'goldEarned': getattr(playerData, 'goldEarned'),
+        'goldSpent': getattr(playerData, 'goldSpent'),
+        
+        'itemsPurchased': getattr(playerData, 'itemsPurchased'),
+        'consumablesPurchased': getattr(playerData, 'consumablesPurchased'),
+
         'item0': getattr(playerData, 'item0'),
         'item1': getattr(playerData, 'item1'),
         'item2': getattr(playerData, 'item2'),
@@ -1028,35 +1321,18 @@ def getPlayerStats(gameData, playerData) -> dict:
         'item4': getattr(playerData, 'item4'),
         'item5': getattr(playerData, 'item5'),
         'item6': getattr(playerData, 'item6'),
-        
-        'summoner1ID': getattr(playerData, 'summoner1ID'),
-        'summoner2ID': getattr(playerData, 'summoner2ID'),
-        
-        'kills': getattr(playerData, 'kills'),
-        'deaths': getattr(playerData, 'deaths'),
-        'assists': getattr(playerData, 'assists'),
-        
-        'true_damage': getattr(playerData, 'true_damage'),
-        'ad_damage': getattr(playerData, 'ad_damage'),
-        'magic_damage': getattr(playerData, 'magic_damage'),
-        
-        'position': getattr(playerData, 'position'),
-        
-        'gold_earned': getattr(playerData, 'gold_earned'),
-        'gold_spent': getattr(playerData, 'gold_spent'),
-        
-        'CID': getattr(playerData, 'CID'),
-        'champion_name': getattr(playerData, 'champion_name'),
-        
-        'total_minions': getattr(playerData, 'total_minions'),
-        
-        'vision_score': getattr(playerData, 'vision_score'),
-        
-        'won_game': getattr(playerData, "won_game")
+
+        'timePlayed': getattr(playerData, 'timePlayed'),
+
+        'gameEndedInEarlySurrender': getattr(playerData, 'gameEndedInEarlySurrender'),
+        'gameEndedInSurrender': getattr(playerData, 'gameEndedInSurrender'),
+        'teamEarlySurrendered': getattr(playerData, 'teamEarlySurrendered'),
+
+        'won': getattr(playerData, 'won'),
     }
     
     return playerStats
 
 
 if __name__ == "__main__":
-    app.run(debug=True, processes=5) #TODO CHANGE BEFORE PRODUCTION
+    app.run(debug=True, threaded=True, port=8080) #TODO CHANGE BEFORE PRODUCTION
