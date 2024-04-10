@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, Response
 
 from flask_restful import Api, Resource, fields, marshal_with
 
@@ -11,8 +11,8 @@ import time
 import sys
 
 from accessRiotApi import (
-    getMatchByMatchID, getMatchXtoX, getMatchTimeLineByMatchID, getSummonerByName, 
-    getSummonerByPUUID, getLeagueInfoBySID, getACCTInfoByRiotID, getAccountByPUUID
+    getMatchByMatchID, getMatchXtoX, getMatchTimeLineByMatchID, getSummonerByPUUID, 
+    getLeagueInfoBySID, getACCTInfoByRiotID, getAccountByPUUID
 )
 
 basedir = os.path.abspath(os.path.dirname(__file__)) + "/data/"
@@ -30,10 +30,8 @@ class PlayedGame(db.Model):
     PUUID = db.Column(db.String, db.ForeignKey('User.PUUID'), primary_key=True)
     GID = db.Column(db.String, db.ForeignKey('Game.GID'), primary_key=True)
     
-    name = db.Column(db.String, nullable=False)
-    
-    riotIdGameName = db.Column(db.String, nullable=False)
-    riotIdTagline = db.Column(db.String, nullable=False)
+    gameName = db.Column(db.String, nullable=False)
+    tagLine = db.Column(db.String, nullable=False)
     
     summonerId = db.Column(db.Integer, nullable=True)
     summonerLevel = db.Column(db.Integer, nullable=True)
@@ -173,8 +171,7 @@ class UserModel(db.Model):
 
     tagLine=db.Column(db.String, nullable=False)
     gameName=db.Column(db.String, nullable=False)
-
-    name = db.Column(db.String, nullable=False)
+    
     profileIcon = db.Column(db.Integer, nullable=True)
     
     tier = db.Column(db.String, nullable=True)
@@ -197,7 +194,6 @@ class UserModel(db.Model):
             'tagLine': self.tagLine,
             'gameName': self.gameName,
 
-            'name': self.name,
             'profileIcon': self.profileIcon,
 
             'tier': self.tier,
@@ -367,7 +363,6 @@ resource_fields = {
     'tagLine': fields.String,
     'gameName': fields.String,
     
-    'name': fields.String,
     'profileIcon': fields.Integer,
     
     'tier': fields.String,
@@ -386,10 +381,10 @@ class UserByRiotID(Resource):
         if not bool(UserModel.query.filter_by(tagLine=tagLine, gameName=gameName).first()):
             status = self.put(tagLine, gameName)
             if status != 201:
-                return status
+                return Response(status=status)
 
         result = UserModel.query.filter_by(tagLine=tagLine, gameName=gameName).first()
-
+        
         return result, 200
 
     def put(self, tagLine, gameName):
@@ -397,6 +392,8 @@ class UserByRiotID(Resource):
         userData = getSummonerByPUUID(userAccountInfo['puuid'])
         userLeagueInfo = getLeagueInfoBySID(userData['id'])
         
+        print(userAccountInfo, file=sys.stderr)
+        
         if bool(UserModel.query.filter_by(PUUID=(userData['puuid'])).first()):
             db.session.delete(UserModel.query.filter_by(PUUID=(userData['puuid'])).first())
             db.session.commit()
@@ -411,45 +408,9 @@ class UserByRiotID(Resource):
         db.session.add(newUser)
         db.session.commit()
         
-        return 201
+        return Response(status=201)
     
 api.add_resource(UserByRiotID, "/user/by-riotID/<tagLine>/<gameName>")
-
-
-class UserByName(Resource):
-    @marshal_with(resource_fields)
-    def get(self, name):
-        if not bool(UserModel.query.filter_by(name=name).first()):
-            status = self.put(name)
-            if status != 201:
-                return status
-            
-        result = UserModel.query.filter_by(name=name).first()
-
-        return result, 200
-
-    def put(self, name):
-        userData = getSummonerByName(name)
-        userLeagueInfo = getLeagueInfoBySID(userData['id'])
-        userAccountInfo = getAccountByPUUID(userData['puuid'])
-        
-        if bool(UserModel.query.filter_by(PUUID=(userData['puuid'])).first()):
-            db.session.delete(UserModel.query.filter_by(PUUID=(userData['puuid'])).first())
-            db.session.commit()
-        
-        for item in userLeagueInfo:
-            if item['queueType'] == 'RANKED_SOLO_5x5':
-                userLeagueInfo = item
-                break
-        
-        newUser = createUser(userData, userLeagueInfo, userAccountInfo)
-        
-        db.session.add(newUser)
-        db.session.commit()
-        
-        return 201
-
-api.add_resource(UserByName, "/user/by-name/<name>")
 
 
 class UserByPUUID(Resource):
@@ -458,7 +419,7 @@ class UserByPUUID(Resource):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
             status = self.put(PUUID)
             if status != 201:
-                return status
+                return Response(status=status)
             
         result = UserModel.query.filter_by(PUUID=PUUID).first()
 
@@ -483,7 +444,7 @@ class UserByPUUID(Resource):
         db.session.add(newUser)
         db.session.commit()
         
-        return 201
+        return Response(status=201)
 
 api.add_resource(UserByPUUID, "/user/by-PUUID/<PUUID>")
 
@@ -491,14 +452,14 @@ api.add_resource(UserByPUUID, "/user/by-PUUID/<PUUID>")
 class GameDataByPlayer(Resource):
     def get(self, GID, PUUID):
         if not bool(GameModel.query.filter_by(GID=GID).first()):
-            return 404
+            return Response(status=404)
 
         gameData = GameModel.query.filter_by(GID=GID).first()
         playerData = PlayedGame.query.filter_by(GID=GID, PUUID=PUUID).first()
         
         playerStats = getPlayerStats(gameData, playerData)
         
-        return playerStats, 200      
+        return Response(playerStats, 200)
 
 api.add_resource(GameDataByPlayer, "/game-data/by-Player/<GID>/<PUUID>")
 
@@ -506,7 +467,7 @@ api.add_resource(GameDataByPlayer, "/game-data/by-Player/<GID>/<PUUID>")
 class GameDataAll(Resource):
     def get(self, GID):
         if not bool(GameModel.query.filter_by(GID=GID).first()):
-            return 404
+            return Response(status=404)
         
         players = getPlayersInGame(GID)
         
@@ -547,7 +508,7 @@ class GameIDXtoX(Resource):
 
         result = db.session.query(GameModel.GID).select_from(GameModel).join(PlayedGame).filter(GameModel.GID == PlayedGame.GID).filter(PlayedGame.PUUID == PUUID).order_by(GameModel.time_start.desc()).offset(x).limit(y).all()
         result = [game[0] for game in result]
-
+        
         return result, 200
 
 api.add_resource(GameIDXtoX, "/game-id/x-x/<PUUID>/<x>/<y>")
@@ -564,22 +525,22 @@ api.add_resource(GameDataXtoX, "/game-data/x-x/<PUUID>/<x>/<y>")
 class UpdateUser(Resource):
     def put(self, PUUID):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
-            return 404
+            return Response(status=404)
         
         if not bool(PlayedGame.query.filter_by(PUUID=PUUID).first()):
             try:
                 gameIds = getMatchXtoX(PUUID, 0, 20)
                 addGames(gameIds)
             except Exception:
-                return 500
-            return 201
+                return Response(status=500)
+            return Response(status=201)
         
         try:
             userData = getSummonerByPUUID(PUUID)
             userLeagueInfo = getLeagueInfoBySID(userData['id'])
             userAccountInfo = getAccountByPUUID(PUUID)
         except Exception:
-            return 500
+            return Response(status=500)
         
         for item in userLeagueInfo:
             if item['queueType'] == 'RANKED_SOLO_5x5':
@@ -601,7 +562,7 @@ class UpdateUser(Resource):
             try:
                 games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
             except Exception:
-                return 500
+                return Response(status=500)
             
             for item in games:
                 if not db.session.query(GameModel.GID).select_from(PlayedGame).join(GameModel).filter(PlayedGame.PUUID == PUUID).filter(GameModel.GID==item).first():
@@ -616,9 +577,9 @@ class UpdateUser(Resource):
             try:
                 addGames(toUpdate)
             except Exception:
-                return 500
+                return Response(status=500)
         
-        return 201
+        return Response(status=201)
 
 api.add_resource(UpdateUser, "/update-user/<PUUID>")
 
@@ -630,13 +591,13 @@ class AsyncUpdateUser(Resource):
     
     def put(self, PUUID):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
-            return 404
+            return Response(status=404)
         try:
             userData = getSummonerByPUUID(PUUID)
             userLeagueInfo = getLeagueInfoBySID(userData['id'])
             userAccountInfo = getAccountByPUUID(PUUID)
         except Exception:
-            return 500
+            return Response(status=500)
         
         for item in userLeagueInfo:
             if item['queueType'] == 'RANKED_SOLO_5x5':
@@ -662,7 +623,7 @@ class AsyncUpdateUser(Resource):
                 games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
                 self.limHandler(1)
             except Exception:
-                return 500
+                return Response(status=500)
             
             for item in games:
                 if not db.session.query(GameModel.GID).select_from(PlayedGame).join(GameModel).filter(PlayedGame.PUUID == PUUID).filter(GameModel.GID==item).first():
@@ -692,7 +653,7 @@ class AsyncUpdateUser(Resource):
                 games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
                 self.limHandler(1)
             except Exception:
-                return 500
+                return Response(status=500)
             
             for item in games:
                 if not db.session.query(GameModel.GID).select_from(PlayedGame).join(GameModel).filter(PlayedGame.PUUID == PUUID).filter(GameModel.GID==item).first():
@@ -710,15 +671,13 @@ class AsyncUpdateUser(Resource):
                 else:
                     gettingNew = False
                     break
-        return 201
+        return Response(status=201)
     
     
     def limHandler(self, numCalls):
         for call in range(numCalls):
-            if self.callIndex == self.maxCalls:
+            if self.callIndex > self.maxCalls:
                 self.callIndex = 0
-            
-            self.callIndex += 1
             
             if self.callIndex in self.callLookup:
                 timeSinceCall = (time.time() - self.callLookup[self.callIndex])
@@ -727,6 +686,8 @@ class AsyncUpdateUser(Resource):
                     time.sleep(120 - timeSinceCall)
             
             self.callLookup[self.callIndex] = time.time()
+            
+            self.callIndex += 1
 
 api.add_resource(AsyncUpdateUser, "/update-user/async/<PUUID>")
 
@@ -734,7 +695,7 @@ api.add_resource(AsyncUpdateUser, "/update-user/async/<PUUID>")
 class generalChampStats(Resource):
     def get(self, PUUID):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
-            return 404
+            return Response(status=404)
         
         UpdateUser().put(PUUID)
         
@@ -763,7 +724,7 @@ api.add_resource(generalChampStats, "/champ-stats/<PUUID>")
 class userTags(Resource):
     def get(self, PUUID):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
-            return 404
+            return Response(status=404)
         
         tags = dict()
         
@@ -823,7 +784,7 @@ api.add_resource(userTags, "/user/tags/<PUUID>")
 class getUserGamesPlayed(Resource):
     def get(self, PUUID):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
-            return 404
+            return Response(status=404)
 
         result = PlayedGame.query.filter_by(PUUID=PUUID).count()
 
@@ -861,10 +822,8 @@ def parseGameData(gameData) -> tuple[GameModel, list[PlayedGame]]:
             PUUID=gameData['info']['participants'][player]['puuid'],
             GID=gameData['metadata']['matchId'],
             
-            name=gameData['info']['participants'][player]['summonerName'],
-            
-            riotIdGameName=gameData['info']['participants'][player]['riotIdGameName'],
-            riotIdTagline=gameData['info']['participants'][player]['riotIdTagline'],
+            gameName=gameData['info']['participants'][player]['riotIdGameName'],
+            tagLine=gameData['info']['participants'][player]['riotIdTagline'],
             
             summonerId=gameData['info']['participants'][player]['summonerId'],
             summonerLevel=gameData['info']['participants'][player]['summonerLevel'],
@@ -1167,8 +1126,7 @@ def createUser(userData, userLeagueInfo, userAccountInfo) -> UserModel:
     newUser = UserModel(
             PUUID=userData['puuid'],
             SID=userData['id'],
-
-            name=userData['name'],
+            
             profileIcon=userData['profileIconId'],
             
             tagLine=userAccountInfo['tagLine'],
@@ -1198,10 +1156,8 @@ def getPlayerStats(gameData, playerData) -> dict:
         
         'GID': getattr(playerData, 'GID'),
         
-        'name': getattr(playerData, 'name'),
-        
-        'riotIdGameName': getattr(playerData, 'riotIdGameName'),
-        'riotIdTagline': getattr(playerData, 'riotIdTagline'),
+        'gameName': getattr(playerData, 'gameName'),
+        'tagLine': getattr(playerData, 'tagLine'),
 
         'summonerId': getattr(playerData, 'summonerId'),
         'summonerLevel': getattr(playerData, 'summonerLevel'),

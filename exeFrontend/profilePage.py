@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QPushButton, QStackedLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QPushButton, QStackedLayout, QMessageBox
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 
@@ -48,7 +48,12 @@ class ProfilePageManager(QWidget):
         self.profileWindow = QWidget()
         profileWindowLayout = QStackedLayout()
         self.profileWindow.setLayout(profileWindowLayout)
-        self.profileWindow.layout().addWidget(ProfilePage(fetchProfileInfo(PUUID, self.BASE_URL), self, self.IMAGE_LOCATION))
+        
+        profileInfo = fetchProfileInfo(PUUID, self.BASE_URL)
+        if profileInfo[1] != 201:
+            self.updateFailed()
+        
+        self.profileWindow.layout().addWidget(ProfilePage(profileInfo[0], self, self.IMAGE_LOCATION))
         
         self.layout.addWidget(self.profileWindow, 1, 0, 1, -1)
         
@@ -74,7 +79,9 @@ class ProfilePageManager(QWidget):
         self.threadPool.start(worker)
     
     def createPageHelper(self, info):
-        newPage = ProfilePage(info, self, self.IMAGE_LOCATION)
+        if info[1] != 201:
+            self.updateFailed()
+        newPage = ProfilePage(info[0], self, self.IMAGE_LOCATION)
         self.addPage(newPage)
 
     def addPage(self, page):
@@ -118,9 +125,17 @@ class ProfilePageManager(QWidget):
         self.threadPool.start(worker)
     
     def updatePageHelper(self, info, index):
+        if info[1] != 201:
+            self.updateFailed()
         self.profileWindow.layout().itemAt(index).widget().deleteLater()
-        newPage = ProfilePage(info, self, self.IMAGE_LOCATION)
+        newPage = ProfilePage(info[0], self, self.IMAGE_LOCATION)
         self.profileWindow.layout().insertWidget(index, newPage)
+        
+    def updateFailed(self):
+        message = QMessageBox()
+        message.setButtonText(QMessageBox.Ok, "Ok")
+        message.setText("Update Failed")
+        message.exec()
         
 
 class ProfilePage(QWidget):
@@ -150,7 +165,7 @@ class ProfilePage(QWidget):
         layout.addWidget(label, 0, 0)
         
         #Username
-        label = QLabel(userData['name'])
+        label = QLabel(userData['gameName'] + " #" + userData['tagLine'])
         label.setAlignment(Qt.AlignCenter)
         layout.addWidget(label, 1, 0)
         

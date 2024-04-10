@@ -41,23 +41,6 @@ def getACCTInfoByRiotID(tagLine, gameName):
         apiError(response.status_code)
 
 
-def getSummonerByName(name):
-    BASE_URL = "https://na1.api.riotgames.com/lol/"
-    
-    requestURL = BASE_URL + "summoner/v4/summoners/by-name/"
-    
-    requestURL = requestURL + name
-    
-    requestURL = requestURL + '?api_key=' + api_key
-
-    response = requests.get(requestURL)
-    
-    if response.status_code == 200:
-        return response.json()
-    else:
-        apiError(response.status_code)
-
-
 def getSummonerByPUUID(PUUID):
     BASE_URL = "https://na1.api.riotgames.com/lol/"
     

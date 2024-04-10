@@ -149,7 +149,7 @@ class PlayerButton(QPushButton):
         self.manager = manager
         self.IMAGE_LOCATION = IMAGE_LOCATION
         
-        self.playerName = gameData[PUUID]['name']
+        self.playerName = gameData[PUUID]['gameName'] + " #" + gameData[PUUID]['tagLine']
         self.setToolTip(self.playerName)
         
         self.PUUID = PUUID

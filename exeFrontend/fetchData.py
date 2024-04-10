@@ -21,7 +21,9 @@ def fetchChampPixmap(champName, IMAGE_LOCATION):
 
 def fetchProfileInfo(PUUID, BASE_URL):
     userData = requests.get(BASE_URL + '/user/by-PUUID/' + str(PUUID)).json()
-    requests.put(BASE_URL + '/update-user/' + str(PUUID))
+    
+    reqStatus = requests.put(BASE_URL + '/update-user/' + str(PUUID)).status_code
+    
     games = fetchGameInfo(userData, BASE_URL, '/0/20')
     
     data = {
@@ -29,7 +31,7 @@ def fetchProfileInfo(PUUID, BASE_URL):
         "games": games
     }
     
-    return data
+    return data, reqStatus
 
 
 def fetchGameInfo(userData, BASE_URL, indexes):

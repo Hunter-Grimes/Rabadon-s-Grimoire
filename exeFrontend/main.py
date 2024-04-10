@@ -17,7 +17,9 @@ class MainWindow(QMainWindow):
         tabs = QTabWidget()
         
         myName = 'LessJnglMoreBush'
-        myPUUID = requests.get(self.BASE_URL + '/user/by-name/' + myName).json()['PUUID']
+        myTag = 'NA1'
+
+        myPUUID = requests.get(self.BASE_URL + '/user/by-riotID/' + myTag + '/' + myName).json()['PUUID']
         
         tabs.addTab(ProfilePageManager(myPUUID, self.BASE_URL, self.threadPool), "Profile")
         tabs.addTab(PatchNotesPage(), "Patch Notes")
