@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout
+from PySide6.QtWidgets import QWidget, QLabel, QGridLayout
 from PySide6.QtCore import Qt
 import requests
 from asyncWorker import Worker
@@ -9,8 +9,9 @@ class userTagsDisplay(QWidget):
         self.threadPool = threadpool
         self.PUUID = PUUID
         self.BASE_URL = BASE_URL
+        self.numTags = 0
         
-        layout = QHBoxLayout()
+        layout = QGridLayout()
         layout.setSpacing(5)
         self.setLayout(layout)
         
@@ -44,5 +45,6 @@ class userTagsDisplay(QWidget):
                 tag.setStyleSheet("background-color: transparent; color: gray; border: 2px solid gray; border-radius: 10px;")
             case _:
                 pass
-            
-        self.layout().addWidget(tag)
+        
+        self.layout().addWidget(tag, (self.numTags // 4), (self.numTags % 4))
+        self.numTags += 1
