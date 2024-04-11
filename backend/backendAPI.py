@@ -469,18 +469,7 @@ class GameDataAll(Resource):
         if not bool(GameModel.query.filter_by(GID=GID).first()):
             return Response(status=404)
         
-        players = getPlayersInGame(GID)
-        
-        gameData = GameModel.query.filter_by(GID=GID).first()
-        
-        allGameData = {}
-        
-        for player in players:
-            
-            playerData = PlayedGame.query.filter_by(GID=GID, PUUID=player).first()
-            playerDataDict = getPlayerStats(gameData, playerData)
-            
-            allGameData[player] = playerDataDict
+        allGameData = getGameDataAll(GID)
         
         return allGameData, 200
      
@@ -718,7 +707,7 @@ class generalChampStats(Resource):
         
         return champStats, 200
 
-api.add_resource(generalChampStats, "/champ-stats/<PUUID>")
+api.add_resource(generalChampStats, "/user/champ-info-summary/<PUUID>")
 
 
 class userTags(Resource):
@@ -791,6 +780,40 @@ class getUserGamesPlayed(Resource):
         return result, 200
 
 api.add_resource(getUserGamesPlayed, "/user/games-played/<PUUID>")
+
+
+class userChampionInfoPage(Resource):
+    def get(self, PUUID, championName):
+        if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
+            return Response(status=404)
+        
+        info = {
+            'userData': None,
+            'gameData': None,
+            'playerStats': None,
+            'averageStats': None,
+            'tags': None,
+        }
+        
+        userData = UserByPUUID().get(PUUID)[0]
+        info['userData'] = userData
+        
+        games = db.session.query(PlayedGame).filter_by(PUUID=PUUID, championName=championName).all()
+        
+        if not games:
+            return Response(status=404)
+        
+        gameIDs = [game.GID for game in games]
+        
+        games = dict()
+        for game in gameIDs:
+            gameData = getGameDataAll(game)
+            games[game] = gameData
+
+        info['games'] = games
+        return info, 200
+
+api.add_resource(userChampionInfoPage, "/user/champ-info-page/<PUUID>/<championName>")
 
 
 #
@@ -1288,6 +1311,22 @@ def getPlayerStats(gameData, playerData) -> dict:
     }
     
     return playerStats
+
+def getGameDataAll(GID):
+    players = getPlayersInGame(GID)
+        
+    gameData = GameModel.query.filter_by(GID=GID).first()
+    
+    allGameData = {}
+    
+    for player in players:
+        
+        playerData = PlayedGame.query.filter_by(GID=GID, PUUID=player).first()
+        playerDataDict = getPlayerStats(gameData, playerData)
+        
+        allGameData[player] = playerDataDict
+    
+    return allGameData
 
 
 if __name__ == "__main__":

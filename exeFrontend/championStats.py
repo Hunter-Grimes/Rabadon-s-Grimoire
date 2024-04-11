@@ -1,12 +1,12 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QScrollArea, QGroupBox, QPushButton, QProgressBar
-from PySide6.QtGui import QPixmap, QFont
+from PySide6.QtGui import QPixmap, QFont, QIcon
 from PySide6.QtCore import Qt
 
 
 class championStatsHandler(QWidget):
-    def __init__(self, totalGames, champStats, manager, IMAGE_LOCATION, *args, **kwargs):
+    def __init__(self, PUUID, totalGames, champStats, manager, IMAGE_LOCATION, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.championStats = championStats(totalGames, champStats, manager, IMAGE_LOCATION)
+        self.championStats = championStats(PUUID, totalGames, champStats, manager, IMAGE_LOCATION)
         layout = QGridLayout()
         layout.setContentsMargins(1, 2, 1, 2)
         layout.setVerticalSpacing(5)
@@ -108,7 +108,7 @@ class championStatsHandler(QWidget):
             self.sortedBy = "winPercentage"
 
 class championStats(QScrollArea):
-    def __init__(self, totalGames, champStats, manager, IMAGE_LOCATION, *args, **kwargs):
+    def __init__(self, PUUID, totalGames, champStats, manager, IMAGE_LOCATION, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.totalGames = totalGames
         self.champStats = champStats
@@ -120,7 +120,7 @@ class championStats(QScrollArea):
         
         boxlayout = QVBoxLayout()
         for champ in champStats.keys():
-            boxlayout.addWidget(champStatsChip(self.totalGames, champ, self.champStats[champ], self.manager, self.IMAGE_LOCATION))
+            boxlayout.addWidget(champStatsChip(PUUID, self.totalGames, champ, self.champStats[champ], self.manager, self.IMAGE_LOCATION))
 
         group.setLayout(boxlayout)
         self.setWidget(group)
@@ -130,11 +130,13 @@ class championStats(QScrollArea):
 
 
 class champStatsChip(QWidget):
-    def __init__(self, totalGames, championName, stats, manager, IMAGE_LOCATION, *args, **kwargs):
+    def __init__(self, PUUID, totalGames, championName, stats, manager, IMAGE_LOCATION, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
         self.myFont = QFont()
         self.myFont.setPointSize(10)
+        
+        self.PUUID = PUUID
         
         self.totalGames = totalGames
         
@@ -154,11 +156,21 @@ class champStatsChip(QWidget):
         boxLayout = QGridLayout()
         
         #Champion Icon
-        label = QLabel()
+        champButton = QPushButton()
+        champButton.setStyleSheet("QPushButton { background: rgba(0, 0, 0, 0.5); border-radius: 5px; } QPushButton:Pressed { background-color: rgb(255,255,255);}")
         pixmap = QPixmap(self.IMAGE_LOCATION + 'champion/' + self.championName + '.png')
         pixmap = pixmap.scaled(40, 40, mode=Qt.SmoothTransformation)
-        label.setPixmap(pixmap)
-        boxLayout.addWidget(label, 0, 0, 4, 1, alignment=Qt.AlignCenter)
+        icon = QIcon()
+        
+        icon.addPixmap(pixmap)
+        champButton.setIcon(icon)
+        
+        champButton.setIconSize(pixmap.size())
+        champButton.setFixedSize(pixmap.size())
+        
+        boxLayout.addWidget(champButton, 0, 0, 4, 1, alignment=Qt.AlignCenter)
+        
+        champButton.pressed.connect(lambda: self.manager.createChampStatsPage(self.PUUID, self.championName))
         
         #Champion Name
         label = QLabel(self.championName)

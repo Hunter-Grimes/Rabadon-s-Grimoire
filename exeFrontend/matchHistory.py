@@ -5,8 +5,7 @@ from PySide6.QtCore import Qt
 from asyncWorker import Worker
 from fetchData import fetchGameInfo, fetchChampPixmap, fetchItemPixmap
 
-
-class matchHistory(QScrollArea):
+class matchHistoryGeneric(QScrollArea):
     def __init__(self, info, manager, IMAGE_LOCATION, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.manager = manager
@@ -17,8 +16,6 @@ class matchHistory(QScrollArea):
         self.matchIndex = 20
         group = QGroupBox()
         
-        self.verticalScrollBar().valueChanged.connect(self.valueChanged, type=Qt.UniqueConnection)
-        
         boxlayout = QVBoxLayout()
         for GID in info['games'].keys():
             boxlayout.addWidget(Match(info['games'][GID], self.userData['PUUID'], self.manager, self.IMAGE_LOCATION))
@@ -27,6 +24,11 @@ class matchHistory(QScrollArea):
         self.setWidget(group)
         self.setFixedWidth(group.width() + 2)
         self.setWidgetResizable(True)
+
+class matchHistory(matchHistoryGeneric):
+    def __init__(self, info, manager, IMAGE_LOCATION, *args, **kwargs):
+        super().__init__(info, manager, IMAGE_LOCATION, *args, **kwargs)
+        self.verticalScrollBar().valueChanged.connect(self.valueChanged, type=Qt.UniqueConnection)
         
     def valueChanged(self, value):
         if value == self.verticalScrollBar().maximum():
@@ -166,3 +168,7 @@ class PlayerButton(QPushButton):
 
     def buttonClicked(self):
         self.manager.createPage(self.PUUID)
+        
+class champMatchHistory(matchHistoryGeneric):
+    def __init__(self, info, manager, IMAGE_LOCATION, *args, **kwargs):
+        super().__init__(info, manager, IMAGE_LOCATION, *args, **kwargs)

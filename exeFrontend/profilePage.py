@@ -7,7 +7,8 @@ from userTags import userTagsDisplay
 from asyncWorker import Worker
 from championStats import championStatsHandler
 from matchHistory import matchHistory
-from fetchData import fetchProfileInfo, fetchChampInfo, asyncUpdatePlayer
+from champStatsPage import ChampStatsPageManager
+from fetchData import fetchProfileInfo, fetchChampInfo, asyncUpdatePlayer, fetchChampInfoPage
 
 
 class ProfilePageManager(QWidget):
@@ -83,6 +84,25 @@ class ProfilePageManager(QWidget):
             self.updateFailed()
         newPage = ProfilePage(info[0], self, self.IMAGE_LOCATION)
         self.addPage(newPage)
+        
+    def createChampStatsPage(self, PUUID, champName):
+        self.loadingIndicator.startAnimation()
+
+        worker = Worker(fetchChampInfoPage, PUUID, champName, self.BASE_URL)
+        self.fetchingPlayer = True
+        self.playerWorker = worker
+
+        worker.signals.result.connect(self.createChampPageHelper)
+        worker.signals.finished.connect(self.setFetchPlayer)
+        worker.signals.finished.connect(self.loadingIndicator.stopAnimation)
+
+        self.threadPool.start(worker)
+        
+    def createChampPageHelper(self, requestData):
+        
+        statsPage = ChampStatsPageManager(requestData, self, self.BASE_URL, self.threadPool, self.IMAGE_LOCATION)
+        self.addPage(statsPage)
+        
 
     def addPage(self, page):
         self.profileWindow.layout().insertWidget(self.profileWindow.layout().currentIndex() + 1, page)
@@ -206,7 +226,7 @@ class ProfilePage(QWidget):
     def champStatsReady(self, info):
         gamesPlayed = info[0]
         championStats = info[1]
-        champStats = championStatsHandler(gamesPlayed, championStats, self.manager, self.IMAGE_LOCATION)
+        champStats = championStatsHandler(self.info['userData']['PUUID'], gamesPlayed, championStats, self.manager, self.IMAGE_LOCATION)
         self.layout().replaceWidget(self.champStats, champStats)
         self.champStats.deleteLater()
         self.champStats = champStats

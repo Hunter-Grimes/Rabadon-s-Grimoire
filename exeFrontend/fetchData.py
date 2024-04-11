@@ -45,10 +45,15 @@ def fetchGameInfo(userData, BASE_URL, indexes):
 
 
 def fetchChampInfo(PUUID, BASE_URL):
-    champStats = requests.get(BASE_URL + '/champ-stats/' + PUUID).json()
+    champStats = requests.get(BASE_URL + '/user/champ-info-summary/' + PUUID).json()
     gamesPlayed = requests.get(BASE_URL + '/user/games-played/' + PUUID).json()
 
     return gamesPlayed, champStats
 
+
 def asyncUpdatePlayer(PUUID, BASE_URL):
     return requests.put(BASE_URL + '/update-user/async/' + PUUID)
+
+
+def fetchChampInfoPage(PUUID, championName, BASE_URL):
+    return requests.get(BASE_URL + '/user/champ-info-page/' + PUUID + '/' + championName).json()
