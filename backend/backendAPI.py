@@ -379,7 +379,7 @@ class UserByRiotID(Resource):
     @marshal_with(resource_fields)
     def get(self, tagLine, gameName):
         if not bool(UserModel.query.filter_by(tagLine=tagLine, gameName=gameName).first()):
-            status = self.put(tagLine, gameName)
+            status = self.put(tagLine, gameName).status_code
             if status != 201:
                 return Response(status=status)
 
@@ -391,8 +391,6 @@ class UserByRiotID(Resource):
         userAccountInfo = getACCTInfoByRiotID(tagLine, gameName)
         userData = getSummonerByPUUID(userAccountInfo['puuid'])
         userLeagueInfo = getLeagueInfoBySID(userData['id'])
-        
-        print(userAccountInfo, file=sys.stderr)
         
         if bool(UserModel.query.filter_by(PUUID=(userData['puuid'])).first()):
             db.session.delete(UserModel.query.filter_by(PUUID=(userData['puuid'])).first())
@@ -417,7 +415,7 @@ class UserByPUUID(Resource):
     @marshal_with(resource_fields)
     def get(self, PUUID):
         if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
-            status = self.put(PUUID)
+            status = self.put(PUUID).status_code
             if status != 201:
                 return Response(status=status)
             
