@@ -5,7 +5,7 @@ from PySide6.QtCore import Qt
 from LoadingIndicator import LoadingIndicator
 from userTags import userTagsDisplay
 from asyncWorker import Worker
-from championStats import championStatsHandler
+from championStatsWidget import championStatsWidgetHandler
 from matchHistory import matchHistory
 from champStatsPage import ChampStatsPageManager
 from fetchData import fetchProfileInfo, fetchChampInfo, asyncUpdatePlayer, fetchChampInfoPage
@@ -226,7 +226,7 @@ class ProfilePage(QWidget):
     def champStatsReady(self, info):
         gamesPlayed = info[0]
         championStats = info[1]
-        champStats = championStatsHandler(self.info['userData']['PUUID'], gamesPlayed, championStats, self.manager, self.IMAGE_LOCATION)
+        champStats = championStatsWidgetHandler(self.info['userData']['PUUID'], gamesPlayed, championStats, self.manager, self.IMAGE_LOCATION)
         self.layout().replaceWidget(self.champStats, champStats)
         self.champStats.deleteLater()
         self.champStats = champStats

@@ -3,7 +3,7 @@ from PySide6.QtGui import QPixmap, QFont, QIcon
 from PySide6.QtCore import Qt
 
 
-class championStatsHandler(QWidget):
+class championStatsWidgetHandler(QWidget):
     def __init__(self, PUUID, totalGames, champStats, manager, IMAGE_LOCATION, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.championStats = championStats(PUUID, totalGames, champStats, manager, IMAGE_LOCATION)
