@@ -10,6 +10,7 @@ from django.contrib.auth.views import (
 )
 from . import views
 from .forms import SignupForm
+from django.contrib.auth.models import User
 
 # View for the home page
 def home(request):
@@ -42,21 +43,26 @@ def signup(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            user.refresh_from_db()  
-            # load the profile instance created by the signal
-            user.save()
-            raw_password = form.cleaned_data.get('password1')
+            # Check if username already exists
+            username = form.cleaned_data.get('username')
+            if User.objects.filter(username=username).exists():
+                form.add_error('username', 'Username already exists')
+            else:
+                user = form.save()
+                user.refresh_from_db()  
+                # load the profile instance created by the signal
+                user.save()
+                raw_password = form.cleaned_data.get('password1')
 
-            # login user after signing up
-            user = authenticate(username=user.username, password=raw_password)
-            login(request, user)
+                # login user after signing up
+                user = authenticate(username=user.username, password=raw_password)
+                login(request, user)
 
-            # redirect user to home page
-            return redirect('home')
+                # redirect user to home page
+                return redirect('home')
     else:
         form = SignupForm()
-    return render(request, 'signup.html', {'form': form}) 
+    return render(request, 'signup.html', {'form': form})
 
 # View for initiating password reset
 class CustomPasswordResetView(PasswordResetView):

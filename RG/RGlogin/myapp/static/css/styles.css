@@ -64,6 +64,63 @@ section {
 }
 /***************************/
 
+/* Sign-up form styles */
+/***************************/
+.sign-up-form {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f7f7f7;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.sign-up-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sign-up-form .form-group {
+    margin-bottom: 20px;
+}
+
+.sign-up-form label {
+    display: block;
+    font-weight: bold;
+}
+
+.sign-up-form input[type="text"],
+.sign-up-form input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.sign-up-form input[type="submit"] {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.sign-up-form input[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.signup-image-section img {
+    max-width: 30%;
+    max-height: 30%;
+    width: auto;
+    height: auto;
+}
+/***************************/
+
 /* Download section styles */
 /***************************/
 #download-section {
