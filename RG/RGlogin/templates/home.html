@@ -1,3 +1,5 @@
+<!-- home.html -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,17 +14,27 @@
     <header>
         <h1>Rabadon's Grimoire</h1>
         <!-- Navigation Links -->
-            <nav id="nav-links">
-                <ul>
-                    <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'about' %}">About</a></li>
-                    <li><a href="{% url 'contact' %}">Contact</a></li>
-                    <li><a href="{% url 'download' %}">Download</a></li>
-                </ul>
-            </nav>
-            <!-- End of Navigation Links -->
-        <!-- End of Header Section -->
+        <nav id="nav-links">
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'about' %}">About us</a></li>
+                <li><a href="{% url 'contact' %}">Contact</a></li>
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'download' %}">Download</a></li>
+                Hi {{ user.username }}!
+                <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">Log Out</button>
+                </form>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                    <li><a href="{% url 'signup' %}">Signup</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        <!-- End of Navigation Links -->
     </header>
+    <!-- End of Header Section -->
 
     <!-- Main Content -->
     <main>
@@ -31,30 +43,17 @@
             <h2>Welcome to Rabadon's Grimoire</h2>
             <p>A League of Legends companion app for a better and healthy gaming experience.</p>
         </section>
-
-        <!-- Login Section -->
-        <section id="login-section">
-            <div class="login-box">
-                <h3>Login</h3>
-                <form id="login-form">
-                    <input type="text" placeholder="Username" name="username">
-                    <input type="password" placeholder="Password" name="password">
-                    <button type="submit">Login</button>
-                </form>
-            </div>
-        </section>
-        <!-- End of Login Section -->
     </main>
     
     <!-- Image Section -->
     <section id="image-section">
         <h2 id="images-heading">App Images</h2>
-        <!-- First image with title -->
+        <!-- First image -->
         <div class="image-container">
             <h3>Interface</h3>
             <img src="{% static 'images/interface.jpg' %}" alt="App Interface" class="image">
         </div>
-        <!-- Second image with title -->
+        <!-- Second image -->
         <div class="image-container">
             <h3>Pop-up</h3>
             <img src="{% static 'images/pop-up.jpg' %}" alt="Pop-up Image" class="image">

@@ -1,15 +1,44 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Sign Up</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <h2>Sign Up</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Sign Up</button>
-    </form>
+    <div class="main-box">
+        <div class="signup-image-section">
+            <img src="{% static 'images/poro with hat.jpg' %}" alt="Welcome Image">
+        </div>
+        <div class="content-section">
+            <form method="POST" class="sign-up-form" novalidate>
+                {% csrf_token %}
+                <h2>Welcome to Rabadon's Grimoire</h2>
+                <div class="form-group">
+                    <label for="id_username">Username:</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <p class="error-message">{{ form.username.errors }}</p>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="id_password1">Password:</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <p class="error-message">{{ form.password1.errors }}</p>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="id_password2">Confirm Password:</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <p class="error-message">{{ form.password2.errors }}</p>
+                    {% endif %}
+                </div>
+                <input type="submit" value="Sign Up" />
+            </form>
+        </div>
+    </div>
 </body>
 </html>
