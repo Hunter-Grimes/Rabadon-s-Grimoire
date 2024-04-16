@@ -57,3 +57,7 @@ def asyncUpdatePlayer(PUUID, BASE_URL):
 
 def fetchChampInfoPage(PUUID, championName, BASE_URL):
     return requests.get(BASE_URL + '/user/champ-info-page/' + PUUID + '/' + championName).json()
+
+
+def fetchRuneRecommendation(CID, BASE_URL):
+    return requests.get(BASE_URL + '/rune-recommendation/' + str(CID)).json()

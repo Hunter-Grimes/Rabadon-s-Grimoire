@@ -54,6 +54,9 @@ class matchHistory(matchHistoryGeneric):
     def incrementMatchIndex(self, n):
         self.matchIndex += n
 
+class champMatchHistory(matchHistoryGeneric):
+    def __init__(self, info, manager, IMAGE_LOCATION, *args, **kwargs):
+        super().__init__(info, manager, IMAGE_LOCATION, *args, **kwargs)
              
 class Match(QWidget):    
     def __init__(self, gameData, PUUID, manager, IMAGE_LOCATION, *args, **kwargs):
@@ -168,7 +171,3 @@ class PlayerButton(QPushButton):
 
     def buttonClicked(self):
         self.manager.createPage(self.PUUID)
-        
-class champMatchHistory(matchHistoryGeneric):
-    def __init__(self, info, manager, IMAGE_LOCATION, *args, **kwargs):
-        super().__init__(info, manager, IMAGE_LOCATION, *args, **kwargs)

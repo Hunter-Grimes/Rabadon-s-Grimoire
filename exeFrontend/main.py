@@ -4,36 +4,62 @@ from PySide6.QtCore import QThreadPool
 
 from profilePage import ProfilePageManager
 from patchNotesPage import PatchNotesPage
+from lobbyPage import LobbyPage
 
+from asyncWorker import Worker
+
+from callLocalRiotAPI import getCurrPlayer, lobbyStartListener, clientClosed
+
+import asyncio
 import requests
 
 class MainWindow(QMainWindow):
     BASE_URL = "http://127.0.0.1:8080"
-    
-    def __init__(self):
+    def __init__(self, summoner):
         super().__init__()
+        self.summoner = summoner
         self.threadPool = QThreadPool()
         
-        tabs = QTabWidget()
+        self.tabs = QTabWidget()
         
-        myName = 'LessJnglMoreBush'
-        myTag = 'NA1'
-
-        myPUUID = requests.get(self.BASE_URL + '/user/by-riotID/' + myTag + '/' + myName).json()['PUUID']
+        myPUUID = requests.get(self.BASE_URL + "/user/by-riotID/" + summoner['tagLine'] + "/" + summoner['gameName']).json()['PUUID']
         
-        tabs.addTab(ProfilePageManager(myPUUID, self.BASE_URL, self.threadPool), "Profile")
-        tabs.addTab(PatchNotesPage(), "Patch Notes")
+        self.tabs.addTab(ProfilePageManager(myPUUID, self.BASE_URL, self.threadPool), "Profile")
+        self.tabs.addTab(PatchNotesPage(), "Patch Notes")
+        
         with open("exeFrontend/tabStyle.qss", "r") as f:
             _style = f.read()
-            tabs.setStyleSheet(_style)
+            self.tabs.setStyleSheet(_style)
 
-        self.setCentralWidget(tabs)
+        self.setCentralWidget(self.tabs)
+        
+        worker = Worker(lambda: asyncio.run(lobbyStartListener()))
+        
+        worker.signals.result.connect(self.lobbyCreated)
+        
+        self.threadPool.start(worker)
+    
+    def lobbyCreated(self):
+        self.tabs.addTab(LobbyPage(self.threadPool, self.summoner, self.BASE_URL), "Lobby")
+        self.tabs.setCurrentIndex(2)
 
+def waitForLogin():
+    try:
+        summoner = asyncio.run(getCurrPlayer())
+    except Exception:
+        summoner = waitForLogin()
+
+    return summoner
 
 def main():
     app = QApplication([])
     loader = QUiLoader()  # noqa: F841
-    window = MainWindow()
+    app.aboutToQuit.connect(clientClosed)
+    
+    # summoner = waitForLogin()
+    summoner = {'tagLine': 'NA1', 'gameName': 'Potilwalda', 'puuid': 'b0ef40cf-ec56-5fbf-b74c-b838f180464f'}
+    
+    window = MainWindow(summoner)
     window.setWindowTitle("Rabadon's Grimoire")
     window.show()
     app.exec()

@@ -11,6 +11,21 @@ class PlayedGame(db.Model):
     summonerId = db.Column(db.Integer, nullable=True)
     summonerLevel = db.Column(db.Integer, nullable=True)
     
+    primaryStyleID = db.Column(db.Integer, db.ForeignKey('Perk.PID'), nullable=True)
+    subStyleID = db.Column(db.Integer, db.ForeignKey('Perk.PID'), nullable=True)
+    
+    primaryStyle1 = db.Column(db.Integer, db.ForeignKey('Perk.PID'), nullable=True)
+    primaryStyle2 = db.Column(db.Integer, db.ForeignKey('Perk.PID'), nullable=True)
+    primaryStyle3 = db.Column(db.Integer, db.ForeignKey('Perk.PID'), nullable=True)
+    primaryStyle4 = db.Column(db.Integer, db.ForeignKey('Perk.PID'), nullable=True)
+    
+    subStyle1 = db.Column(db.Integer, db.ForeignKey('Perk.PID'), nullable=True)
+    subStyle2 = db.Column(db.Integer, db.ForeignKey('Perk.PID'), nullable=True)
+    
+    offensePerk = db.Column(db.Integer, db.ForeignKey('Perk.PID'), nullable=True)
+    flexPerk = db.Column(db.Integer, db.ForeignKey('Perk.PID'), nullable=True)
+    defensePerk = db.Column(db.Integer, db.ForeignKey('Perk.PID'), nullable=True)
+    
     firstBloodAssist = db.Column(db.Boolean, nullable=True)
     firstBloodKill = db.Column(db.Boolean, nullable=True)
     
@@ -137,6 +152,14 @@ class PlayedGame(db.Model):
 
     user = db.relationship('UserModel', back_populates = 'games')
     game = db.relationship('GameModel', back_populates = 'users')
+
+
+class Perk(db.Model):
+    __tablename__ = 'Perk'
+    PID = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    description = db.Column(db.String, nullable=False)
+    icon = db.Column(db.String, nullable=False)
 
 
 class UserModel(db.Model):

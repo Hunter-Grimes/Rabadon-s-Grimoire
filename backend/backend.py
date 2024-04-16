@@ -8,7 +8,7 @@ from apiEndpoints import(
     UserByRiotID, UserByPUUID, GameDataByPlayer, GameDataAll,
     GameIDLast20, GameIDXtoX, GameDataXtoX, UpdateUser,
     AsyncUpdateUser, generalChampStats, userTags, getUserGamesPlayed,
-    userChampionInfoPage
+    userChampionInfoPage, runeRecommendation
 )
 
 def create_app():
@@ -22,6 +22,10 @@ def create_app():
 def register_extensions(app):
     """Register Flask extensions."""
     db.init_app(app)
+    
+    with app.app_context():
+        db.create_all()
+
     api.init_app(app)
     return None
 
@@ -39,6 +43,7 @@ def register_endpoints():
     api.add_resource(userTags, "/user/tags/<PUUID>")
     api.add_resource(getUserGamesPlayed, "/user/games-played/<PUUID>")
     api.add_resource(userChampionInfoPage, "/user/champ-info-page/<PUUID>/<championName>")
+    api.add_resource(runeRecommendation, "/rune-recommendation/<CID>")
     return None
 
 if __name__ == '__main__':

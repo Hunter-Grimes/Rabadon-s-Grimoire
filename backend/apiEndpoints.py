@@ -2,7 +2,7 @@ from flask import Response
 
 from flask_restful import Resource, fields, marshal_with
 
-from sqlalchemy import update, func
+from sqlalchemy import update, func, desc
 
 import time
 import sys
@@ -453,3 +453,53 @@ class userChampionInfoPage(Resource):
 
         info['games'] = games
         return info, 200
+
+   
+class runeRecommendation(Resource):
+    discontinuedRunes = {
+        5002: 5001
+    }
+    
+    def get(self, CID):
+        CID = int(CID)
+        if not bool(PlayedGame.query.filter_by(CID=CID).first()):
+            return Response(status=404)
+        
+        primaryStyleID = db.session.query(PlayedGame.primaryStyleID, func.count(PlayedGame.PUUID).label('qty')).filter_by(CID=CID).group_by(PlayedGame.primaryStyleID).order_by(desc('qty')).first()[0]
+        subStyleID = db.session.query(PlayedGame.subStyleID, func.count(PlayedGame.PUUID).label('qty')).filter_by(CID=CID).group_by(PlayedGame.subStyleID).order_by(desc('qty')).first()[0]
+        
+        primaryStyle1 = db.session.query(PlayedGame.primaryStyle1, func.count(PlayedGame.PUUID).label('qty')).filter_by(CID=CID, primaryStyleID=primaryStyleID).group_by(PlayedGame.primaryStyle1).order_by(desc('qty')).first()[0]
+        primaryStyle2 = db.session.query(PlayedGame.primaryStyle2, func.count(PlayedGame.PUUID).label('qty')).filter_by(CID=CID, primaryStyleID=primaryStyleID).group_by(PlayedGame.primaryStyle2).order_by(desc('qty')).first()[0]
+        primaryStyle3 = db.session.query(PlayedGame.primaryStyle3, func.count(PlayedGame.PUUID).label('qty')).filter_by(CID=CID, primaryStyleID=primaryStyleID).group_by(PlayedGame.primaryStyle3).order_by(desc('qty')).first()[0]
+        primaryStyle4 = db.session.query(PlayedGame.primaryStyle4, func.count(PlayedGame.PUUID).label('qty')).filter_by(CID=CID, primaryStyleID=primaryStyleID).group_by(PlayedGame.primaryStyle4).order_by(desc('qty')).first()[0]
+        
+        subStyle1 = db.session.query(PlayedGame.subStyle1, func.count(PlayedGame.PUUID).label('qty')).filter_by(CID=CID, subStyleID=subStyleID).group_by(PlayedGame.subStyle1).order_by(desc('qty')).first()[0]
+        subStyle2 = db.session.query(PlayedGame.subStyle2, func.count(PlayedGame.PUUID).label('qty')).filter_by(CID=CID, subStyleID=subStyleID).group_by(PlayedGame.subStyle2).order_by(desc('qty')).first()[0]
+        
+        offensePerk = db.session.query(PlayedGame.offensePerk, func.count(PlayedGame.PUUID).label('qty')).filter_by(CID=CID).group_by(PlayedGame.offensePerk).order_by(desc('qty')).first()[0]
+        flexPerk = db.session.query(PlayedGame.flexPerk, func.count(PlayedGame.PUUID).label('qty')).filter_by(CID=CID).group_by(PlayedGame.flexPerk).order_by(desc('qty')).first()[0]
+        defensePerk = db.session.query(PlayedGame.defensePerk, func.count(PlayedGame.PUUID).label('qty')).filter_by(CID=CID).group_by(PlayedGame.defensePerk).order_by(desc('qty')).first()[0]
+        
+        if offensePerk in self.discontinuedRunes:
+            offensePerk = self.discontinuedRunes[offensePerk]
+        if flexPerk in self.discontinuedRunes:
+            flexPerk = self.discontinuedRunes[flexPerk]
+        if defensePerk in self.discontinuedRunes:
+            defensePerk = self.discontinuedRunes[defensePerk]
+        
+        runes = {
+            'primaryStyleID': primaryStyleID,
+            'subStyleID': subStyleID,
+            'primaryStyle1': primaryStyle1,
+            'primaryStyle2': primaryStyle2,
+            'primaryStyle3': primaryStyle3,
+            'primaryStyle4': primaryStyle4,
+            'subStyle1': subStyle1,
+            'subStyle2': subStyle2,
+            'offensePerk': offensePerk,
+            'flexPerk': flexPerk,
+            'defensePerk': defensePerk,
+        }
+        
+        return runes, 200
+        

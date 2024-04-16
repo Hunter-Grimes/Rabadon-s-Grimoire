@@ -30,6 +30,17 @@ def parseGameData(gameData) -> tuple[GameModel, list[PlayedGame]]:
     newPlayedGames = []
     
     for player in range(len(gameData['info']['participants'])):
+        perks = {}
+        for style in gameData['info']['participants'][player]['perks']['styles']:
+            perkChoices = {}
+            for i, choice in enumerate(style['selections']):
+                perkChoices[i] = choice['perk']
+                perkChoices['ID'] = style['style']
+            perks[style['description']] = perkChoices
+        perks['offense'] = gameData['info']['participants'][player]['perks']['statPerks']['offense']
+        perks['flex'] = gameData['info']['participants'][player]['perks']['statPerks']['flex']
+        perks['defense'] = gameData['info']['participants'][player]['perks']['statPerks']['defense']
+        
         played = PlayedGame(
             PUUID=gameData['info']['participants'][player]['puuid'],
             GID=gameData['metadata']['matchId'],
@@ -39,6 +50,21 @@ def parseGameData(gameData) -> tuple[GameModel, list[PlayedGame]]:
             
             summonerId=gameData['info']['participants'][player]['summonerId'],
             summonerLevel=gameData['info']['participants'][player]['summonerLevel'],
+            
+            primaryStyleID = perks['primaryStyle']['ID'],
+            subStyleID = perks['subStyle']['ID'],
+            
+            primaryStyle1 = perks['primaryStyle'][0],
+            primaryStyle2 = perks['primaryStyle'][1],
+            primaryStyle3 = perks['primaryStyle'][2],
+            primaryStyle4 = perks['primaryStyle'][3],
+
+            subStyle1 = perks['subStyle'][0],
+            subStyle2 = perks['subStyle'][1],
+            
+            offensePerk = perks['offense'],
+            flexPerk = perks['flex'],
+            defensePerk = perks['defense'],
             
             firstBloodAssist=gameData['info']['participants'][player]['firstBloodAssist'],
             firstBloodKill=gameData['info']['participants'][player]['firstBloodKill'],
@@ -370,6 +396,21 @@ def getPlayerStats(gameData, playerData) -> dict:
         
         'gameName': getattr(playerData, 'gameName'),
         'tagLine': getattr(playerData, 'tagLine'),
+        
+        'primaryStyleID': getattr(playerData, 'primaryStyleID'),
+        'subStyleID': getattr(playerData, 'subStyleID'),
+        
+        'primaryStyle1': getattr(playerData, 'primaryStyle1'),
+        'primaryStyle2': getattr(playerData, 'primaryStyle2'),
+        'primaryStyle3': getattr(playerData, 'primaryStyle3'),
+        'primaryStyle4': getattr(playerData, 'primaryStyle4'),
+
+        'subStyle1': getattr(playerData, 'subStyle1'),
+        'subStyle2': getattr(playerData, 'subStyle2'),
+        
+        'offensePerk': getattr(playerData, 'offensePerk'),
+        'flexPerk': getattr(playerData, 'flexPerk'),
+        'defensePerk': getattr(playerData, 'defensePerk'),
 
         'summonerId': getattr(playerData, 'summonerId'),
         'summonerLevel': getattr(playerData, 'summonerLevel'),
