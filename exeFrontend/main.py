@@ -6,9 +6,7 @@ from profilePage import ProfilePageManager
 from patchNotesPage import PatchNotesPage
 from lobbyPage import LobbyPage
 
-from asyncWorker import Worker
-
-from callLocalRiotAPI import getCurrPlayer, lobbyStartListener, clientClosed
+from callLocalRiotAPI import getCurrPlayer, lobbyListener
 
 import asyncio
 import requests
@@ -33,15 +31,14 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.tabs)
         
-        worker = Worker(lambda: asyncio.run(lobbyStartListener()))
-        
-        worker.signals.result.connect(self.lobbyCreated)
-        
-        self.threadPool.start(worker)
+        self.lobby = lobbyListener()
+        self.lobby.signals.result.connect(self.lobbyCreated)
+        self.threadPool.start(self.lobby)
     
     def lobbyCreated(self):
         self.tabs.addTab(LobbyPage(self.threadPool, self.summoner, self.BASE_URL), "Lobby")
         self.tabs.setCurrentIndex(2)
+
 
 def waitForLogin():
     try:
@@ -53,13 +50,11 @@ def waitForLogin():
 
 def main():
     app = QApplication([])
-    loader = QUiLoader()  # noqa: F841
-    app.aboutToQuit.connect(clientClosed)
-    
-    # summoner = waitForLogin()
-    summoner = {'tagLine': 'NA1', 'gameName': 'Potilwalda', 'puuid': 'b0ef40cf-ec56-5fbf-b74c-b838f180464f'}
-    
+    loader = QUiLoader()  # noqa: F841    
+    summoner = waitForLogin()
+    # summoner = {'tagLine': 'NA1', 'gameName': 'Potilwalda', 'puuid': 'b0ef40cf-ec56-5fbf-b74c-b838f180464f'}
     window = MainWindow(summoner)
+    app.aboutToQuit.connect(window.lobby.clientClosed)
     window.setWindowTitle("Rabadon's Grimoire")
     window.show()
     app.exec()

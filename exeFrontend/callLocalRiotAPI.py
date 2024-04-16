@@ -3,15 +3,6 @@ from PySide6.QtCore import QRunnable, QObject, Signal, Slot
 import asyncio
 from willump import Willump
 
-global client
-client = True
-
-
-def clientClosed():
-    global client
-    client = False
-
-
 async def getCurrPlayer():
     wllp = await Willump.start()
     
@@ -26,30 +17,6 @@ async def getCurrPlayer():
     await wllp.close()
     
     return summoner
-
-
-async def lobbyStartListener():
-    global lobby
-    global client
-    
-    lobby = False
-    wllp = await Willump.start()
-    
-    lobby_start = await wllp.subscribe('OnJsonApiEvent')
-    wllp.subscription_filter_endpoint(lobby_start, '/lol-champ-select/v1/session', handler=lobbyCreated)
-    
-    while True:
-        if lobby or not client:
-            await wllp.close()
-            return
-        await asyncio.sleep(5)
-
-       
-async def lobbyCreated(data):
-    global lobby
-    lobby = True
-    return
-
 
 async def setRunes(runes):
     wllp = await Willump.start()
@@ -75,23 +42,24 @@ async def setRunes(runes):
     
     await wllp.close()
 
-class champSelectSignals(QObject):
+
+class willumpWorkerSignals(QObject):
     finished = Signal()
     error = Signal(tuple)
     progress = Signal(int)
+    result = Signal(object)
+
 
 class champSelectWorker(QRunnable):
     def __init__(self, puuid):
         super(champSelectWorker, self).__init__()
-        # Store constructor arguments (re-used for processing)
         self.puuid = puuid
         self.selected = None
-        self.signals = champSelectSignals()
+        self.signals = willumpWorkerSignals()
     
     @Slot()
     def run(self):
         asyncio.run(self.runHelper())
-        self.signals.finished.emit()
     
     async def runHelper(self):
         wllp = await Willump.start()
@@ -119,9 +87,39 @@ class champSelectWorker(QRunnable):
                     break
                 self.signals.progress.emit(player['championId'])
                 self.selected = player['championId']
+
+              
+class lobbyListener(QRunnable):
+    def __init__(self):
+        super(lobbyListener, self).__init__()
+        self.signals = willumpWorkerSignals()
+        self.notLobby = True
+
+    @Slot()
+    def run(self):
+        asyncio.run(self.runHelper())
+
+    async def runHelper(self):
+        wllp = await Willump.start()
+
+        all_events_subscription = await wllp.subscribe('OnJsonApiEvent')
+
+        wllp.subscription_filter_endpoint(all_events_subscription, '/lol-champ-select/v1/session', handler=lambda data: self.sessionStarted(data))
+
+        while self.notLobby:
+            await asyncio.sleep(5)
+
+        await wllp.close()
+
+    async def sessionStarted(self, data):
+        self.signals.result.emit(None)
+        self.notLobby = False
+    
+    @Slot()
+    def clientClosed(self):
+        self.notLobby = False
         
-        
-        
+
 async def main():
     pass
     
