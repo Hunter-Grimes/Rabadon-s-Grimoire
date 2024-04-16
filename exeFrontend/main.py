@@ -6,9 +6,8 @@ from profilePage import ProfilePageManager
 from patchNotesPage import PatchNotesPage
 from lobbyPage import LobbyPage
 
-from callLocalRiotAPI import getCurrPlayer, lobbyListener
+from callLocalRiotAPI import waitForLogin, lobbyListener
 
-import asyncio
 import requests
 
 class MainWindow(QMainWindow):
@@ -40,24 +39,21 @@ class MainWindow(QMainWindow):
         self.tabs.setCurrentIndex(2)
 
 
-def waitForLogin():
-    try:
-        summoner = asyncio.run(getCurrPlayer())
-    except Exception:
-        summoner = waitForLogin()
-
-    return summoner
-
 def main():
     app = QApplication([])
-    loader = QUiLoader()  # noqa: F841    
+    loader = QUiLoader()  # noqa: F841 
+       
     summoner = waitForLogin()
     # summoner = {'tagLine': 'NA1', 'gameName': 'Potilwalda', 'puuid': 'b0ef40cf-ec56-5fbf-b74c-b838f180464f'}
+    
     window = MainWindow(summoner)
     app.aboutToQuit.connect(window.lobby.clientClosed)
+    
     window.setWindowTitle("Rabadon's Grimoire")
+    
     window.show()
     app.exec()
+
 
 if __name__ == '__main__':
     main()

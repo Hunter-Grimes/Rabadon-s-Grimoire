@@ -3,6 +3,15 @@ from PySide6.QtCore import QRunnable, QObject, Signal, Slot
 import asyncio
 from willump import Willump
 
+def waitForLogin():
+    try:
+        summoner = asyncio.run(getCurrPlayer())
+    except Exception:
+        summoner = waitForLogin()
+
+    return summoner
+
+
 async def getCurrPlayer():
     wllp = await Willump.start()
     
@@ -17,6 +26,7 @@ async def getCurrPlayer():
     await wllp.close()
     
     return summoner
+
 
 async def setRunes(runes):
     wllp = await Willump.start()
