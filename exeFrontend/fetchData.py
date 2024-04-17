@@ -2,6 +2,28 @@ from PySide6.QtGui import QPixmap, QColor
 from PySide6.QtCore import Qt
 import requests
 
+
+def fetchRolePixmap(role):
+    match role:
+        case 'TOP':
+            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-top.png')
+        case 'JUNGLE':
+            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-jungle.png')
+        case 'MIDDLE':
+            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-middle.png')
+        case 'BOTTOM':
+            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-bottom.png')
+        case 'UTILITY':
+            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-utility.png')
+        case _:
+            pixmap = QPixmap(30, 30)
+            pixmap.fill(QColor(100, 100, 100))
+    
+    pixmap = pixmap.scaled(30, 30, mode=Qt.SmoothTransformation)
+
+    return pixmap
+
+
 def fetchItemPixmap(itemID, IMAGE_LOCATION):
     if itemID == 0:
         pixmap = QPixmap(30, 30)
@@ -61,3 +83,11 @@ def fetchChampInfoPage(PUUID, championName, BASE_URL):
 
 def fetchRuneRecommendation(CID, BASE_URL):
     return requests.get(BASE_URL + '/rune-recommendation/' + str(CID)).json()
+
+
+def fetchChampSelectInfoGeneric(CID, BASE_URL):
+    return requests.get(BASE_URL + '/champ-select/generic/' + str(CID)).json()
+
+
+def fetchChampSelectInfoSpecific(CID, gameName, tagLine, BASE_URL):
+    return requests.get(BASE_URL + '/champ-select/specific/' + str(CID) + '/' + gameName + '/' + tagLine).json()

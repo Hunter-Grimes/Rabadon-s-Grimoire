@@ -199,5 +199,5 @@ class runeButton(QPushButton):
         
     def unchecked(self):
         effect = QGraphicsOpacityEffect(self)
-        effect.setOpacity(0.3)
+        effect.setOpacity(0.2)
         self.setGraphicsEffect(effect)

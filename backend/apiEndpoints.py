@@ -465,6 +465,8 @@ class runeRecommendation(Resource):
         if not bool(PlayedGame.query.filter_by(CID=CID).first()):
             return Response(status=404)
         
+        champName = db.session.query(PlayedGame.championName).filter_by(CID=CID).first()[0]
+        
         primaryStyleID = db.session.query(PlayedGame.primaryStyleID, func.count(PlayedGame.PUUID).label('qty')).filter_by(CID=CID).group_by(PlayedGame.primaryStyleID).order_by(desc('qty')).first()[0]
         subStyleID = db.session.query(PlayedGame.subStyleID, func.count(PlayedGame.PUUID).label('qty')).filter_by(CID=CID).group_by(PlayedGame.subStyleID).order_by(desc('qty')).first()[0]
         
@@ -488,6 +490,7 @@ class runeRecommendation(Resource):
             defensePerk = self.discontinuedRunes[defensePerk]
         
         runes = {
+            'champName': champName,
             'primaryStyleID': primaryStyleID,
             'subStyleID': subStyleID,
             'primaryStyle1': primaryStyle1,
@@ -502,4 +505,68 @@ class runeRecommendation(Resource):
         }
         
         return runes, 200
+    
+
+class champSelectChampInfoGeneric(Resource):
+    def get(self, CID):
+        CID = int(CID)
+        if not bool(PlayedGame.query.filter_by(CID=CID).first()):
+            return Response(status=404)
         
+        champName = db.session.query(PlayedGame.championName).filter_by(CID=CID).first()[0]
+        totalGames = db.session.query(PlayedGame).filter_by(CID=CID).count()
+        wins = db.session.query(PlayedGame.won).filter_by(CID=CID).count()
+        winPercent = wins / totalGames
+        
+        averageMagicDamage = db.session.query(func.avg(PlayedGame.magicDamageDealtToChampions)).filter_by(CID=CID).first()[0]
+        averagePhysicalDamage = db.session.query(func.avg(PlayedGame.physicalDamageDealtToChampions)).filter_by(CID=CID).first()[0]
+        averageTrueDamage = db.session.query(func.avg(PlayedGame.trueDamageDealtToChampions)).filter_by(CID=CID).first()[0]
+        averageTotalDamage = db.session.query(func.avg(PlayedGame.totalDamageDealtToChampions)).filter_by(CID=CID).first()[0]
+        
+        info = {
+            'champName': champName,
+            'winPercent': winPercent,
+            'averageMagicDamage': averageMagicDamage,
+            'averagePhysicalDamage': averagePhysicalDamage,
+            'averageTrueDamage': averageTrueDamage,
+            'averageTotalDamage': averageTotalDamage,
+        }
+        
+        return info, 200
+
+
+class champSelectChampInfoSpecific(Resource):
+    def get(self, CID, gameName, tagLine):
+        PUUID = UserByRiotID().get(tagLine, gameName)[0]['PUUID']
+        CID = int(CID)
+        if not bool(PlayedGame.query.filter_by(CID=CID).first()):
+            return Response(status=404)
+        
+        if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
+            return Response(status=404)
+        
+        if not bool(PlayedGame.query.filter_by(CID=CID, PUUID=PUUID).first()):
+            return Response(status=404)
+
+        champName = db.session.query(PlayedGame.championName).filter_by(CID=CID).first()[0]
+        totalGames = db.session.query(PlayedGame).filter_by(CID=CID, PUUID=PUUID).count()
+        wins = db.session.query(PlayedGame.won).filter_by(CID=CID, PUUID=PUUID).count()
+        winPercent = wins / totalGames
+        
+        averageMagicDamage = db.session.query(func.avg(PlayedGame.magicDamageDealtToChampions)).filter_by(CID=CID, PUUID=PUUID).first()[0]
+        averagePhysicalDamage = db.session.query(func.avg(PlayedGame.physicalDamageDealtToChampions)).filter_by(CID=CID, PUUID=PUUID).first()[0]
+        averageTrueDamage = db.session.query(func.avg(PlayedGame.trueDamageDealtToChampions)).filter_by(CID=CID, PUUID=PUUID).first()[0]
+        averageTotalDamage = db.session.query(func.avg(PlayedGame.totalDamageDealtToChampions)).filter_by(CID=CID, PUUID=PUUID).first()[0]
+        
+        info = {
+            'gameName': gameName,
+            'tagLine': tagLine,
+            'champName': champName,
+            'winPercent': winPercent,
+            'averageMagicDamage': averageMagicDamage,
+            'averagePhysicalDamage': averagePhysicalDamage,
+            'averageTrueDamage': averageTrueDamage,
+            'averageTotalDamage': averageTotalDamage,
+        }
+        
+        return info, 200

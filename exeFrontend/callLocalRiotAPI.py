@@ -56,7 +56,7 @@ async def setRunes(runes):
 class willumpWorkerSignals(QObject):
     finished = Signal()
     error = Signal(tuple)
-    progress = Signal(int)
+    progress = Signal(object)
     result = Signal(object)
 
 
@@ -79,11 +79,11 @@ class champSelectWorker(QRunnable):
         wllp.subscription_filter_endpoint(all_events_subscription, '/lol-champ-select/v1/session', handler=lambda data: self.sessionData(data['data']))
         
         while True:
-            data = await wllp.request('get', '/lol-champ-select/v1/current-champion')
+            data = await wllp.request('get', '/lol-champ-select/v1/session')
             data = await data.json()
 
-            if data != 0:
-                self.signals.progress.emit(data)
+            if data['timer']['adjustedTimeLeftInPhase'] == 0:
+                self.signals.finished.emit()
                 break
             
             await asyncio.sleep(5)
@@ -91,12 +91,13 @@ class champSelectWorker(QRunnable):
         await wllp.close()
             
     async def sessionData(self, data):
-        for player in data['myTeam']:
-            if player['puuid'] == self.puuid:
-                if self.selected == player['championId'] or player['championId'] == 0:
-                    break
-                self.signals.progress.emit(player['championId'])
-                self.selected = player['championId']
+        # for player in data['myTeam']:
+        #     if player['puuid'] == self.puuid:
+        #         if self.selected == player['championId'] or player['championId'] == 0:
+        #             break
+        #         self.signals.progress.emit(player['championId'])
+        #         self.selected = player['championId']
+        self.signals.progress.emit(data)
 
               
 class lobbyListener(QRunnable):
@@ -122,8 +123,9 @@ class lobbyListener(QRunnable):
         await wllp.close()
 
     async def sessionStarted(self, data):
-        self.signals.result.emit(None)
-        self.notLobby = False
+        if self.notLobby:
+            self.signals.result.emit(None)
+            self.notLobby = False
     
     @Slot()
     def clientClosed(self):

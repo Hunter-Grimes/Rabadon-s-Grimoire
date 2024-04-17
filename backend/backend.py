@@ -8,7 +8,7 @@ from apiEndpoints import(
     UserByRiotID, UserByPUUID, GameDataByPlayer, GameDataAll,
     GameIDLast20, GameIDXtoX, GameDataXtoX, UpdateUser,
     AsyncUpdateUser, generalChampStats, userTags, getUserGamesPlayed,
-    userChampionInfoPage, runeRecommendation
+    userChampionInfoPage, runeRecommendation, champSelectChampInfoGeneric, champSelectChampInfoSpecific
 )
 
 def create_app():
@@ -44,6 +44,8 @@ def register_endpoints():
     api.add_resource(getUserGamesPlayed, "/user/games-played/<PUUID>")
     api.add_resource(userChampionInfoPage, "/user/champ-info-page/<PUUID>/<championName>")
     api.add_resource(runeRecommendation, "/rune-recommendation/<CID>")
+    api.add_resource(champSelectChampInfoGeneric, "/champ-select/generic/<CID>")
+    api.add_resource(champSelectChampInfoSpecific, "/champ-select/specific/<CID>/<gameName>/<tagLine>")
     return None
 
 if __name__ == '__main__':
