@@ -1,13 +1,14 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QPushButton, QStackedLayout
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QPushButton, QStackedLayout, QMessageBox
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 
 from LoadingIndicator import LoadingIndicator
 from userTags import userTagsDisplay
 from asyncWorker import Worker
-from championStats import championStatsHandler
+from championStatsWidget import championStatsWidgetHandler
 from matchHistory import matchHistory
-from fetchData import fetchProfileInfo, fetchChampInfo
+from champStatsPage import ChampStatsPageManager
+from fetchData import fetchProfileInfo, fetchChampInfo, asyncUpdatePlayer, fetchChampInfoPage
 
 
 class ProfilePageManager(QWidget):
@@ -40,10 +41,20 @@ class ProfilePageManager(QWidget):
         self.loadingIndicator = LoadingIndicator(self)
         self.layout.addWidget(self.loadingIndicator, 0, 10)
         
+        #user update button
+        updateUserBtn = QPushButton("Update User")
+        updateUserBtn.clicked.connect(self.updateBtnHandler)
+        self.layout.addWidget(updateUserBtn, 0, 9)
+        
         self.profileWindow = QWidget()
         profileWindowLayout = QStackedLayout()
         self.profileWindow.setLayout(profileWindowLayout)
-        self.profileWindow.layout().addWidget(ProfilePage(fetchProfileInfo(PUUID, self.BASE_URL), self, self.IMAGE_LOCATION))
+        
+        profileInfo = fetchProfileInfo(PUUID, self.BASE_URL)
+        if profileInfo[1] != 201:
+            self.updateFailed()
+        
+        self.profileWindow.layout().addWidget(ProfilePage(profileInfo[0], self, self.IMAGE_LOCATION))
         
         self.layout.addWidget(self.profileWindow, 1, 0, 1, -1)
         
@@ -69,8 +80,29 @@ class ProfilePageManager(QWidget):
         self.threadPool.start(worker)
     
     def createPageHelper(self, info):
-        newPage = ProfilePage(info, self, self.IMAGE_LOCATION)
+        if info[1] != 201:
+            self.updateFailed()
+        newPage = ProfilePage(info[0], self, self.IMAGE_LOCATION)
         self.addPage(newPage)
+        
+    def createChampStatsPage(self, PUUID, champName):
+        self.loadingIndicator.startAnimation()
+
+        worker = Worker(fetchChampInfoPage, PUUID, champName, self.BASE_URL)
+        self.fetchingPlayer = True
+        self.playerWorker = worker
+
+        worker.signals.result.connect(self.createChampPageHelper)
+        worker.signals.finished.connect(self.setFetchPlayer)
+        worker.signals.finished.connect(self.loadingIndicator.stopAnimation)
+
+        self.threadPool.start(worker)
+        
+    def createChampPageHelper(self, requestData):
+        
+        statsPage = ChampStatsPageManager(requestData, self, self.BASE_URL, self.threadPool, self.IMAGE_LOCATION)
+        self.addPage(statsPage)
+        
 
     def addPage(self, page):
         self.profileWindow.layout().insertWidget(self.profileWindow.layout().currentIndex() + 1, page)
@@ -86,7 +118,45 @@ class ProfilePageManager(QWidget):
         
     def retreatPage(self):
         self.profileWindow.layout().setCurrentIndex(self.profileWindow.layout().currentIndex() - 1)
+    
+    def updateBtnHandler(self):
+        page = self.profileWindow.layout().itemAt(self.profileWindow.layout().currentIndex()).widget()
+        PUUID = page.info['userData']['PUUID']
+        self.loadingIndicator.startAnimation()
+        worker = Worker(asyncUpdatePlayer, PUUID, self.BASE_URL)
+        self.fetchingPlayer = True
+        self.playerWorker = worker
+        
+        worker.signals.result.connect(lambda: self.updatePage(PUUID))
 
+        self.threadPool.start(worker)
+       
+    def updatePage(self, PUUID):
+        self.loadingIndicator.startAnimation()
+        
+        worker = Worker(fetchProfileInfo, PUUID, self.BASE_URL)
+        self.fetchingPlayer = True
+        self.playerWorker = worker
+        
+        worker.signals.result.connect(lambda info: self.updatePageHelper(info, self.profileWindow.layout().currentIndex()))
+        worker.signals.finished.connect(self.setFetchPlayer)
+        worker.signals.finished.connect(self.loadingIndicator.stopAnimation)
+        
+        self.threadPool.start(worker)
+    
+    def updatePageHelper(self, info, index):
+        if info[1] != 201:
+            self.updateFailed()
+        self.profileWindow.layout().itemAt(index).widget().deleteLater()
+        newPage = ProfilePage(info[0], self, self.IMAGE_LOCATION)
+        self.profileWindow.layout().insertWidget(index, newPage)
+        
+    def updateFailed(self):
+        message = QMessageBox()
+        message.setButtonText(QMessageBox.Ok, "Ok")
+        message.setText("Update Failed")
+        message.exec()
+        
 
 class ProfilePage(QWidget):
     def __init__(self, info, manager, IMAGE_LOCATION, *args, **kwargs):
@@ -115,7 +185,7 @@ class ProfilePage(QWidget):
         layout.addWidget(label, 0, 0)
         
         #Username
-        label = QLabel(userData['name'])
+        label = QLabel(userData['gameName'] + " #" + userData['tagLine'])
         label.setAlignment(Qt.AlignCenter)
         layout.addWidget(label, 1, 0)
         
@@ -144,9 +214,9 @@ class ProfilePage(QWidget):
         self.champStats.layout().setAlignment(Qt.AlignCenter)
         loading.startAnimation()
         self.champStats.setFixedWidth(320)
+        layout.addWidget(self.champStats, 2, 4, 1, 1)
         
         #Real Champion Stats
-        layout.addWidget(self.champStats, 2, 4, 1, 1)
         worker = Worker(fetchChampInfo, userData['PUUID'], self.manager.BASE_URL)
         worker.signals.result.connect(self.champStatsReady)
         self.threadPool.start(worker)
@@ -156,7 +226,7 @@ class ProfilePage(QWidget):
     def champStatsReady(self, info):
         gamesPlayed = info[0]
         championStats = info[1]
-        champStats = championStatsHandler(gamesPlayed, championStats, self.manager, self.IMAGE_LOCATION)
+        champStats = championStatsWidgetHandler(self.info['userData']['PUUID'], gamesPlayed, championStats, self.manager, self.IMAGE_LOCATION)
         self.layout().replaceWidget(self.champStats, champStats)
         self.champStats.deleteLater()
         self.champStats = champStats

@@ -1,0 +1,62 @@
+{
+    "offense": [
+        {
+            "id": 5008,
+            "key": "Adaptive Force",
+            "icon": "perk-images/StatMods/StatModsAdaptiveForceIcon.png",
+            "name": "Adaptive Force"
+        },
+        {
+            "id": 5005,
+            "key": "Attack Speed",
+            "icon": "perk-images/StatMods/StatModsAttackSpeedIcon.png",
+            "name": "Attack Speed"
+        },
+        {
+            "id": 5007,
+            "key": "Ability Haste",
+            "icon": "perk-images/StatMods/StatModsCDRScalingIcon.png",
+            "name": "Ability Haste"
+        }
+    ],
+    "flex": [
+        {
+            "id": 5008,
+            "key": "Adaptive Force",
+            "icon": "perk-images/StatMods/StatModsAdaptiveForceIcon.png",
+            "name": "Adaptive Force"
+        },
+        {
+            "id": 5010,
+            "key": "Move Speed",
+            "icon": "perk-images/StatMods/StatModsMovementSpeedIcon.png",
+            "name": "Move Speed"
+        },
+        {
+            "id": 5001,
+            "key": "Health Scaling",
+            "icon": "perk-images/StatMods/StatModsHealthPlusIcon.png",
+            "name": "HealthScaling"
+        }
+    ],
+    "defense": [
+        {
+            "id": 5011,
+            "key": "Health",
+            "icon": "perk-images/StatMods/StatModsHealthScalingIcon.png",
+            "name": "Health"
+        },
+        {
+            "id": 5013,
+            "key": "Tenacity And Slow Resistance",
+            "icon": "perk-images/StatMods/StatModsTenacityIcon.png",
+            "name": "Tenacity And Slow Resistance"
+        },
+        {
+            "id": 5001,
+            "key": "Health Scaling",
+            "icon": "perk-images/StatMods/StatModsHealthPlusIcon.png",
+            "name": "HealthScaling"
+        }
+    ]
+}

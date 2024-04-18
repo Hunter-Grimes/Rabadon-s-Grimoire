@@ -2,6 +2,28 @@ from PySide6.QtGui import QPixmap, QColor
 from PySide6.QtCore import Qt
 import requests
 
+
+def fetchRolePixmap(role):
+    match role:
+        case 'TOP':
+            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-top.png')
+        case 'JUNGLE':
+            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-jungle.png')
+        case 'MIDDLE':
+            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-middle.png')
+        case 'BOTTOM':
+            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-bottom.png')
+        case 'UTILITY':
+            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-utility.png')
+        case _:
+            pixmap = QPixmap(30, 30)
+            pixmap.fill(QColor(100, 100, 100))
+    
+    pixmap = pixmap.scaled(30, 30, mode=Qt.SmoothTransformation)
+
+    return pixmap
+
+
 def fetchItemPixmap(itemID, IMAGE_LOCATION):
     if itemID == 0:
         pixmap = QPixmap(30, 30)
@@ -21,7 +43,9 @@ def fetchChampPixmap(champName, IMAGE_LOCATION):
 
 def fetchProfileInfo(PUUID, BASE_URL):
     userData = requests.get(BASE_URL + '/user/by-PUUID/' + str(PUUID)).json()
-    requests.put(BASE_URL + '/update-user/' + str(PUUID))
+    
+    reqStatus = requests.put(BASE_URL + '/update-user/' + str(PUUID)).status_code
+    
     games = fetchGameInfo(userData, BASE_URL, '/0/20')
     
     data = {
@@ -29,7 +53,7 @@ def fetchProfileInfo(PUUID, BASE_URL):
         "games": games
     }
     
-    return data
+    return data, reqStatus
 
 
 def fetchGameInfo(userData, BASE_URL, indexes):
@@ -43,7 +67,27 @@ def fetchGameInfo(userData, BASE_URL, indexes):
 
 
 def fetchChampInfo(PUUID, BASE_URL):
-    champStats = requests.get(BASE_URL + '/champ-stats/' + PUUID).json()
+    champStats = requests.get(BASE_URL + '/user/champ-info-summary/' + PUUID).json()
     gamesPlayed = requests.get(BASE_URL + '/user/games-played/' + PUUID).json()
 
     return gamesPlayed, champStats
+
+
+def asyncUpdatePlayer(PUUID, BASE_URL):
+    return requests.put(BASE_URL + '/update-user/async/' + PUUID)
+
+
+def fetchChampInfoPage(PUUID, championName, BASE_URL):
+    return requests.get(BASE_URL + '/user/champ-info-page/' + PUUID + '/' + championName).json()
+
+
+def fetchRuneRecommendation(CID, BASE_URL):
+    return requests.get(BASE_URL + '/rune-recommendation/' + str(CID)).json()
+
+
+def fetchChampSelectInfoGeneric(CID, BASE_URL):
+    return requests.get(BASE_URL + '/champ-select/generic/' + str(CID)).json()
+
+
+def fetchChampSelectInfoSpecific(CID, gameName, tagLine, BASE_URL):
+    return requests.get(BASE_URL + '/champ-select/specific/' + str(CID) + '/' + gameName + '/' + tagLine).json()

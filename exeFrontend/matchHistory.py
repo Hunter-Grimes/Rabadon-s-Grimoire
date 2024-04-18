@@ -5,8 +5,7 @@ from PySide6.QtCore import Qt
 from asyncWorker import Worker
 from fetchData import fetchGameInfo, fetchChampPixmap, fetchItemPixmap
 
-
-class matchHistory(QScrollArea):
+class matchHistoryGeneric(QScrollArea):
     def __init__(self, info, manager, IMAGE_LOCATION, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.manager = manager
@@ -17,8 +16,6 @@ class matchHistory(QScrollArea):
         self.matchIndex = 20
         group = QGroupBox()
         
-        self.verticalScrollBar().valueChanged.connect(self.valueChanged, type=Qt.UniqueConnection)
-        
         boxlayout = QVBoxLayout()
         for GID in info['games'].keys():
             boxlayout.addWidget(Match(info['games'][GID], self.userData['PUUID'], self.manager, self.IMAGE_LOCATION))
@@ -27,6 +24,11 @@ class matchHistory(QScrollArea):
         self.setWidget(group)
         self.setFixedWidth(group.width() + 2)
         self.setWidgetResizable(True)
+
+class matchHistory(matchHistoryGeneric):
+    def __init__(self, info, manager, IMAGE_LOCATION, *args, **kwargs):
+        super().__init__(info, manager, IMAGE_LOCATION, *args, **kwargs)
+        self.verticalScrollBar().valueChanged.connect(self.valueChanged, type=Qt.UniqueConnection)
         
     def valueChanged(self, value):
         if value == self.verticalScrollBar().maximum():
@@ -52,6 +54,9 @@ class matchHistory(QScrollArea):
     def incrementMatchIndex(self, n):
         self.matchIndex += n
 
+class champMatchHistory(matchHistoryGeneric):
+    def __init__(self, info, manager, IMAGE_LOCATION, *args, **kwargs):
+        super().__init__(info, manager, IMAGE_LOCATION, *args, **kwargs)
              
 class Match(QWidget):    
     def __init__(self, gameData, PUUID, manager, IMAGE_LOCATION, *args, **kwargs):
@@ -66,13 +71,13 @@ class Match(QWidget):
         
         #Champion Icon
         label = QLabel()
-        pixmap = QPixmap(self.IMAGE_LOCATION + 'champion/' + gameData[PUUID]['champion_name'] + '.png')
+        pixmap = QPixmap(self.IMAGE_LOCATION + 'champion/' + gameData[PUUID]['championName'] + '.png')
         pixmap = pixmap.scaled(50, 50, mode=Qt.SmoothTransformation)
         label.setPixmap(pixmap)
         boxLayout.addWidget(label, 0, 0, -1, 1)
         
         #Loss/Win
-        if gameData[PUUID]['won_game']:
+        if gameData[PUUID]['won']:
             label = QLabel("Victory")
             label.setStyleSheet("color: green")
         else:
@@ -86,7 +91,7 @@ class Match(QWidget):
         boxLayout.addWidget(label, 0, 2)
         
         #CS
-        label = QLabel('CS: ' + str(gameData[PUUID]['total_minions']))
+        label = QLabel('CS: ' + str(gameData[PUUID]['totalMinionsKilled']))
         boxLayout.addWidget(label, 1, 2)
         
         #Items
@@ -133,7 +138,7 @@ class ChampDisplay(QGroupBox):
         
         for i, player in enumerate(list(gameData.keys())):
             
-            button = PlayerButton(player, gameData, fetchChampPixmap(gameData[player]['champion_name'], self.IMAGE_LOCATION), self.manager, self.IMAGE_LOCATION)
+            button = PlayerButton(player, gameData, fetchChampPixmap(gameData[player]['championName'], self.IMAGE_LOCATION), self.manager, self.IMAGE_LOCATION)
             
             if i < 5:
                 champs.addWidget(button, 0, i)
@@ -149,7 +154,7 @@ class PlayerButton(QPushButton):
         self.manager = manager
         self.IMAGE_LOCATION = IMAGE_LOCATION
         
-        self.playerName = gameData[PUUID]['name']
+        self.playerName = gameData[PUUID]['gameName'] + " #" + gameData[PUUID]['tagLine']
         self.setToolTip(self.playerName)
         
         self.PUUID = PUUID
