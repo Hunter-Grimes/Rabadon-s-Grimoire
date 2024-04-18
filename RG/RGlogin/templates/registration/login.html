@@ -6,11 +6,12 @@
     <title>Login</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
-<body>
+<body class="login-background-image">
     <div class="login-section">
         <h2>Login</h2>
         <form method="post" class="login-form">
             {% csrf_token %}
+            <h2>Enter Rabadon's Grimoire</h2>
             <div class="form-group">
                 <label for="id_username">Username:</label>
                 {{ form.username }}

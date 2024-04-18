@@ -9,7 +9,7 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Link to CSS file -->
 </head>
-<body>
+<body class="homepage-background">
     <!-- Header Section -->
     <header>
         <h1>Rabadon's Grimoire</h1>
@@ -21,11 +21,11 @@
                 <li><a href="{% url 'contact' %}">Contact</a></li>
                 {% if user.is_authenticated %}
                     <li><a href="{% url 'download' %}">Download</a></li>
+                    <li>Hi {{ user.username }}!</li>
                     <form action="{% url 'logout' %}" method="post">
                         {% csrf_token %}
                         <li><button type="submit" class="logout-button">Log Out</button></li>
                     </form>
-                    <li>Hi {{ user.username }}!</li>
                 {% else %}
                     <li><a href="{% url 'login' %}">Login</a></li>
                     <li><a href="{% url 'signup' %}">Signup</a></li>
