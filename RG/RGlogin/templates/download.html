@@ -5,32 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Download Rabadon's Grimoire</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Link to CSS file --></head>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}"> <!-- Link to CSS file -->
+</head>
 <body>
     <!-- Header Section -->
     <header>
         <h1>Rabadon's Grimoire</h1>
         <!-- Navigation Links -->
-            <nav id="nav-links">
-                <ul>
-                    <li><a href="{% url 'home' %}">Home</a></li>
-                    <li><a href="{% url 'about' %}">About</a></li>
-                    <li><a href="{% url 'contact' %}">Contact</a></li>
-                    <li><a href="{% url 'download' %}">Download</a></li>
-                </ul>
-            </nav>
-            <!-- End of Navigation Links -->
-        <!-- End of Header Section -->
+        <nav id="nav-links">
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'about' %}">About us</a></li>
+                <li><a href="{% url 'contact' %}">Contact</a></li>
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'download' %}">Download</a></li>
+                Hi {{ user.username }}!
+                <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">Log Out</button>
+                </form>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                    <li><a href="{% url 'signup' %}">Signup</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        <!-- End of Navigation Links -->
     </header>
+    <!-- End of Header Section -->
 
     <!-- Main Content -->
     <main>
+        <!-- Introduction Section -->
+        <section id="intro">
+            <h2>Welcome to Rabadon's Grimoire</h2>
+            <p>Thank You for becoming a member!!!</p>
+
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+
         <!-- Download Section -->
-        <section id="download">
-            <h2>Download Rabadon's Grimoire</h2>
-            <p>The companion app will be available for download here once it's ready.</p>
-            <!-- Add a download button or link here -->
+        <section id="download-section">
+            <div class="download-box">
+                <h3>Download Rabadon's Grimoire</h3>
+                <p>Click the button below to download the latest version of Rabadon's Grimoire for Windows.</p>
+                <a href="{% static 'files/RabadonsGrimoireSetup.exe' %}" download="RabadonsGrimoireSetup.exe">
+                    <button type="button"> Download Now</button>
+                </a>
+                <p>Click the button below to download the latest version of Rabadon's Grimoire for MacOS.</p>
+                <a href="{% static 'files/RabadonsGrimoireSetup.exe' %}" download="RabadonsGrimoireSetup.exe">
+                    <button type="button"> Download Now</button>
+                </a>
+            </div>
         </section>
+        <!-- End of Download Section -->
     </main>
 
     <!-- Under Construction Section -->

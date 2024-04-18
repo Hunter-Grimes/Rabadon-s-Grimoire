@@ -8,6 +8,9 @@ from django.contrib.auth.views import (
     LoginView, LogoutView, PasswordResetView, PasswordResetDoneView,
     PasswordResetConfirmView, PasswordResetCompleteView
 )
+from . import views
+from .forms import SignupForm
+from django.contrib.auth.models import User
 
 # View for the home page
 def home(request):
@@ -22,35 +25,44 @@ def contact(request):
     return render(request, 'contact.html')
 
 # View for the download page
+@login_required
 def download(request):
     return render(request, 'download.html')
 
 # View for the login page
-def index(request):
-    return render(request, 'index.html')
+def custom_login(request):
+    return render(request, 'login.html')
 
-# View for user login
-class CustomLoginView(LoginView):
-    template_name = 'login.html'
+# View for the logout page
+def custom_logout(request):
+    logout(request)
+    return redirect('home')
 
 # View for user signup
-def user_signup(request):
+def signup(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = SignupForm(request.POST)
         if form.is_valid():
-            form.save()
+            # Check if username already exists
             username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            login(request, user)
-            return redirect('home')
-    else:
-        form = UserCreationForm()
-    return render(request, 'signup.html', {'form': form})
+            if User.objects.filter(username=username).exists():
+                form.add_error('username', 'Username already exists')
+            else:
+                user = form.save()
+                user.refresh_from_db()  
+                # load the profile instance created by the signal
+                user.save()
+                raw_password = form.cleaned_data.get('password1')
 
-# View for user logout
-class CustomLogoutView(LogoutView):
-    next_page = 'home'
+                # login user after signing up
+                user = authenticate(username=user.username, password=raw_password)
+                login(request, user)
+
+                # redirect user to home page
+                return redirect('home')
+    else:
+        form = SignupForm()
+    return render(request, 'signup.html', {'form': form})
 
 # View for initiating password reset
 class CustomPasswordResetView(PasswordResetView):
