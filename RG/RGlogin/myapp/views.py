@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate, logout
 from django.shortcuts import redirect
@@ -11,27 +10,34 @@ from django.contrib.auth.views import (
 from . import views
 from .forms import SignupForm
 from django.contrib.auth.models import User
+from django.utils import timezone
+from django.shortcuts import render
 
 # View for the home page
 def home(request):
-    return render(request, 'home.html')
+    timestamp = int(timezone.now().timestamp())
+    return render(request, 'home.html', {'timestamp': timestamp})
 
 # View for the about page
 def about(request):
-    return render(request, 'about.html')
+    timestamp = int(timezone.now().timestamp())
+    return render(request, 'about.html', {'timestamp': timestamp})
 
 # View for the contact page
 def contact(request):
-    return render(request, 'contact.html')
+    timestamp = int(timezone.now().timestamp())
+    return render(request, 'contact.html', {'timestamp': timestamp})
 
 # View for the download page
 @login_required
 def download(request):
-    return render(request, 'download.html')
+    timestamp = int(timezone.now().timestamp())
+    return render(request, 'download.html', {'timestamp': timestamp})
 
 # View for the login page
 def custom_login(request):
-    return render(request, 'login.html')
+    timestamp = int(timezone.now().timestamp())
+    return render(request, 'login.html', {'timestamp': timestamp})
 
 # View for the logout page
 def custom_logout(request):
@@ -40,6 +46,7 @@ def custom_logout(request):
 
 # View for user signup
 def signup(request):
+    timestamp = int(timezone.now().timestamp())
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
@@ -62,7 +69,7 @@ def signup(request):
                 return redirect('home')
     else:
         form = SignupForm()
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'signup.html', {'form': form, 'timestamp': timestamp})
 
 # View for initiating password reset
 class CustomPasswordResetView(PasswordResetView):

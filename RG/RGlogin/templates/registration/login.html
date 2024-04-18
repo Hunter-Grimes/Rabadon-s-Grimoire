@@ -4,11 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Login</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v={{ timestamp }}"> <!-- Link to CSS file with timestamp -->
 </head>
 <body class="login-background-image">
     <div class="login-section">
-        <h2>Login</h2>
         <form method="post" class="login-form">
             {% csrf_token %}
             <h2>Enter Rabadon's Grimoire</h2>
