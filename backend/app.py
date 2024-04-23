@@ -8,13 +8,13 @@ from apiEndpoints import(
     UserByRiotID, UserByPUUID, GameDataByPlayer, GameDataAll,
     GameIDLast20, GameIDXtoX, GameDataXtoX, UpdateUser,
     AsyncUpdateUser, generalChampStats, userTags, getUserGamesPlayed,
-    userChampionInfoPage, runeRecommendation, champSelectChampInfoGeneric, champSelectChampInfoSpecific
+    userChampionInfoPage, runeRecommendation, champSelectChampInfoGeneric, champSelectChampInfoSpecific,
+    getChampSpecificTags
 )
 
 def create_app():
-    basedir = os.path.abspath(os.path.dirname(__file__)) + "/data/"
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database.db')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DB_URL')
     register_endpoints()
     register_extensions(app)
     return app
@@ -46,8 +46,9 @@ def register_endpoints():
     api.add_resource(runeRecommendation, "/rune-recommendation/<CID>")
     api.add_resource(champSelectChampInfoGeneric, "/champ-select/generic/<CID>")
     api.add_resource(champSelectChampInfoSpecific, "/champ-select/specific/<CID>/<gameName>/<tagLine>")
+    api.add_resource(getChampSpecificTags, "/champ-select/tags/<CID>/<gameName>/<tagLine>/<role>")
     return None
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True, threaded=True, port=8080) #TODO CHANGE BEFORE PRODUCTION
+    app.run(debug=True, threaded=True, port=8080, host="0.0.0.0") #TODO CHANGE BEFORE PRODUCTION

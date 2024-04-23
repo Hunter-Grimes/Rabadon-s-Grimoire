@@ -1,4 +1,5 @@
 from extensions import db
+import time
 
 from accessRiotApi import (
     getMatchByMatchID, getMatchTimeLineByMatchID
@@ -321,7 +322,7 @@ def addGames(games):
     return 201
 
 
-def addGame(GID): 
+def addGame(GID):
     if not bool(GameModel.query.filter_by(GID=GID).first()):
         gameData = getMatchByMatchID(GID)
         timeLineData = getMatchTimeLineByMatchID(GID)
@@ -332,13 +333,26 @@ def addGame(GID):
         db.session.add(newGameData)
 
         for played in newPlayedGames:
+            if not bool(UserModel.query.filter_by(PUUID=played.PUUID).first()):
+                newUser = UserModel (
+                    PUUID = played.PUUID,
+                    SID = played.summonerId,
+                    tagLine = played.tagLine,
+                    gameName = played.gameName,
+                    revisionDate = time.time()
+                )
+                db.session.add(newUser)
+                db.session.commit()
+            
             db.session.add(played)
         
         db.session.add(timeLine['timeline'])
         
         for entry in timeLine['entries']:
             db.session.add(entry['entry'])
-
+        db.session.commit()
+        
+        for entry in timeLine['entries']:
             for frame in entry['frames']:
                 db.session.add(frame)
 

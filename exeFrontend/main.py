@@ -11,6 +11,7 @@ from callLocalRiotAPI import waitForLogin, lobbyListener
 
 import requests
 
+
 class MainWindow(QMainWindow):
     BASE_URL = "http://127.0.0.1:8080"
     def __init__(self, summoner):
@@ -18,7 +19,7 @@ class MainWindow(QMainWindow):
         self.summoner = summoner
         self.threadPool = QThreadPool()
         
-        self.resize(1280, 720)
+        self.resize(1280, 700)
         
         self.tabs = QTabWidget()
         
@@ -26,10 +27,6 @@ class MainWindow(QMainWindow):
         
         self.tabs.addTab(ProfilePageManager(myPUUID, self.BASE_URL, self.threadPool), "Profile")
         self.tabs.addTab(PatchNotesPage(), "Patch Notes")
-        
-        # info = requests.get(self.BASE_URL + "/champ-select/generic/" + "895").json()
-        # info['role'] = 'BOTTOM'
-        # self.tabs.addTab(LobbyPage(self.threadPool, self.summoner, self.BASE_URL), "Test")
         
         with open("exeFrontend/tabStyle.qss", "r") as f:
             _style = f.read()
@@ -60,6 +57,7 @@ def main():
     
     summoner = waitForLogin()
     # summoner = {'tagLine': 'NA1', 'gameName': 'Potilwalda', 'puuid': 'b0ef40cf-ec56-5fbf-b74c-b838f180464f'}
+    # summoner = {'tagLine': 'NA1', 'gameName': 'LessJnglMoreBush', 'puuid': 'b0ef40cf-ec56-5fbf-b74c-b838f180464f'}
     
     window = MainWindow(summoner)
     app.aboutToQuit.connect(window.lobby.clientClosed)
