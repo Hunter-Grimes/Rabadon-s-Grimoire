@@ -55,9 +55,9 @@ def main():
     app = QApplication([])
     loader = QUiLoader()  # noqa: F841 
     
-    summoner = waitForLogin()
+    # summoner = waitForLogin()
     # summoner = {'tagLine': 'NA1', 'gameName': 'Potilwalda', 'puuid': 'b0ef40cf-ec56-5fbf-b74c-b838f180464f'}
-    # summoner = {'tagLine': 'NA1', 'gameName': 'LessJnglMoreBush', 'puuid': 'b0ef40cf-ec56-5fbf-b74c-b838f180464f'}
+    summoner = {'tagLine': 'NA1', 'gameName': 'LessJnglMoreBush', 'puuid': 'b0ef40cf-ec56-5fbf-b74c-b838f180464f'}
     
     window = MainWindow(summoner)
     app.aboutToQuit.connect(window.lobby.clientClosed)

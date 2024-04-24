@@ -7,3 +7,4 @@ instance
 database.db
 dragontailData
 .DS_Store
+RIOT_API_KEY.txt

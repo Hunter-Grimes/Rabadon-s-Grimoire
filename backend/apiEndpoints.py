@@ -226,7 +226,7 @@ class UpdateUser(Resource):
 
 
 class AsyncUpdateUser(Resource):
-    maxCalls = 50
+    maxCalls = 55
     callIndex = 0
     callLookup = dict()
     
@@ -259,7 +259,7 @@ class AsyncUpdateUser(Resource):
         gettingNew = True
         needPrev = True
         while(gettingNew):
-            print("checking to " + str(updateIndex), file=sys.stderr)
+            print("checking from " + str(updateIndex) + " to " + str(updateIndex + 100), file=sys.stderr)
             try:
                 games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
                 self.limHandler(1)
@@ -289,7 +289,7 @@ class AsyncUpdateUser(Resource):
         updateIndex += numCurrSeasonGames
         
         while(gettingNew):
-            print("checking to " + str(updateIndex), file=sys.stderr)
+            print("checking from " + str(updateIndex) + " to " + str(updateIndex + 100), file=sys.stderr)
             try:
                 games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
                 self.limHandler(1)
@@ -518,7 +518,7 @@ class champSelectChampInfoGeneric(Resource):
         
         champName = db.session.query(PlayedGame.championName).filter_by(CID=CID).first()[0]
         totalGames = db.session.query(PlayedGame).filter_by(CID=CID).count()
-        wins = db.session.query(PlayedGame.won).filter_by(CID=CID).count()
+        wins = db.session.query(PlayedGame.won).filter_by(CID=CID, won=True).count()
         winPercent = wins / totalGames
         
         averageMagicDamage = float(db.session.query(func.avg(PlayedGame.magicDamageDealtToChampions)).filter_by(CID=CID).first()[0])
@@ -553,7 +553,7 @@ class champSelectChampInfoSpecific(Resource):
 
         champName = db.session.query(PlayedGame.championName).filter_by(CID=CID).first()[0]
         totalGames = db.session.query(PlayedGame).filter_by(CID=CID, PUUID=PUUID).count()
-        wins = db.session.query(PlayedGame.won).filter_by(CID=CID, PUUID=PUUID).count()
+        wins = db.session.query(PlayedGame.won).filter_by(CID=CID, PUUID=PUUID, won=True).count()
         winPercent = wins / totalGames
         
         averageMagicDamage = float(db.session.query(func.avg(PlayedGame.magicDamageDealtToChampions)).filter_by(CID=CID, PUUID=PUUID).first()[0])
