@@ -1,10 +1,8 @@
-from dotenv import load_dotenv
 import os
 import requests
 from HandleError import riotApiError as apiError
 
-load_dotenv()
-api_key = os.getenv('RIOT_API_KEY')
+api_key = os.environ.get('RIOT_API_KEY')
 
 
 def getAccountByPUUID(PUUID):

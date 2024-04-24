@@ -1,13 +1,13 @@
 from collections import defaultdict
 
-from PySide6.QtWidgets import QWidget, QLabel, QGridLayout, QGroupBox, QHBoxLayout, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QLabel, QGridLayout, QGroupBox, QHBoxLayout, QVBoxLayout, QProgressBar
 from PySide6.QtCore import Qt
 
 from runeSuggestion import RuneSelector
 from callLocalRiotAPI import champSelectWorker
 from fetchData import(
     fetchRuneRecommendation, fetchChampPixmap, fetchRolePixmap, fetchChampSelectInfoGeneric,
-    fetchChampSelectInfoSpecific
+    fetchChampSelectInfoSpecific, fetchChampSpecificTags
 )
 from asyncWorker import Worker
 
@@ -21,11 +21,12 @@ class LobbyPage(QWidget):
         self.selectedChamps = defaultdict(lambda: 0)
         
         layout = QGridLayout()
-        self.champSelectArray = champSelectChipArrayLobby(self.summoner['puuid'])
-        layout.addWidget(self.champSelectArray, 0, 0)
+        self.champSelectArray = champSelectChipArrayLobby(self.summoner['puuid'], self.BASE_URL, self.threadPool)
+        layout.addWidget(self.champSelectArray, 0, 0, 2, 1)
         
         self.runeSelectorBox = QGroupBox()
-        self.boxLayout = QHBoxLayout()
+        self.boxLayout = QVBoxLayout()
+        self.boxLayout.addWidget(QLabel("Rune Suggestions"), alignment=Qt.AlignCenter)
         self.boxLayout.setContentsMargins(0, 0, 0, 0)
         self.runeSelectorBox.setContentsMargins(0, 0, 0, 0)
         
@@ -36,6 +37,9 @@ class LobbyPage(QWidget):
         self.runeSelectorBox.setFixedSize(275, 350)
 
         layout.addWidget(self.runeSelectorBox, 0, 1)
+        
+        self.damageIndicator = damageIndicator()
+        layout.addWidget(self.damageIndicator, 1, 1)
         
         champSelectHover = champSelectWorker(self.summoner['puuid'])
         champSelectHover.signals.progress.connect(self.parseLobbyData)
@@ -69,6 +73,7 @@ class LobbyPage(QWidget):
         
         worker = Worker(self.getChipInfo, toUpdate)
         worker.signals.result.connect(lambda info: self.champSelectArray.updateChampSelect(info))
+        worker.signals.result.connect(lambda info: self.updateDamageIndicator(info))
         self.threadPool.start(worker)
         
     def champSelected(self, CID):
@@ -78,33 +83,111 @@ class LobbyPage(QWidget):
         
     def changeRuneRecommendations(self, info):
         newRunes = RuneSelector('dragontailData/14.5.1/', info, info['champName'], self.threadPool)
-        self.boxLayout.replaceWidget(self.runesWidget, newRunes)
-        self.runeSelectorBox.update()
+        self.boxLayout.removeWidget(self.runesWidget)
+        self.runesWidget.deleteLater()
+        self.boxLayout.addWidget(newRunes)
         self.runesWidget = newRunes
+        self.runeSelectorBox.update()
+        self.boxLayout.update()
 
     def getChipInfo(self, toUpdate):
         for i, player in enumerate(toUpdate['myTeam']):
             if player['puuid'] == self.summoner['puuid']:
                 info = fetchChampSelectInfoSpecific(player['championId'], self.summoner['gameName'], self.summoner['tagLine'], self.BASE_URL)
                 info['role'] = player['assignedPosition']
+                if player['assignedPosition'] not in ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"]:
+                    info['role'] = player['cellId']
                 toUpdate['myTeam'][i] = (player, info)
             else:
                 info = fetchChampSelectInfoGeneric(player['championId'], self.BASE_URL)
                 info['role'] = player['assignedPosition']
+                if player['assignedPosition'] not in ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"]:
+                    info['role'] = player['cellId']
                 toUpdate['myTeam'][i] = (player, info)
                 
         for i, player in enumerate(toUpdate['theirTeam']):
             info = fetchChampSelectInfoGeneric(player['championId'], self.BASE_URL)
             info['role'] = player['assignedPosition']
+            if player['assignedPosition'] not in ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"]:
+                    info['role'] = player['cellId']
             toUpdate['theirTeam'][i] = (player, info)
             
         return toUpdate
+    
+    def updateDamageIndicator(self, info):
+        self.damageIndicator.updateDamageIndicator(info)
+
+       
+class damageIndicator(QWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.totalDamage = defaultdict(lambda: 0)
+        self.damageIndicator = None
+        self.layout = QHBoxLayout()
+        self.setContentsMargins(0, 0, 0, 0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        
+        self.box = QGroupBox()
+        self.boxLayout = QVBoxLayout()
+        self.boxLayout.addWidget(QLabel('Your Team\'s Damage Spread'), alignment=Qt.AlignCenter)
+        self.box.setFixedSize(275, 100)
+        self.box.setLayout(self.boxLayout)
+        
+        self.layout.addWidget(self.box)
+
+        self.setLayout(self.layout)
+
+    def updateDamageIndicator(self, info):
+        for player in info['myTeam']:
+            self.totalDamage[player[0]['summonerId']] = (player[1]['averageMagicDamage'], player[1]['averagePhysicalDamage'], player[1]['averageTrueDamage'])
+        
+        totalMagic = sum([x[0] for x in self.totalDamage.values()])
+        totalPhysical = sum([x[1] for x in self.totalDamage.values()])
+        totalTrue = sum([x[2] for x in self.totalDamage.values()])
+
+        if totalMagic + totalPhysical + totalTrue == 0:
+            return
+        
+        if self.damageIndicator is not None:
+            newDamage = damageBar(totalMagic, totalPhysical, totalTrue)
+            self.boxLayout.replaceWidget(self.damageIndicator, newDamage)
+            self.damageIndicator = newDamage
+        else:
+            newDamage = damageBar(totalMagic, totalPhysical, totalTrue)
+            self.boxLayout.addWidget(newDamage)
+            self.damageIndicator = newDamage 
+
+        self.box.update()
+
+
+class damageBar(QProgressBar):
+    def __init__(self, totalMagic, totalPhysical, totalTrue, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        totalDamage = float(totalMagic) + float(totalPhysical) + float(totalTrue)
+        percentMagic = totalMagic / totalDamage
+        percentPhysical = totalPhysical / totalDamage
+        
+        self.setFixedSize(250, 20)
+        self.setOrientation(Qt.Horizontal)
+        self.setStyleSheet(
+            "::chunk {"
+            "background-color: qlineargradient(x0: 0, x2: 1, "
+            "stop: 0 blue, stop: " + str(percentMagic) + " blue, "
+            "stop: " + str(percentMagic) + " red, stop: " + str(percentMagic + percentPhysical) + " red, "
+            "stop: " + str(percentMagic + percentPhysical) + " gray, stop: 1 gray)"
+            "}"
+        )
+        self.setValue(100)
+        self.setAlignment(Qt.AlignCenter)
+        self.setTextVisible(False)
 
 
 class champSelectChipArrayLobby(QWidget):
-    def __init__(self, myPUUID, *args, **kwargs):
+    def __init__(self, myPUUID, BASE_URL, threadPool, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.puuid = myPUUID
+        self.BASE_URL = BASE_URL
+        self.threadPool = threadPool
 
         self.layout = QGridLayout()
         self.setContentsMargins(0, 0, 0, 0)
@@ -123,29 +206,40 @@ class champSelectChipArrayLobby(QWidget):
                 continue
             
             if player[0]['puuid'] == self.puuid:
-                chip = specificChampSelectChip(player[1])
+                chip = specificChampSelectChip(player[1], player[0]['championId'], self.BASE_URL, self.threadPool)
             else:
                 chip = genericChampSelectChip(player[1])
                 
             match player[0]['assignedPosition']:
                 
                 case 'TOP':
-                    self.layout.replaceWidget(self.layout.itemAtPosition(0, 0).widget(), chip)
-
+                    oldWidget = self.layout.itemAtPosition(0, 0).widget()
+                    self.layout.replaceWidget(oldWidget, chip)
+                    oldWidget.deleteLater()
                 case 'JUNGLE':
-                    self.layout.replaceWidget(self.layout.itemAtPosition(0, 1).widget(), chip)
+                    oldWidget = self.layout.itemAtPosition(0, 1).widget()
+                    self.layout.replaceWidget(oldWidget, chip)
+                    oldWidget.deleteLater()
 
                 case 'MIDDLE':
-                    self.layout.replaceWidget(self.layout.itemAtPosition(0, 2).widget(), chip)
+                    oldWidget = self.layout.itemAtPosition(0, 2).widget()
+                    self.layout.replaceWidget(oldWidget, chip)
+                    oldWidget.deleteLater()
 
                 case 'BOTTOM':
-                    self.layout.replaceWidget(self.layout.itemAtPosition(0, 3).widget(), chip)
+                    oldWidget = self.layout.itemAtPosition(0, 3).widget()
+                    self.layout.replaceWidget(oldWidget, chip)
+                    oldWidget.deleteLater()
 
                 case 'UTILITY':
-                    self.layout.replaceWidget(self.layout.itemAtPosition(0, 4).widget(), chip)
+                    oldWidget = self.layout.itemAtPosition(0, 4).widget()
+                    self.layout.replaceWidget(oldWidget, chip)
+                    oldWidget.deleteLater()
                     
                 case _:
-                    self.layout.replaceWidget(self.layout.itemAtPosition(0, 2).widget(), chip)
+                    oldWidget = self.layout.itemAtPosition(0, int(player[1]['role']) % 4).widget()
+                    self.layout.replaceWidget(oldWidget, chip)
+                    oldWidget.deleteLater()
         
         for player in info['theirTeam']:
             if player[0]['championId'] == 0:
@@ -156,19 +250,34 @@ class champSelectChipArrayLobby(QWidget):
             match player[0]['assignedPosition']:
 
                 case 'TOP':
-                    self.layout.replaceWidget(self.layout.itemAtPosition(1, 0).widget(), chip)
+                    oldWidget = self.layout.itemAtPosition(1, 0).widget()
+                    self.layout.replaceWidget(oldWidget, chip)
+                    oldWidget.deleteLater()
 
                 case 'JUNGLE':
-                    self.layout.replaceWidget(self.layout.itemAtPosition(1, 1).widget(), chip)
+                    oldWidget = self.layout.itemAtPosition(1, 1).widget()
+                    self.layout.replaceWidget(oldWidget, chip)
+                    oldWidget.deleteLater()
 
                 case 'MIDDLE':
-                    self.layout.replaceWidget(self.layout.itemAtPosition(1, 2).widget(), chip)
+                    oldWidget = self.layout.itemAtPosition(1, 2).widget()
+                    self.layout.replaceWidget(oldWidget, chip)
+                    oldWidget.deleteLater()
 
                 case 'BOTTOM':
-                    self.layout.replaceWidget(self.layout.itemAtPosition(1, 3).widget(), chip)
+                    oldWidget = self.layout.itemAtPosition(1, 3).widget()
+                    self.layout.replaceWidget(oldWidget, chip)
+                    oldWidget.deleteLater()
 
                 case 'UTILITY':
-                    self.layout.replaceWidget(self.layout.itemAtPosition(1, 4).widget(), chip)
+                    oldWidget = self.layout.itemAtPosition(1, 4).widget()
+                    self.layout.replaceWidget(oldWidget, chip)
+                    oldWidget.deleteLater()
+                
+                case _:
+                    oldWidget = self.layout.itemAtPosition(1, int(player[1]['role']) % 4).widget()
+                    self.layout.replaceWidget(oldWidget, chip)
+                    oldWidget.deleteLater()
                     
         self.update()
 
@@ -218,9 +327,14 @@ class genericChampSelectChip(champSelectChipTemplate):
         role.setAlignment(Qt.AlignCenter)
         self.boxLayout.addWidget(role)
         
-        roleName = QLabel(self.info['role'])
-        roleName.setAlignment(Qt.AlignCenter)
-        self.boxLayout.addWidget(roleName)
+        if self.info['role'] not in ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"]:
+            roleName = QLabel("None")
+            roleName.setAlignment(Qt.AlignCenter)
+            self.boxLayout.addWidget(roleName)
+        else:
+            roleName = QLabel(self.info['role'])
+            roleName.setAlignment(Qt.AlignCenter)
+            self.boxLayout.addWidget(roleName)
 
     def setLabel(self):
         name = QLabel(self.info['champName'])
@@ -229,11 +343,61 @@ class genericChampSelectChip(champSelectChipTemplate):
 
     
 class specificChampSelectChip(genericChampSelectChip):
-    def __init__(self, info, *args, **kwargs):
+    def __init__(self, info, CID, BASE_URL, threadPool, *args, **kwargs):
         super().__init__(info, *args, **kwargs)
         self.info = info
+        self.CID = CID
+        self.BASE_URL = BASE_URL
+        self.threadPool = threadPool
+        
+        self.getTags()
         
     def setLabel(self):
         name = QLabel(self.info['gameName'] + " #" + self.info['tagLine'])
         name.setAlignment(Qt.AlignCenter)
         self.boxLayout.addWidget(name)
+        
+    def getTags(self):
+        worker = Worker(fetchChampSpecificTags, self.CID, self.info['gameName'], self.info['tagLine'], self.info['role'], self.BASE_URL)
+        worker.signals.result.connect(self.addTags)
+        self.threadPool.start(worker)
+    
+    def addTags(self, info):
+        self.boxLayout.addWidget(champSelectTagDisplay(info))
+        self.update()
+
+       
+class champSelectTagDisplay(QWidget):
+    def __init__(self, info, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.numTags = 0
+        
+        layout = QGridLayout()
+        layout.setSpacing(10)
+        self.setLayout(layout)
+        
+        self.displayTags(info)
+    
+    def displayTags(self, tags):
+        for tag in tags.keys():
+            self.tag(tag, tags[tag])
+    
+    def tag(self, champ, info):
+        tag = QLabel(champ)
+        tag.setToolTip(info[1])
+        tag.setAlignment(Qt.AlignCenter)
+        tag.setFixedHeight(15)
+        tag.setFixedWidth(75)
+        
+        match info[0]:
+            case 0:
+                tag.setStyleSheet("background-color: transparent; color: green; border: 2px solid green; border-radius: 5px; font-size: 10px;")
+            case 1:
+                tag.setStyleSheet("background-color: transparent; color: red; border: 2px solid red; border-radius: 5px; font-size: 10px;")
+            case 2:
+                tag.setStyleSheet("background-color: transparent; color: gray; border: 2px solid gray; border-radius: 5px; font-size: 10px;")
+            case _:
+                pass
+        
+        self.layout().addWidget(tag, (self.numTags // 2), (self.numTags % 2))
+        self.numTags += 1

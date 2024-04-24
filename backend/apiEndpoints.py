@@ -193,37 +193,40 @@ class UpdateUser(Resource):
         )
         db.session.commit()
 
-        #Get Game Data
-        toUpdate = []
+        # #Get Game Data
+        # toUpdate = []
         
-        updateIndex = 0
-        gettingNew = True
-        while(gettingNew):
-            try:
-                games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
-            except Exception:
-                return Response(status=500)
+        # updateIndex = 20
+        # gettingNew = True
+        # while(gettingNew):
+        #     try:
+        #         games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
+        #     except Exception:
+        #         return Response(status=500)
             
-            for item in games:
-                if not db.session.query(GameModel.GID).select_from(PlayedGame).join(GameModel).filter(PlayedGame.PUUID == PUUID).filter(GameModel.GID==item).first():
-                    toUpdate.append(item)
-                    updateIndex += 1
-                else:
-                    gettingNew = False
-                    break
-            if(updateIndex == 100):
-                gettingNew = False
-        if updateIndex != 0:
-            try:
-                addGames(toUpdate)
-            except Exception:
-                return Response(status=500)
+        #     for item in games:
+        #         if not bool(db.session.query(GameModel.GID).select_from(PlayedGame).join(GameModel).filter(PlayedGame.PUUID == PUUID).filter(GameModel.GID==item).first()):
+        #             toUpdate.append(item)
+        #             updateIndex += 1
+        #         else:
+        #             gettingNew = False
+        #             break
+                
+        #         if(updateIndex >= 30):
+        #             gettingNew = False
+        #             break
+
+        # if updateIndex != 20:
+        #     try:
+        #         addGames(toUpdate)
+        #     except Exception:
+        #         return Response(status=500)
         
         return Response(status=201)
 
 
 class AsyncUpdateUser(Resource):
-    maxCalls = 50
+    maxCalls = 55
     callIndex = 0
     callLookup = dict()
     
@@ -256,7 +259,7 @@ class AsyncUpdateUser(Resource):
         gettingNew = True
         needPrev = True
         while(gettingNew):
-            print("checking to " + str(updateIndex), file=sys.stderr)
+            print("checking from " + str(updateIndex) + " to " + str(updateIndex + 100), file=sys.stderr)
             try:
                 games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
                 self.limHandler(1)
@@ -286,7 +289,7 @@ class AsyncUpdateUser(Resource):
         updateIndex += numCurrSeasonGames
         
         while(gettingNew):
-            print("checking to " + str(updateIndex), file=sys.stderr)
+            print("checking from " + str(updateIndex) + " to " + str(updateIndex + 100), file=sys.stderr)
             try:
                 games = getMatchXtoX(PUUID, updateIndex, updateIndex + 100)
                 self.limHandler(1)
@@ -346,9 +349,9 @@ class generalChampStats(Resource):
             stats['wins'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, championName=champ[0]).filter(PlayedGame.won).count()
             stats['losses'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, championName=champ[0]).filter(not PlayedGame.won).count()
             stats['gamesPlayed'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID, championName=champ[0]).count()
-            stats['avgKill'] = round(db.session.query(func.avg(PlayedGame.kills)).filter_by(PUUID=PUUID, championName=champ[0]).scalar(), 1)
-            stats['avgDeath'] = round(db.session.query(func.avg(PlayedGame.deaths)).filter_by(PUUID=PUUID, championName=champ[0]).scalar(), 1)
-            stats['avgAssist'] = round(db.session.query(func.avg(PlayedGame.assists)).filter_by(PUUID=PUUID, championName=champ[0]).scalar(), 1)
+            stats['avgKill'] = float(round(db.session.query(func.avg(PlayedGame.kills)).filter_by(PUUID=PUUID, championName=champ[0]).scalar(), 1))
+            stats['avgDeath'] = float(round(db.session.query(func.avg(PlayedGame.deaths)).filter_by(PUUID=PUUID, championName=champ[0]).scalar(), 1))
+            stats['avgAssist'] = float(round(db.session.query(func.avg(PlayedGame.assists)).filter_by(PUUID=PUUID, championName=champ[0]).scalar(), 1))
         
             champStats[champ[0]] = stats
         
@@ -515,13 +518,13 @@ class champSelectChampInfoGeneric(Resource):
         
         champName = db.session.query(PlayedGame.championName).filter_by(CID=CID).first()[0]
         totalGames = db.session.query(PlayedGame).filter_by(CID=CID).count()
-        wins = db.session.query(PlayedGame.won).filter_by(CID=CID).count()
+        wins = db.session.query(PlayedGame.won).filter_by(CID=CID, won=True).count()
         winPercent = wins / totalGames
         
-        averageMagicDamage = db.session.query(func.avg(PlayedGame.magicDamageDealtToChampions)).filter_by(CID=CID).first()[0]
-        averagePhysicalDamage = db.session.query(func.avg(PlayedGame.physicalDamageDealtToChampions)).filter_by(CID=CID).first()[0]
-        averageTrueDamage = db.session.query(func.avg(PlayedGame.trueDamageDealtToChampions)).filter_by(CID=CID).first()[0]
-        averageTotalDamage = db.session.query(func.avg(PlayedGame.totalDamageDealtToChampions)).filter_by(CID=CID).first()[0]
+        averageMagicDamage = float(db.session.query(func.avg(PlayedGame.magicDamageDealtToChampions)).filter_by(CID=CID).first()[0])
+        averagePhysicalDamage = float(db.session.query(func.avg(PlayedGame.physicalDamageDealtToChampions)).filter_by(CID=CID).first()[0])
+        averageTrueDamage = float(db.session.query(func.avg(PlayedGame.trueDamageDealtToChampions)).filter_by(CID=CID).first()[0])
+        averageTotalDamage = float(db.session.query(func.avg(PlayedGame.totalDamageDealtToChampions)).filter_by(CID=CID).first()[0])
         
         info = {
             'champName': champName,
@@ -550,13 +553,13 @@ class champSelectChampInfoSpecific(Resource):
 
         champName = db.session.query(PlayedGame.championName).filter_by(CID=CID).first()[0]
         totalGames = db.session.query(PlayedGame).filter_by(CID=CID, PUUID=PUUID).count()
-        wins = db.session.query(PlayedGame.won).filter_by(CID=CID, PUUID=PUUID).count()
+        wins = db.session.query(PlayedGame.won).filter_by(CID=CID, PUUID=PUUID, won=True).count()
         winPercent = wins / totalGames
         
-        averageMagicDamage = db.session.query(func.avg(PlayedGame.magicDamageDealtToChampions)).filter_by(CID=CID, PUUID=PUUID).first()[0]
-        averagePhysicalDamage = db.session.query(func.avg(PlayedGame.physicalDamageDealtToChampions)).filter_by(CID=CID, PUUID=PUUID).first()[0]
-        averageTrueDamage = db.session.query(func.avg(PlayedGame.trueDamageDealtToChampions)).filter_by(CID=CID, PUUID=PUUID).first()[0]
-        averageTotalDamage = db.session.query(func.avg(PlayedGame.totalDamageDealtToChampions)).filter_by(CID=CID, PUUID=PUUID).first()[0]
+        averageMagicDamage = float(db.session.query(func.avg(PlayedGame.magicDamageDealtToChampions)).filter_by(CID=CID, PUUID=PUUID).first()[0])
+        averagePhysicalDamage = float(db.session.query(func.avg(PlayedGame.physicalDamageDealtToChampions)).filter_by(CID=CID, PUUID=PUUID).first()[0])
+        averageTrueDamage = float(db.session.query(func.avg(PlayedGame.trueDamageDealtToChampions)).filter_by(CID=CID, PUUID=PUUID).first()[0])
+        averageTotalDamage = float(db.session.query(func.avg(PlayedGame.totalDamageDealtToChampions)).filter_by(CID=CID, PUUID=PUUID).first()[0])
         
         info = {
             'gameName': gameName,
@@ -570,3 +573,90 @@ class champSelectChampInfoSpecific(Resource):
         }
         
         return info, 200
+    
+
+class getChampSpecificTags(Resource):
+    def get(self, CID, gameName, tagLine, role):
+        PUUID = UserByRiotID().get(tagLine, gameName)[0]['PUUID']
+        CID = int(CID)
+        champName = db.session.query(PlayedGame.championName).filter_by(CID=CID).first()[0]
+        if not bool(PlayedGame.query.filter_by(CID=CID).first()):
+            return Response(status=404)
+
+        if not bool(UserModel.query.filter_by(PUUID=PUUID).first()):
+            return Response(status=404)
+
+        if not bool(PlayedGame.query.filter_by(CID=CID, PUUID=PUUID).first()):
+            return Response(status=404)
+        
+        tags = dict()
+        
+        streak = None
+        streakGames = 0
+        for game in db.session.query(PlayedGame.won).select_from(PlayedGame).join(GameModel).filter(GameModel.GID == PlayedGame.GID).filter(PlayedGame.PUUID == PUUID).order_by(GameModel.time_start.desc()).all():
+            if streak is None:
+                streak = game[0]
+            else:
+                if streak != game[0]:
+                    break
+            streakGames += 1
+        
+        if streakGames >= 3:
+            if streak:
+                tags['Win Streak'] = (0, "This player has won " + str(streakGames) + " games in a row")
+            else:
+                tags['Loss Streak'] = (1, "This player has lost " + str(streakGames) + " games in a row")
+        
+        totalGames = db.session.query(PlayedGame).filter_by(PUUID=PUUID).count()
+        totalGamesOnChamp = db.session.query(PlayedGame).filter_by(CID=CID, PUUID=PUUID).count()
+        totalGamesOnChampPercent = totalGamesOnChamp / totalGames
+        totalWinsOnChamp = db.session.query(PlayedGame.won).filter_by(CID=CID, PUUID=PUUID, won=True).count()
+        winPercentOnChamp = totalWinsOnChamp / totalGamesOnChamp
+        
+        avgVisionScoreForPlayer = float(db.session.query(func.avg(PlayedGame.visionScore)).filter_by(CID=CID, PUUID=PUUID).first()[0])
+        avgVisionScoreForAllPlayers = float(db.session.query(func.avg(PlayedGame.visionScore)).filter_by(CID=CID).first()[0])
+        
+        averageTurretForPlayer = float(db.session.query(func.avg(PlayedGame.turretKills)).filter_by(CID=CID, PUUID=PUUID).first()[0])
+        averageTurretForAllPlayers = float(db.session.query(func.avg(PlayedGame.turretKills)).filter_by(CID=CID).first()[0])
+        
+        averageGoldEarnedForPlayer = float(db.session.query(func.avg(PlayedGame.goldEarned)).filter_by(CID=CID, PUUID=PUUID).first()[0])
+        averageGoldEarnedForAllPlayers = float(db.session.query(func.avg(PlayedGame.goldEarned)).filter_by(CID=CID).first()[0])
+        
+        numPlayed = dict()
+        numPlayed['TOP'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID).filter(PlayedGame.position == 'TOP').count()
+        numPlayed['JUNGLE'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID).filter(PlayedGame.position == 'JUNGLE').count()
+        numPlayed['MIDDLE'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID).filter(PlayedGame.position == 'MIDDLE').count()
+        numPlayed['BOTTOM'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID).filter(PlayedGame.position == 'BOTTOM').count()
+        numPlayed['UTILITY'] = db.session.query(PlayedGame).filter_by(PUUID=PUUID).filter(PlayedGame.position == 'UTILITY').count()
+        
+        if totalGamesOnChampPercent >= 0.9:
+            tags['One Trick'] = (0, "This player one tricks " + champName)
+            
+        if winPercentOnChamp >= 0.55 and totalGamesOnChamp >= 10:
+            tags['High WinRate'] = (0, "This player wins often when playing " + champName)
+        
+        if winPercentOnChamp <= 0.45 and totalGamesOnChamp >= 10:
+            tags['Low WinRate'] = (1, "This player loses often when playing " + champName)
+        
+        if role in ['TOP', "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"]:
+            percentInRole = numPlayed[role] / totalGames
+            
+            if percentInRole <= 0.1:
+                tags['Autofilled?'] = (1, "This player may be autofilled")
+        
+        if avgVisionScoreForPlayer >= 1.2 * avgVisionScoreForAllPlayers:
+            tags['Great Vision'] = (0, "This player has great vision when playing " + champName)
+            
+        if avgVisionScoreForPlayer <= 0.8 * avgVisionScoreForAllPlayers:
+            tags['Bad Vision'] = (1, "This player has bad vision when playing " + champName)
+            
+        if averageTurretForPlayer >= 1.2 * averageTurretForAllPlayers:
+            tags['Turret Toppler'] = (0, "This player destroys many turrets when playing " + champName)
+            
+        if averageGoldEarnedForPlayer >= 1.2 * averageGoldEarnedForAllPlayers:
+            tags['Rich'] = (0, "This player gets a lot of gold when playing " + champName)
+            
+        if averageGoldEarnedForPlayer <= 0.8 * averageGoldEarnedForAllPlayers:
+            tags['Poor'] = (1, "This player doesn't get a lot of gold when playing " + champName)
+        
+        return tags, 200

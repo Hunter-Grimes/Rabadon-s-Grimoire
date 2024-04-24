@@ -1,6 +1,7 @@
 from PySide6.QtGui import QPixmap, QColor
 from PySide6.QtCore import Qt
 import requests
+from functools import cache
 
 
 def fetchRolePixmap(role):
@@ -42,9 +43,9 @@ def fetchChampPixmap(champName, IMAGE_LOCATION):
 
 
 def fetchProfileInfo(PUUID, BASE_URL):
-    userData = requests.get(BASE_URL + '/user/by-PUUID/' + str(PUUID)).json()
-    
     reqStatus = requests.put(BASE_URL + '/update-user/' + str(PUUID)).status_code
+    
+    userData = requests.get(BASE_URL + '/user/by-PUUID/' + str(PUUID)).json()
     
     games = fetchGameInfo(userData, BASE_URL, '/0/20')
     
@@ -80,14 +81,18 @@ def asyncUpdatePlayer(PUUID, BASE_URL):
 def fetchChampInfoPage(PUUID, championName, BASE_URL):
     return requests.get(BASE_URL + '/user/champ-info-page/' + PUUID + '/' + championName).json()
 
-
+@cache
 def fetchRuneRecommendation(CID, BASE_URL):
     return requests.get(BASE_URL + '/rune-recommendation/' + str(CID)).json()
 
-
+@cache
 def fetchChampSelectInfoGeneric(CID, BASE_URL):
     return requests.get(BASE_URL + '/champ-select/generic/' + str(CID)).json()
 
 
 def fetchChampSelectInfoSpecific(CID, gameName, tagLine, BASE_URL):
     return requests.get(BASE_URL + '/champ-select/specific/' + str(CID) + '/' + gameName + '/' + tagLine).json()
+
+
+def fetchChampSpecificTags(CID, gameName, tagLine, role, BASE_URL):
+    return requests.get(BASE_URL + '/champ-select/tags/' + str(CID) + '/' + gameName + '/' + tagLine + '/' + str(role)).json()
