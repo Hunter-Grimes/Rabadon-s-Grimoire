@@ -7,7 +7,7 @@ services:
       - "8080:8080"
     environment:
       - DB_URL=postgresql://postgres:postgres@flask_db:5432/postgres
-      - RIOT_API_KEY=RGAPI-5215809d-6791-415a-84a2-8580b3797332
+      - RIOT_API_KEY=RGAPI-797d6a18-d2d0-431d-878f-be1d8b5d5987
     depends_on:
       - flask_db
 
