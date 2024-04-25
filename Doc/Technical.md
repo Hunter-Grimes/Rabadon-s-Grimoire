@@ -3,33 +3,36 @@
 |||
 |-|--|
 |**version**|1.0|
-|**Developers**|Hunter Grimes,|
+|**Developers**|Hunter Grimes,Michael Jung, Tarun Hoskere,Fernando Nunez,Erik Tkachenko|
 
 ## Getting Started
 1. [Overview](#Overview)
-2. [Riot API](#API)
-3. [Requirements](#Requirements)
-4. [App Backend]()
-5. [App Frontend]()
-6. [Database]()
-7. [Website]()
+2. [Requirements](#Requirements)
+3. [Riot API](#API)
+4. [App Backend](#AppBackend)
+5. [App Frontend](#AppFrontend)
+6. [Database](#Database)
+7. [Website](#Website)
 ## Overview{#Overview}
 **Rabadon's Grimore** is a League of Legends companion app whose main goal is to help a player improve the way they are able to play the game, while also avoiding bloatware to provide the best experience with only what is needed. As such all work that has been made currently has been made with that goal in mind, and all future work should consider this as well before adding any new features or changes. 
+## Requirements{#Requirements}
+Before Attempting to change or add to the code it is important to ensure one ha:
+(currently just listing will, this include short explanations)
+1. [Python3]()
+1. [Flask](https://flask.palletsprojects.com/en/3.0.x/)
+2. [Flask restful](https://flask-restful.readthedocs.io/en/latest/)
+3. [SQL alchemy](https://www.sqlalchemy.org/)
+4. [Pyside6](https://pypi.org/project/PySide6/)
+5. [Docker](https://docs.docker.com/manuals/)
+6. [Willump](https://pypi.org/project/willump/)
+7. [Django](https://docs.djangoproject.com/en/5.0/)
+8. [Apache2](https://httpd.apache.org/docs/2.4/)
 ## Riot API{#API}
 As League of Legends(LOL) is an Multiplayer online battle arena (MOBA) game developed and published by Riot Games, the most important thing to have before working is API key from Riot.
-The API key gives us the ability and permision to obtain data from LOL users to use in our APP.An API key is required for the app to function and as such it is absolutely necessary for one to have a valid key for the app at all times. The current API key being used for the app has a request limit for each region (North America, Asia, etc.) of 20 per second, and 100 for every 2 minutes. This means focus should be used to ensuring every request is being used as effectively as possible, though this could change with if rate limit is increased.
+The API key gives us the ability and permision to obtain data from LOL users to use in our app. An API key is required for the app to function and as such it is absolutely necessary for one to have a valid key for the app at all times. The current API key being used for the app has a request limit for each region (North America, Asia, etc.) of 20 per second, and 100 for every 2 minutes. This means focus should be used to ensuring every request is being used as effectively as possible, though this could change with if rate limit is increased in future updates.
 
 For additinal info on the Riot API usage policies, features, and restrictions check: https://developer.riotgames.com/docs/lol
-## Requirements{#Requirements}
-(currently just listing will, this include short explanations)
-flask
-flask restful
-sql alchemy
-pyside6
-docker
-willump
-django
-## App Backend{#}
-## App Frontend{#}
+## App Backend{#App_Backend}
+## App Frontend{#AppFrontend}
 ## Database{#}
 ## Website{#}
