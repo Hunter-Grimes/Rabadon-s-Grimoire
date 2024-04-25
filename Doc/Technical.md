@@ -24,9 +24,11 @@ For additinal info on the Riot API usage policies, features, and restrictions ch
 (currently just listing will, this include short explanations)
 flask
 flask restful
+sql alchemy
 pyside6
 docker
 willump
+django
 ## App Backend{#}
 ## App Frontend{#}
 ## Database{#}
