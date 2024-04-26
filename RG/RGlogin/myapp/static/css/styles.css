@@ -1,5 +1,4 @@
 /* CSS styles for Rabadon's Grimoire */
-@import url('https://fonts.googleapis.com/earlyaccess/malgu.css');
 
 /* Reset default margin and padding */
 body, h1, h2, h3, p, ul {
@@ -62,7 +61,7 @@ main {
     justify-content: center;
     align-items: center; /* Align items at the start of the cross axis */
     text-align: center;
-    padding: 20px;
+    padding: 80px;
     color: #fff;
     font-size: 18px;
 }
@@ -71,11 +70,12 @@ section {
     margin-bottom: 30px;
 }
 
-body.homepage-background {
+.homepage-background {
     background-image: url('../images/homepage.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    min-height: 100vh;
 }
 /***************************/
 
