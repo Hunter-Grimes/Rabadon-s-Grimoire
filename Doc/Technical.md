@@ -32,7 +32,8 @@ The API key gives us the ability and permision to obtain data from LOL users to 
 
 For additinal info on the Riot API usage policies, features, and restrictions check: https://developer.riotgames.com/docs/lol
 ## App Backend{#App_Backend}
-[Test](./User.md)
+[Backend](./Backend.md)
 ## App Frontend{#AppFrontend}
-
+[Backend](./Frontend.md)
 ## Website{#}
+[Website](./Website.md)
