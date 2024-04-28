@@ -7,6 +7,7 @@ import json
 import asyncio
 from asyncWorker import Worker
 from callLocalRiotAPI import setRunes
+from dataFiles import find_data_file
 
 class RuneSelector(QWidget):
     def __init__(self, DATA_LOCATION, suggestions, champName, threadPool, *args, **kwargs):
@@ -33,7 +34,8 @@ class RuneSelector(QWidget):
                 if rune['id'] == self.secondaryTree:
                     secondaryTreeData = rune
                     
-        with open('exeFrontend/pipInfo.json', 'r') as pips:
+        pipInfo = find_data_file('pipInfo.json')
+        with open(pipInfo, 'r') as pips:
             pipInfo = json.load(pips)
 
         layout = QGridLayout()
@@ -140,7 +142,7 @@ class runeOptions(QWidget):
         super().__init__(*args, **kwargs)
         self.runeSelector = runeSelector
         IMAGE_LOCATION = 'dragontailData/img/'
-        
+        IMAGE_LOCATION = find_data_file(IMAGE_LOCATION)
         self.optionType = optionType
         
         layout = QHBoxLayout()

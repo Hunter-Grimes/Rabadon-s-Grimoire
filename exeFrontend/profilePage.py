@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QGridLayout, QPushBu
 from PySide6.QtGui import QPixmap
 from PySide6.QtCore import Qt
 
+from dataFiles import find_data_file
 from LoadingIndicator import LoadingIndicator
 from userTags import userTagsDisplay
 from asyncWorker import Worker
@@ -22,7 +23,9 @@ class ProfilePageManager(QWidget):
         self.fetchingGames = False
         
         self.BASE_URL = BASE_URL
+        
         self.IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
+        self.IMAGE_LOCATION = find_data_file(self.IMAGE_LOCATION)
         
         self.layout = QGridLayout()
         

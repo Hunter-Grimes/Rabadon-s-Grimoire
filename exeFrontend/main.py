@@ -1,16 +1,16 @@
-from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import QApplication, QMainWindow, QTabWidget
 from PySide6.QtCore import QThreadPool
 from PySide6.QtGui import QScreen
 
+from dataFiles import find_data_file
 from profilePage import ProfilePageManager
-from patchNotesPage import PatchNotesPage
 from lobbyPage import LobbyPage
 
-from callLocalRiotAPI import waitForLogin, lobbyListener
+from callLocalRiotAPI import waitForLogin , lobbyListener
 
 import requests
-
+# import threading
+# import faulthandler
 
 class MainWindow(QMainWindow):
     BASE_URL = "http://184.73.76.247:8080"
@@ -27,9 +27,11 @@ class MainWindow(QMainWindow):
         myPUUID = requests.get(self.BASE_URL + "/user/by-riotID/" + summoner['tagLine'] + "/" + summoner['gameName']).json()['PUUID']
         
         self.tabs.addTab(ProfilePageManager(myPUUID, self.BASE_URL, self.threadPool), "Profile")
-        self.tabs.addTab(PatchNotesPage(), "Patch Notes")
+        # self.tabs.addTab(PatchNotesPage(), "Patch Notes")
         
-        with open("exeFrontend/tabStyle.qss", "r") as f:
+        tab = find_data_file("tabStyle.qss")
+        
+        with open(tab, "r") as f:
             _style = f.read()
             self.tabs.setStyleSheet(_style)
 
@@ -43,7 +45,7 @@ class MainWindow(QMainWindow):
 
     def lobbyCreated(self):
         self.tabs.addTab(LobbyPage(self.threadPool, self.summoner, self.BASE_URL), "Lobby")
-        self.tabs.setCurrentIndex(2)
+        self.tabs.setCurrentIndex(1)
         
     def center(self):
         qr = self.frameGeometry()
@@ -54,7 +56,6 @@ class MainWindow(QMainWindow):
 
 def main():
     app = QApplication([])
-    loader = QUiLoader()  # noqa: F841 
     
     summoner = waitForLogin()
     # summoner = {'tagLine': 'NA1', 'gameName': 'Potilwalda', 'puuid': 'b0ef40cf-ec56-5fbf-b74c-b838f180464f'}
@@ -69,4 +70,6 @@ def main():
 
 
 if __name__ == '__main__':
+    # faulthandler.enable()
+    # threading.stack_size(134217728)
     main()

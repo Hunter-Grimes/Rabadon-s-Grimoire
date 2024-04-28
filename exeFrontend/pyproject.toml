@@ -1,0 +1,13 @@
+[project]
+name = "rabadonsGrimoire"
+version = "0.1"
+description = "My GUI application!"
+
+[tool.cxfreeze]
+executables = [
+    {script = "main.py", base = "gui"}
+]
+
+[tool.cxfreeze.build_exe]
+excludes = ["tkinter", "unittest"]
+zip_include_packages = ["encodings", "PySide6", "shiboken6"]

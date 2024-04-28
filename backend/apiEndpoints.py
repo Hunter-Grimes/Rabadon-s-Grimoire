@@ -549,7 +549,10 @@ class champSelectChampInfoSpecific(Resource):
             return Response(status=404)
         
         if not bool(PlayedGame.query.filter_by(CID=CID, PUUID=PUUID).first()):
-            return Response(status=404)
+            info = champSelectChampInfoGeneric().get(CID)[0]
+            info['gameName'] = gameName
+            info['tagLine'] = tagLine
+            return info, 200
 
         champName = db.session.query(PlayedGame.championName).filter_by(CID=CID).first()[0]
         totalGames = db.session.query(PlayedGame).filter_by(CID=CID, PUUID=PUUID).count()

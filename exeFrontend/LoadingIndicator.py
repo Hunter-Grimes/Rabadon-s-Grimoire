@@ -1,13 +1,17 @@
 from PySide6.QtWidgets import QLabel
 from PySide6.QtGui import QMovie
 
+from dataFiles import find_data_file
+
 class LoadingIndicator(QLabel):
     def __init__(self, manager, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.manager = manager
         
         self.setFixedSize(20, 20)
-        self.movie = QMovie('exeFrontend/loading.gif')
+        loadingLocation = find_data_file('loading.gif')
+        
+        self.movie = QMovie(loadingLocation)
         self.movie.setScaledSize(self.size())
         self.setMovie(self.movie)
         

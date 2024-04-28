@@ -3,6 +3,7 @@ from collections import defaultdict
 from PySide6.QtWidgets import QWidget, QLabel, QGridLayout, QGroupBox, QHBoxLayout, QVBoxLayout, QProgressBar
 from PySide6.QtCore import Qt
 
+from dataFiles import find_data_file
 from runeSuggestion import RuneSelector
 from callLocalRiotAPI import champSelectWorker
 from fetchData import(
@@ -82,7 +83,10 @@ class LobbyPage(QWidget):
         self.threadPool.start(worker)
         
     def changeRuneRecommendations(self, info):
-        newRunes = RuneSelector('dragontailData/14.5.1/', info, info['champName'], self.threadPool)
+        IMAGE_LOCATION = 'dragontailData/14.5.1/'
+        IMAGE_LOCATION = find_data_file(IMAGE_LOCATION)
+        
+        newRunes = RuneSelector(IMAGE_LOCATION, info, info['champName'], self.threadPool)
         self.boxLayout.removeWidget(self.runesWidget)
         self.runesWidget.deleteLater()
         self.boxLayout.addWidget(newRunes)
@@ -307,6 +311,7 @@ class genericChampSelectChip(champSelectChipTemplate):
     def __init__(self, info, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.IMAGE_LOCATION = 'dragontailData/14.5.1/img/'
+        self.IMAGE_LOCATION = find_data_file(self.IMAGE_LOCATION)
         self.info = info
         
         self.setLabel()

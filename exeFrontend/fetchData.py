@@ -2,20 +2,26 @@ from PySide6.QtGui import QPixmap, QColor
 from PySide6.QtCore import Qt
 import requests
 from functools import cache
+from dataFiles import find_data_file
 
 
 def fetchRolePixmap(role):
     match role:
         case 'TOP':
-            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-top.png')
+            loc = find_data_file('CommunityDragon/roleIcons/icon-position-top.png')
+            pixmap = QPixmap(loc)
         case 'JUNGLE':
-            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-jungle.png')
+            loc = find_data_file('CommunityDragon/roleIcons/icon-position-jungle.png')
+            pixmap = QPixmap(loc)
         case 'MIDDLE':
-            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-middle.png')
+            loc = find_data_file('CommunityDragon/roleIcons/icon-position-middle.png')
+            pixmap = QPixmap(loc)
         case 'BOTTOM':
-            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-bottom.png')
+            loc = find_data_file('CommunityDragon/roleIcons/icon-position-bottom.png')
+            pixmap = QPixmap(loc)
         case 'UTILITY':
-            pixmap = QPixmap('exeFrontend/CommunityDragon/roleIcons/icon-position-utility.png')
+            loc = find_data_file('CommunityDragon/roleIcons/icon-position-utility.png')
+            pixmap = QPixmap(loc)
         case _:
             pixmap = QPixmap(30, 30)
             pixmap.fill(QColor(100, 100, 100))
