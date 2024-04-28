@@ -4,6 +4,7 @@
 body, h1, h2, h3, p, ul {
     margin: 0;
     padding: 0;
+    font-family: 'Malgun Gothic', sans-serif;
 }
 
 /* Header styles */
@@ -15,6 +16,7 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-size: 24px;
 }
 
 .header-top {
@@ -25,39 +27,16 @@ header {
 
 nav ul {
     list-style-type: none;
-    margin: 0; /* Remove default margin */
 }
 
 nav ul li {
     display: inline;
-    margin-right: 20px;
+    margin-right: 18px;
 }
 
 nav ul li a {
     color: #fff;
     text-decoration: none;
-}
-/***************************/
-
-/* Main content styles */
-/***************************/
-main {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start; /* Align items at the start of the cross axis */
-    padding: 20px;
-    color: #fff;
-}
-
-section {
-    margin-bottom: 30px;
-}
-
-body.homepage-background {
-    background-image: url('../images/homepage.jpg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
 }
 /***************************/
 
@@ -69,7 +48,47 @@ body.homepage-background {
     color: rgb(255, 255, 255);
     text-decoration: none;
     cursor: pointer;
-    margin-left: auto;
+    margin-left: 463px;
+    display: inline;
+    font-size: 20px;
+}
+/***************************/
+
+/* Main content styles */
+/***************************/
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Align items at the start of the cross axis */
+    text-align: center;
+    padding: 80px;
+    color: #fff;
+    font-size: 18px;
+}
+
+section {
+    margin-bottom: 30px;
+}
+
+.homepage-background {
+    background-image: url('../images/homepage.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+}
+/***************************/
+
+/* About section styles */
+/***************************/
+#about {
+    max-width: 50%; /* Set maximum width to 50% of the viewport width */
+    margin: 0 auto; /* Center the content horizontally */
+}
+
+.name {
+    font-weight: bold;
+    text-decoration: underline;
 }
 /***************************/
 
@@ -254,10 +273,6 @@ body.homepage-background {
     color: #fff;
 }
 
-#images-heading {
-    margin-left: 20px; /* Adjust margin to match the margin of the "Welcome to Rabadon's Grimoire" heading */
-}
-
 .image-container {
     margin-top: 20px; /* Adjust margin between images */
     text-align: center; /* Center the image */
@@ -271,15 +286,22 @@ body.homepage-background {
 }
 /***************************/
 
-/* Under construction section styles */
+/* Video styles */
 /***************************/
-#under-construction {
+#video-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: calc(100vh - 200px);
+    text-align: center;
     color: #fff;
+    margin-bottom: 200px;
+}
+
+.video-frame {
+    width: 60vw; /* Set the width of the video to 80% of the viewport width */
+    height: calc(60vw * 9 / 16); /* Calculate the height based on a 16:9 aspect ratio */
+    max-width: 100%; /* Set maximum width to ensure the video does not exceed its container */
+    max-height: calc(100vh - 200px); /* Set maximum height to ensure the video fits within the viewport */
 }
 /***************************/
 
