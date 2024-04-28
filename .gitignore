@@ -6,7 +6,6 @@ __pycache__
 instance
 .vscode
 database.db
-dragontailData
 .DS_Store
 build
 dist
