@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Rabadon's Grimoire</title>
+    <link rel="icon" type="image/x-icon" href="/pstatic/images/webpage-icon.ico">
+    {% load static %}
+    <link rel="stylesheet" href="{% static '/pstatic/css/styles.css' %}?v={{ timestamp }}"> <!-- Link to CSS file with timestamp -->
+</head>
+<body class="homepage-background">
+    <!-- Header Section -->
+    <header>
+        <h1>Rabadon's Grimoire</h1>
+        <!-- Navigation Links -->
+        <nav id="nav-links">
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'about' %}">About us</a></li>
+                <li><a href="{% url 'contact' %}">Contact</a></li>
+                {% if user.is_authenticated %}
+                <li><a href="{% url 'download' %}">Download</a></li>
+                Hi {{ user.username }}!
+                <form action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="logout-button">Log Out</button>
+                </form>
+                {% else %}
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                    <li><a href="{% url 'signup' %}">Signup</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        <!-- End of Navigation Links -->
+    </header>
+    <!-- End of Header Section -->
+
+    <!-- Main Content -->
+    <main>
+        <!-- Contact Section -->
+        <section id="contact">
+            <h2>Contact Us</h2>
+            <!-- Contact form or contact information goes here -->
+            <p>For users or future gamers with questions about us or our application, please email us at rabadonsgrimoire@gmail.com. We aim to respond as soon as possible. Any bug reports are also appreciated. Thank you!</p>
+        </section>
+    </main>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>&copy; 2024 Rabadon's Grimoire. All rights reserved.</p>
+    </footer>
+</body>
+</html>
