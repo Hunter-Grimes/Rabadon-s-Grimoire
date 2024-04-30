@@ -1,3 +1,23 @@
 # Frontend
 ### Overview
 This is file by file explantion on what the role each file on the frontend folder has on the app, for a less thourough explanation on what the role of the Frontend is visit the [Getting Started](./Technical.md#AppFrontend) file.
+### [asyncWorker.py](/exeFrontend/asyncWorker.py)
+### [callLocalRiotAPI.py](/exeFrontend/callLocalRiotAPI.py)
+### [championStatsWidget.py](/exeFrontend/championStatsWidget.py)
+### [champStatsPage.py](/exeFrontend/champStatsPage.py)
+### [dataFiles.py](/exeFrontend/dataFiles.py)
+### [fetchData.py](/exeFrontend/fetchData.py)
+### [leagueOverlay.py](/exeFrontend/leagueOverlay.py)
+### [LoadingIndicator.py](/exeFrontend/LoadingIndicator.py)
+### [lobbyPage.py](/exeFrontend/lobbyPage.py)
+### [main.py](/exeFrontend/main.py)
+### [matchHistory.py](/exeFrontend/matchHistory.py)
+### [oldSetup.py](/exeFrontend/oldSetup.py)
+### [patchNotesPage.py](/exeFrontend/patchNotesPage.py)
+### [pipInfo.json](/exeFrontend/pipInfo.json)
+### [profilePage.py](/exeFrontend/profilePage.py)
+### [pyproject.toml](/exeFrontend/pyproject.toml)
+### [runeSuggestion.py](/exeFrontend/runeSuggestion.py)
+### [setup.py](/exeFrontend/setup.py)
+### [tabStyle.qss](/exeFrontend/tabStyle.qss)
+### [userTags.py](/exeFrontend/userTags.py)
