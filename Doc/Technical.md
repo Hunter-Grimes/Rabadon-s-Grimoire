@@ -31,15 +31,19 @@ graph LR;
     end
     app-->id2
     subgraph Frontend;
-    id2[thing]
+    id2[main]
     id3[(Game Icons)];
+    id3-->id2;
     end
     subgraph Website;
     direction TB;
     id4[(User data)];
     id5[(Rabadon's Grimore 1.0)];
     end
-    C<---->RiotAPI
+    C<---->RiotAPI;
+    subgraph AWS
+    Website;
+    end;
 ``` 
 ## Requirements{#Requirements}
 Before Attempting to change or add to the code it is important to ensure one understnds how to use python, html, and have installed or able to access the following (recommended to use following links for either installation or learning how to use):
@@ -53,6 +57,7 @@ Before Attempting to change or add to the code it is important to ensure one und
 7. [Willump](https://pypi.org/project/willump/)
 8. [Django](https://docs.djangoproject.com/en/5.0/)
 9. [Apache2](https://httpd.apache.org/docs/2.4/)
+10. [cx_Freeze](https://pypi.org/project/cx-Freeze/)
 
 ## Riot API{#API}
 As League of Legends(LOL) is an Multiplayer online battle arena (MOBA) game developed and published by Riot Games, the most important thing to have before working is API key from Riot.
