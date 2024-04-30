@@ -1,3 +1,4 @@
 # Website
 ### Overview
-This is file by file explantion on what the role each file on the RG folder has on the app, for a less thourough explanation on what the role of the RG folder is, visit the [Getting Started](./Technical.md) file.
+ Unlike the frontend and backend explanations this won't be a file by file explanation as the way the website works can be completely changed if needed, as though it serves as the first thing possible users will see, our product is the Rabadon's Grimore app. For a quick on what the role website is, visit the [Getting Started](./Technical.md) file.
+###  

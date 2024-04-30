@@ -1,8 +1,8 @@
 # Backend
 ### Overview
-This is file by file explantion on what the role each file on the backend folder has on the app, for a less thourough explanation on what the role of the Backend is visit the [Getting Started](./Technical.md) file.
+This is file by file explantion on what the role each file on the backend folder has on the app, for a less thourough explanation on what the role of the Backend is visit the [Getting Started](./Technical.md#App_Backend) file.
 ### [accessRiotApi.py](/backend/accessRiotApi.py)
-This file contains all of the functions that make direct requests with the Riot API, as such any further additions
+This file contains all of the functions that make direct requests with the Riot API, as such any further additions of such functions should be added here as well (and of course has to follow)
 ### [apiEndpoints.py](/backend/apiEndpoints.py)
 
 ### [apiHelpers.py](/backend/apiHelpers.py)
@@ -20,3 +20,5 @@ For an explanation on what each error code means and some common reasons for it 
 ### [requirements.txt](/backend/requirements.txt)
 ### [RIOT_API_KEY.txt](/backend/RIOT_API_KEY.txt)
 This is the project's Riot API key, currently it is using a personal key so it is set to a fixed rate. This probably should not be ever changed unless a Product API key is obtained.
+
+#### Return to [Getting Started](Technical.md) page
