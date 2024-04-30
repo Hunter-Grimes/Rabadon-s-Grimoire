@@ -13,7 +13,34 @@
 5. [App Frontend](#AppFrontend)
 7. [Website](#Website)
 ## Overview{#Overview}
-**Rabadon's Grimore** is a League of Legends companion app whose main goal is to help a player improve the way they are able to play the game, while also avoiding bloatware to provide the best experience with only what is needed. As such all work that has been made currently has been made with that goal in mind, and all future work should consider this as well before adding any new features or changes. 
+**Rabadon's Grimore** is a League of Legends companion app whose main goal is to help a player improve the way they are able to play the game, while also avoiding bloatware to provide the best experience with only what is needed. As such all work that has been made currently has been made with that goal in mind, and all future work should consider this as well before adding any new features or changes.
+Below is a visual representation of the major parts of the project and the function of the parts.
+```mermaid
+graph LR;
+    A(User)<--->C;
+    A<-->B(League of Legends)==>C;
+    A<--->Website;
+    subgraph C[Rabadon's Grimore];
+        direction TB;
+        Backend
+        Frontend
+    end
+    subgraph Backend;
+    direction TB;
+    id1[(Saved Player Data)]<-->app
+    end
+    app-->id2
+    subgraph Frontend;
+    id2[thing]
+    id3[(Game Icons)];
+    end
+    subgraph Website;
+    direction TB;
+    id4[(User data)];
+    id5[(Rabadon's Grimore 1.0)];
+    end
+    C<---->RiotAPI
+``` 
 ## Requirements{#Requirements}
 Before Attempting to change or add to the code it is important to ensure one understnds how to use python, html, and have installed or able to access the following (recommended to use following links for either installation or learning how to use):
 1. [Python3](https://docs.python.org/3/index.html) (version 3.10 and above)
@@ -37,4 +64,5 @@ For additinal info on the Riot API usage policies, features, and restrictions ch
 ## App Frontend{#AppFrontend}
 [Frontend](./Frontend.md)
 ## Website{#}
-[Website](./Website.md)
+While the website isn't our focus, it is the face of our product and as such must be properly maintained and visually appealing. It holds info about the app, about the developers, user data(usernames and password), and most importantly the download link for the app itself.
+For a deeper explanation on the website visit the [Website](./Website.md) file.
