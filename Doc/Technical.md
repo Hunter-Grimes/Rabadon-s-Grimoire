@@ -15,11 +15,12 @@
 ## Overview{#Overview}
 **Rabadon's Grimore** is a League of Legends companion app whose main goal is to help a player improve the way they are able to play the game, while also avoiding bloatware to provide the best experience with only what is needed. As such all work that has been made currently has been made with that goal in mind, and all future work should consider this as well before adding any new features or changes. 
 ## Requirements{#Requirements}
-Before Attempting to change or add to the code it is important to ensure one understnds how to use python, html, and have installed or able to access the following (recommended to use following links for either installation or ):
-1. [Python3](https://docs.python.org/3/index.html)
+Before Attempting to change or add to the code it is important to ensure one understnds how to use python, html, and have installed or able to access the following (recommended to use following links for either installation or learning how to use):
+1. [Python3](https://docs.python.org/3/index.html) (version 3.10 and above)
 2. [Flask](https://flask.palletsprojects.com/en/3.0.x/)
-3. [Flask restful](https://flask-restful.readthedocs.io/en/latest/) 
-4. [SQL alchemy](https://www.sqlalchemy.org/)
+3. [Flask restful](https://flask-restful.readthedocs.io/en/latest/)
+3. [Flask-SqlAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/3.1.x/) 
+4. [SQLAlchemy](https://www.sqlalchemy.org/)
 5. [Pyside6](https://pypi.org/project/PySide6/)
 6. [Docker](https://docs.docker.com/manuals/)
 7. [Willump](https://pypi.org/project/willump/)
@@ -34,6 +35,6 @@ For additinal info on the Riot API usage policies, features, and restrictions ch
 ## App Backend{#App_Backend}
 [Backend](./Backend.md)
 ## App Frontend{#AppFrontend}
-[Backend](./Frontend.md)
+[Frontend](./Frontend.md)
 ## Website{#}
 [Website](./Website.md)
