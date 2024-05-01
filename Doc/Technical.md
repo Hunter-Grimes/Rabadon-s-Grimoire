@@ -6,13 +6,13 @@
 |**Developers**|Hunter Grimes,Michael Jung, Tarun Hoskere,Fernando Nunez,Erik Tkachenko|
 
 ## Getting Started
-1. [Overview](#Overview)
+1. [Overview](##Overview)
 2. [Requirements](#Requirements)
 3. [Riot API](#API)
 4. [App Backend](#App_Backend)
 5. [App Frontend](#AppFrontend)
 7. [Website](#Website)
-## Overview{#Overview}
+## Overview
 **Rabadon's Grimore** is a League of Legends companion app whose main goal is to help a player improve the way they are able to play the game, while also avoiding bloatware to provide the best experience with only what is needed. As such all work that has been made currently has been made with that goal in mind, and all future work should consider this as well before adding any new features or changes.
 Below is a visual representation of the major parts of the project and the function of the parts.
 ```mermaid
