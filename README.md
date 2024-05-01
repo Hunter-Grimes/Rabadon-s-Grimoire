@@ -1,3 +1,3 @@
 Website and App download: https://www.rabadonsgrimoire.com/
 
-Video:
+Video: https://www.rabadonsgrimoire.com/
