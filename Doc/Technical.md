@@ -9,7 +9,7 @@
 1. [Overview](#Overview)
 2. [Requirements](#Requirements)
 3. [Riot API](#API)
-4. [App Backend](#App_Backend)
+4. [App Backend](#AppBackend)
 5. [App Frontend](#AppFrontend)
 7. [Website](#Website)
 ## Overview
@@ -66,7 +66,7 @@ As League of Legends(LOL) is an Multiplayer online battle arena (MOBA) game deve
 The API key gives us the ability and permision to obtain data from LOL users to use in our app. An API key is required for the app to function and as such it is absolutely necessary for one to have a valid key for the app at all times. The current API key being used for the app has a request limit for each region (North America, Asia, etc.) of 20 per second, and 100 for every 2 minutes. This means focus should be used to ensuring every request is being used as effectively as possible, though this could change with if rate limit is increased in future updates.
 
 For additinal info on the Riot API usage policies, features, and restrictions check: https://developer.riotgames.com/docs/lol
-## App Backend
+## AppBackend
 The heart of the app in charge of gathering and sorting the data obtained from the Riot API. Currently tries to balance between , though this might change if the rate limit for the API key is increased. 
 For a file by file explanation visit the [Backend](./Backend.md) file.
 ## App Frontend 
@@ -75,3 +75,5 @@ For a file by file explanation visit the [Frontend](./Frontend.md) file.
 ## Website 
 While the website isn't our focus, it is the face of our product and as such must be properly maintained and visually appealing. It holds info about the app, about the developers, user data(usernames and password), and most importantly the download link for the app itself.
 For a deeper explanation on the website visit the [Website](./Website.md) file.
+
+For a quick guide on how to contribute to the project visit [this guide](Developer%20Contribution%20Guide.md)
