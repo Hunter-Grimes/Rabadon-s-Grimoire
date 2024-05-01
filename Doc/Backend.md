@@ -10,9 +10,8 @@ This file regulates both the info that is put in the Riot API requests (things l
 Sorts the data obtained into the different models on the database to be easily used and accessed.
 ### [app.py](/backend/app.py)
 This essentially puts everything in the backend together to be easily used in one file, as such one needs to be sure any additions or changes in other files are accesible in this file.
-### [docker-compose.yml](/backend/docker-compose.yml)
-
-### [Dockerfile](/backend/Dockerfile)
+### [docker-compose.yml](/backend/docker-compose.yml) and [Dockerfile](/backend/Dockerfile)
+Define a docker container in which the Database and backendAPI is contained and establishes a connection between the two.
 
 ### [extensions.py](/backend/extensions.py)
 This files contains the extensions to flask and the declaration of variable sto be used accross the different files. While currently only containing flask related extensions and variables this is not limited only to flask and could also hold future needed extensions with their needed variable accross files. 
