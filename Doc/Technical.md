@@ -6,7 +6,7 @@
 |**Developers**|Hunter Grimes,Michael Jung, Tarun Hoskere,Fernando Nunez,Erik Tkachenko|
 
 ## Getting Started
-1. [Overview](#Overview)
+1. [Overview](/Doc/Technical.md#Overview)
 2. [Requirements](#Requirements)
 3. [Riot API](#API)
 4. [App Backend](#AppBackend)
