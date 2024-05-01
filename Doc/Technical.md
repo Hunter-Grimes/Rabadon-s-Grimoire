@@ -38,9 +38,10 @@ graph LR;
     subgraph Website;
     direction TB;
     id4[(User data)];
-    id5[(Rabadon's Grimore 1.0)];
+    id6[download link];
     end
     C<---->RiotAPI;
+    id6---id5[(Rabadon's Grimore 1.0)];
     subgraph AWS
     Website;
     end;
