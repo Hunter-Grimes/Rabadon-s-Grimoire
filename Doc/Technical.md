@@ -61,7 +61,7 @@ Before Attempting to change or add to the code it is important to ensure one und
 10. [cx_Freeze](https://pypi.org/project/cx-Freeze/)
 11. [EC2](https://docs.aws.amazon.com/ec2/?icmpid=docs_homepage_featuredsvcs)
 
-## Riot API{#API}
+## Riot API{ #API }
 As League of Legends(LOL) is an Multiplayer online battle arena (MOBA) game developed and published by Riot Games, the most important thing to have before working is API key from Riot.
 The API key gives us the ability and permision to obtain data from LOL users to use in our app. An API key is required for the app to function and as such it is absolutely necessary for one to have a valid key for the app at all times. The current API key being used for the app has a request limit for each region (North America, Asia, etc.) of 20 per second, and 100 for every 2 minutes. This means focus should be used to ensuring every request is being used as effectively as possible, though this could change with if rate limit is increased in future updates.
 
