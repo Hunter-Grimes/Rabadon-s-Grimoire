@@ -6,7 +6,7 @@
 |**Developers**|Hunter Grimes,Michael Jung, Tarun Hoskere,Fernando Nunez,Erik Tkachenko|
 
 ## Getting Started
-1. [Overview](##Overview)
+1. [Overview](#Overview)
 2. [Requirements](#Requirements)
 3. [Riot API](#API)
 4. [App Backend](#App_Backend)
@@ -46,7 +46,7 @@ graph LR;
     Website;
     end;
 ``` 
-## Requirements {#Requirements}
+## Requirements
 Before Attempting to change or add to the code it is important to ensure one understnds how to use python, html, and have installed or able to access the following (recommended to use following links for either installation or learning how to use):
 1. [Python3](https://docs.python.org/3/index.html) (version 3.10 and above)
 2. [Flask](https://flask.palletsprojects.com/en/3.0.x/)
@@ -61,17 +61,17 @@ Before Attempting to change or add to the code it is important to ensure one und
 10. [cx_Freeze](https://pypi.org/project/cx-Freeze/)
 11. [EC2](https://docs.aws.amazon.com/ec2/?icmpid=docs_homepage_featuredsvcs)
 
-## Riot API {#API}
+## Riot API 
 As League of Legends(LOL) is an Multiplayer online battle arena (MOBA) game developed and published by Riot Games, the most important thing to have before working is API key from Riot.
 The API key gives us the ability and permision to obtain data from LOL users to use in our app. An API key is required for the app to function and as such it is absolutely necessary for one to have a valid key for the app at all times. The current API key being used for the app has a request limit for each region (North America, Asia, etc.) of 20 per second, and 100 for every 2 minutes. This means focus should be used to ensuring every request is being used as effectively as possible, though this could change with if rate limit is increased in future updates.
 
 For additinal info on the Riot API usage policies, features, and restrictions check: https://developer.riotgames.com/docs/lol
-## App Backend {#App_Backend}
+## App Backend
 The heart of the app in charge of gathering and sorting the data obtained from the Riot API. Currently tries to balance between , though this might change if the rate limit for the API key is increased. 
 For a file by file explanation visit the [Backend](./Backend.md) file.
-## App Frontend {#AppFrontend}
+## App Frontend 
 The frontend is what the app user gets to see such as the images, the features, and the stats on past matches. Data obtained from the backend will be used here in a way the user can easily understand.
 For a file by file explanation visit the [Frontend](./Frontend.md) file.
-## Website {#Website}
+## Website 
 While the website isn't our focus, it is the face of our product and as such must be properly maintained and visually appealing. It holds info about the app, about the developers, user data(usernames and password), and most importantly the download link for the app itself.
 For a deeper explanation on the website visit the [Website](./Website.md) file.
